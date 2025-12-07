@@ -43,7 +43,7 @@ const AIChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const stream = await sendMessageStream(userMsg.text);
+      const stream = await sendMessageStream(userMsg.text, { section: 'general', mode: 'STRATEGIC' });
       
       const botMsgId = (Date.now() + 1).toString();
       setMessages(prev => [...prev, { id: botMsgId, role: 'model', text: '', isStreaming: true }]);

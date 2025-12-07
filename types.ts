@@ -58,3 +58,8 @@ export interface BlogPost {
 }
 
 export type AgentStatus = 'IDLE' | 'LISTENING' | 'ANALYZING' | 'EXECUTING' | 'STREAMING';
+export type CognitiveMode = 'STRATEGIC' | 'TECHNICAL';
+
+export interface NeuralInterfaceProps {
+  currentSection: string;
+}

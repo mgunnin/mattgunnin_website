@@ -99,7 +99,7 @@ const App: React.FC = () => {
       <Blog />
       <Contact />
       
-      <NeuralInterface />
+      <NeuralInterface currentSection={currentSection} />
 
       <footer className="py-12 text-center text-gray-600 text-sm border-t border-gray-900 bg-black relative z-10 px-4">
         <div className="flex justify-center gap-6 mb-4">

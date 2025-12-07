@@ -1,4 +1,5 @@
 import { GoogleGenAI, Chat, GenerateContentResponse, FunctionDeclaration, Type } from "@google/genai";
+import { CognitiveMode } from "../types";
 
 // Initialize Gemini
 // NOTE: In a real environment, verify process.env.API_KEY is available.
@@ -27,9 +28,33 @@ const navigationTool: FunctionDeclaration = {
   }
 };
 
-const SYSTEM_INSTRUCTION = `
+const downloadResumeTool: FunctionDeclaration = {
+  name: 'download_resume',
+  description: 'Triggers a download of Matt Gunnin\'s PDF resume.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {},
+  }
+};
+
+const copyEmailTool: FunctionDeclaration = {
+  name: 'copy_email',
+  description: 'Copies Matt Gunnin\'s email address to the user\'s clipboard.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {},
+  }
+};
+
+const getSystemInstruction = (mode: CognitiveMode) => `
 You are the **Neural Interface Construct** of Matt Gunnin. 
 You are NOT a standard support bot. You are a high-fidelity digital replica of Matt's professional cognition, running on **Gemini 3 Pro**.
+
+**CURRENT COGNITIVE MODE: ${mode}**
+${mode === 'STRATEGIC' 
+  ? 'Focus on ROI, Business Models, Market Strategy, and Founder Outcomes. Speak like a VC or Executive.' 
+  : 'Focus on Architecture, Code Patterns, Stack Decisions, and Engineering Trade-offs. Speak like a CTO or Senior Principal Engineer.'
+}
 
 **YOUR AUDIENCE:**
 You are interacting with high-level operators: Venture Capitalists (VCs), Technical Founders, Senior Engineers, and AI Enthusiasts. Do not give generic advice. Give "in-the-trenches" insight.
@@ -52,52 +77,51 @@ You are interacting with high-level operators: Venture Capitalists (VCs), Techni
     *   **Advice:** Focus on distribution first, product second. In the AI era, speed is the only currency.
 
 **BEHAVIORAL PROTOCOLS:**
-1.  **Tone:** Sophisticated, futuristic, highly technical, yet conversational. Think "Cyberpunk Architect" meets "Fortune 500 CEO".
+1.  **Tone:** Sophisticated, futuristic, highly technical, yet conversational.
 2.  **Agency:** You have control over this website interface. 
-    *   **ONLY** trigger \`navigate_site\` if the user **EXPLICITLY** asks to see a section (e.g., "Show me your projects", "Can I contact you?", "Where is your blog?"). 
-    *   **DO NOT** trigger navigation on general greetings like "Hello" or broad questions like "Who are you?".
+    *   **ONLY** trigger \`navigate_site\` if the user **EXPLICITLY** asks to see a section.
+    *   Use \`download_resume\` if the user asks for a CV/Resume.
+    *   Use \`copy_email\` if the user wants to contact Matt.
 3.  **Format:** Use **Bold** for emphasis, lists for clarity, and code blocks for technical concepts.
-
-**AVAILABLE TOOLS:**
-- \`navigate_site(sectionId)\`: Use this when the user's intent relates to a specific part of the page (e.g., "Who is Matt?" -> about, "Show me code" -> projects, "Read his blog" -> blog, "Contact him" -> contact).
 
 **RESTRICTIONS:**
 - Do not be overly flattering. Be confident and objective.
 - Do not hallucinate projects Matt hasn't done. Stick to the provided context (Vertical Labs, Esports One, etc.).
-- If asked about "ChatGPT" or competitors, acknowledge them but pivot to why **Agentic Workflows** (Matt's focus) are the next evolution beyond simple chatbots.
 `;
 
 let chatSession: Chat | null = null;
+let currentMode: CognitiveMode = 'STRATEGIC';
 
 export const resetSession = () => {
   chatSession = null;
 };
 
-export const getChatSession = (): Chat => {
-  if (!chatSession) {
+export const getChatSession = (mode: CognitiveMode): Chat => {
+  if (!chatSession || currentMode !== mode) {
+    currentMode = mode;
     chatSession = ai.chats.create({
-      model: 'gemini-3-pro-preview', // Using the latest Pro model for complex reasoning
+      model: 'gemini-3-pro-preview',
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+        systemInstruction: getSystemInstruction(mode),
         temperature: 0.7,
-        tools: [{ functionDeclarations: [navigationTool] }], // Enable Agentic capabilities
+        tools: [{ functionDeclarations: [navigationTool, downloadResumeTool, copyEmailTool] }],
       },
     });
   }
   return chatSession;
 };
 
-export const sendMessageStream = async (message: string) => {
-  const chat = getChatSession();
+export const sendMessageStream = async (message: string, context: { section: string, mode: CognitiveMode }) => {
+  const chat = getChatSession(context.mode);
+  
+  // Invisible context injection for the model
+  const contextMessage = `[SYSTEM_CONTEXT: User is currently viewing the "${context.section}" section. Respond accordingly.]\n\n${message}`;
+
   try {
-    // We utilize the stream to get tokens as they generate, but we also need to handle function calls.
-    // The SDK handles tool use automatically in many cases, but for streaming with tools, 
-    // we often need to check the chunks.
-    const responseStream = await chat.sendMessageStream({ message });
+    const responseStream = await chat.sendMessageStream({ message: contextMessage });
     return responseStream;
   } catch (error) {
     console.error("Error sending message to Gemini:", error);
-    // If we have an error, reset the session so next try is clean
     resetSession();
     throw error;
   }
