@@ -43,4 +43,14 @@ export interface Skill {
   category: 'Frontend' | 'Backend' | 'AI' | 'Tools';
 }
 
+export interface BlogPost {
+  id: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  tags: string[];
+}
+
 export type AgentStatus = 'IDLE' | 'LISTENING' | 'ANALYZING' | 'EXECUTING' | 'STREAMING';

@@ -15,9 +15,9 @@ const Background: React.FC = () => {
     canvas.height = height;
 
     const particles: { x: number; y: number; vx: number; vy: number; size: number; color: string }[] = [];
-    const particleCount = 100;
+    const particleCount = 120; // Increased count for better density
     const connectionDistance = 150;
-    const mouse = { x: 0, y: 0 };
+    const mouse = { x: -1000, y: -1000 }; // Initialize off-screen
 
     const colors = ['#00f0ff', '#7000ff', '#333333'];
 
@@ -44,13 +44,29 @@ const Background: React.FC = () => {
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        // Mouse repulsion
+        // Mouse Interactions
         const dx = mouse.x - p.x;
         const dy = mouse.y - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 200) {
-           p.x -= dx * 0.01;
-           p.y -= dy * 0.01;
+        const distMouse = Math.sqrt(dx * dx + dy * dy);
+
+        // Repulsion
+        if (distMouse < 200) {
+           const forceDirectionX = dx / distMouse;
+           const forceDirectionY = dy / distMouse;
+           const force = (200 - distMouse) / 200;
+           // Gentle push
+           p.x -= forceDirectionX * force * 1.5;
+           p.y -= forceDirectionY * force * 1.5;
+        }
+
+        // Mouse Connections (The "Interactive" part)
+        if (distMouse < 200) {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(0, 240, 255, ${0.4 * (1 - distMouse / 200)})`;
+          ctx.lineWidth = 0.5;
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(p.x, p.y);
+          ctx.stroke();
         }
 
         ctx.beginPath();
@@ -58,7 +74,7 @@ const Background: React.FC = () => {
         ctx.fillStyle = p.color;
         ctx.fill();
 
-        // Draw connections
+        // Draw connections between particles
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx2 = p.x - p2.x;
@@ -67,7 +83,7 @@ const Background: React.FC = () => {
 
           if (dist2 < connectionDistance) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(0, 240, 255, ${1 - dist2 / connectionDistance})`;
+            ctx.strokeStyle = `rgba(0, 240, 255, ${0.15 * (1 - dist2 / connectionDistance)})`; // Fainter lines for particle-particle
             ctx.lineWidth = 0.5;
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);

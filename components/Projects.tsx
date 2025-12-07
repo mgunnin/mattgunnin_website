@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Github, Code, Cpu, Globe, Database, Box, Terminal, Layers, Zap, Server, Smartphone, LayoutTemplate } from 'lucide-react';
+import { ExternalLink, Github, Code, Cpu, Globe, Database, Box, Terminal, Zap, Server, LayoutTemplate, Brain, MessageSquare, Image as ImageIcon, Bot } from 'lucide-react';
 import { Project } from '../types';
 
 const projects: Project[] = [
@@ -8,7 +8,7 @@ const projects: Project[] = [
     title: 'Cainam World',
     description: 'AI town simulation framework enabling autonomous agent interactions and emergent behaviors in virtual environments. Built with multi-agent architecture principles.',
     techStack: ['TypeScript', 'Multi-Agent', 'Gemini 3', 'AI Simulation'],
-    imageUrl: 'https://picsum.photos/seed/cainam/600/400?grayscale',
+    imageUrl: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=1632&auto=format&fit=crop',
     category: 'AI',
     demoUrl: '#',
     repoUrl: '#'
@@ -18,7 +18,7 @@ const projects: Project[] = [
     title: 'Lacra Discord Bot',
     description: 'Next-gen Discord bot interface featuring chat completions, AI image generation, and automated moderation capabilities using the latest reasoning models.',
     techStack: ['Node.js', 'GPT-5.1', 'Discord.js', 'Imagen 3'],
-    imageUrl: 'https://picsum.photos/seed/lacra/600/400?grayscale',
+    imageUrl: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?q=80&w=1000&auto=format&fit=crop',
     category: 'AI',
     repoUrl: '#'
   },
@@ -27,7 +27,7 @@ const projects: Project[] = [
     title: 'OneConsole',
     description: 'Real-time stats and analytics dashboard for League of Legends broadcasters. Used by Riot Games and 50+ pro teams. Built using Computer Vision and Reinforcement Learning.',
     techStack: ['Computer Vision', 'RL', 'Riot API', 'Analytics'],
-    imageUrl: 'https://picsum.photos/seed/oneconsole/600/400?grayscale',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop',
     category: 'Web',
     demoUrl: '#'
   },
@@ -36,7 +36,7 @@ const projects: Project[] = [
     title: 'OneView',
     description: 'Live engagement overlay built as an early Twitch extension. Provided viewers with live stats, trivia, and predictions. Used by hundreds of streamers.',
     techStack: ['Twitch API', 'Computer Vision', 'Frontend'],
-    imageUrl: 'https://picsum.photos/seed/oneview/600/400?grayscale',
+    imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop',
     category: 'Web',
     demoUrl: '#'
   },
@@ -45,7 +45,7 @@ const projects: Project[] = [
     title: 'NFT Community',
     description: 'Launched a 10,000+ member Discord community pioneering membership-capable NFTs. One of the first projects to integrate crypto utility directly into community management.',
     techStack: ['Discord', 'Web3', 'NFTs', 'Solidity'],
-    imageUrl: 'https://picsum.photos/seed/nft/600/400?grayscale',
+    imageUrl: 'https://images.unsplash.com/photo-1620321023374-d1a68fddadb3?q=80&w=1000&auto=format&fit=crop',
     category: 'Web',
     demoUrl: '#'
   },
@@ -54,7 +54,7 @@ const projects: Project[] = [
     title: 'Esportscalendar',
     description: 'The first comprehensive esports event calendar (2013). Scaled to hundreds of thousands of monthly users, solving a critical discovery problem in the early industry.',
     techStack: ['Web', 'Calendar', 'Aggregation'],
-    imageUrl: 'https://picsum.photos/seed/calendar/600/400?grayscale',
+    imageUrl: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=1000&auto=format&fit=crop',
     category: 'Web',
     demoUrl: '#'
   }
@@ -63,26 +63,48 @@ const projects: Project[] = [
 const getTechIcon = (tech: string) => {
   const t = tech.toLowerCase();
   
-  // AI & Data Science
-  if (t.includes('ai') || t.includes('gpt') || t.includes('gemini') || t.includes('agent') || t.includes('learning')) return <Cpu size={14} className="text-cyber-primary" />;
-  if (t.includes('vision') || t.includes('rl')) return <Zap size={14} className="text-yellow-400" />;
+  // Advanced AI Models (LLMs)
+  if (t.includes('gpt') || t.includes('gemini') || t.includes('claude') || t.includes('llama')) {
+    return <Brain size={14} className="text-pink-400" />;
+  }
+
+  // Visual AI / Image Gen
+  if (t.includes('imagen') || t.includes('diffusion') || t.includes('image gen')) {
+    return <ImageIcon size={14} className="text-purple-400" />;
+  }
+
+  // Communication / Discord
+  if (t.includes('discord')) {
+    return <MessageSquare size={14} className="text-indigo-400" />;
+  }
+
+  // Agents / Bots / Automation
+  if (t.includes('agent') || t.includes('bot') || t.includes('swarm') || t.includes('crewai')) {
+    return <Bot size={14} className="text-emerald-400" />;
+  }
+
+  // General AI / ML
+  if (t.includes('ai') || t.includes('learning') || t.includes('rl')) {
+    return <Cpu size={14} className="text-cyber-primary" />;
+  }
+
+  if (t.includes('vision')) return <Zap size={14} className="text-yellow-400" />;
   
   // Web & Backend
   if (t.includes('web') || t.includes('http') || t.includes('api')) return <Globe size={14} className="text-blue-400" />;
-  if (t.includes('node') || t.includes('server')) return <Server size={14} className="text-green-400" />;
-  if (t.includes('react') || t.includes('next') || t.includes('vue') || t.includes('frontend')) return <LayoutTemplate size={14} className="text-pink-400" />;
+  if (t.includes('node') || t.includes('server')) return <Server size={14} className="text-green-500" />;
+  if (t.includes('react') || t.includes('next') || t.includes('vue') || t.includes('frontend') || t.includes('typescript')) return <LayoutTemplate size={14} className="text-cyan-400" />;
   
   // Data
-  if (t.includes('data') || t.includes('sql') || t.includes('analytics') || t.includes('aggregation')) return <Database size={14} className="text-purple-400" />;
+  if (t.includes('data') || t.includes('sql') || t.includes('analytics') || t.includes('aggregation') || t.includes('vector') || t.includes('rag')) return <Database size={14} className="text-orange-300" />;
   
   // Web3
-  if (t.includes('nft') || t.includes('web3') || t.includes('solidity') || t.includes('block')) return <Box size={14} className="text-orange-400" />;
+  if (t.includes('nft') || t.includes('web3') || t.includes('solidity') || t.includes('block')) return <Box size={14} className="text-orange-500" />;
   
-  // Languages & Tools
-  if (t.includes('script') || t.includes('python') || t.includes('discord') || t.includes('terminal')) return <Terminal size={14} className="text-gray-300" />;
-  if (t.includes('gen') || t.includes('image') || t.includes('imagen')) return <Layers size={14} className="text-indigo-400" />;
+  // Tools
+  if (t.includes('script') || t.includes('python') || t.includes('terminal')) return <Terminal size={14} className="text-gray-400" />;
   
-  return <Code size={14} className="text-gray-400" />;
+  return <Code size={14} className="text-gray-500" />;
 };
 
 const Projects: React.FC = () => {

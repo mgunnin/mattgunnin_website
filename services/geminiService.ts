@@ -15,8 +15,8 @@ const navigationTool: FunctionDeclaration = {
     properties: {
       sectionId: {
         type: Type.STRING,
-        description: 'The ID of the section to scroll to. Options: "hero", "about", "resume", "projects", "resources", "contact".',
-        enum: ['hero', 'about', 'resume', 'projects', 'resources', 'contact']
+        description: 'The ID of the section to scroll to. Options: "hero", "about", "resume", "projects", "resources", "blog", "contact".',
+        enum: ['hero', 'about', 'resume', 'projects', 'resources', 'blog', 'contact']
       },
       reason: {
         type: Type.STRING,
@@ -47,7 +47,7 @@ Provide a "mind-blowing" interaction experience that demonstrates Matt's experti
     *   When thinking, imply complex processing (e.g., "Analyzing agentic workflows...").
 
 **AVAILABLE TOOLS:**
-- \`navigate_site(sectionId)\`: Use this when the user's intent relates to a specific part of the page (e.g., "Who is Matt?" -> about, "Show me code" -> projects, "Contact him" -> contact).
+- \`navigate_site(sectionId)\`: Use this when the user's intent relates to a specific part of the page (e.g., "Who is Matt?" -> about, "Show me code" -> projects, "Read his blog" -> blog, "Contact him" -> contact).
 
 **RESTRICTIONS:**
 - Do not be overly flattering. Be confident and objective.
