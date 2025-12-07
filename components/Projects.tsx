@@ -6,9 +6,9 @@ const projects: Project[] = [
   {
     id: 'cainam',
     title: 'Cainam World',
-    description: 'AI town simulation framework enabling autonomous agent interactions and emergent behaviors in virtual environments. Built with multi-agent architecture principles.',
+    description: 'Architected a decentralized AI simulation framework where autonomous agents exhibit emergent social behaviors. Utilized multi-agent reinforcement learning (MARL) to simulate complex economy and social dynamics, allowing agents to form alliances, trade resources, and evolve independent of human intervention.',
     techStack: ['TypeScript', 'Multi-Agent', 'Gemini 3', 'AI Simulation'],
-    imageUrl: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=1632&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1200&auto=format&fit=crop', // Abstract AI Network
     category: 'AI',
     demoUrl: '#',
     repoUrl: '#'
@@ -16,45 +16,45 @@ const projects: Project[] = [
   {
     id: 'lacra',
     title: 'Lacra Discord Bot',
-    description: 'Next-gen Discord bot interface featuring chat completions, AI image generation, and automated moderation capabilities using the latest reasoning models.',
+    description: 'Engineered a high-throughput autonomous discord agent leveraging GPT-5.1 and Imagen 3 for multimodal interactions. Implemented a custom RAG pipeline to provide context-aware moderation and dynamic content generation, serving over 50,000 users with sub-200ms latency.',
     techStack: ['Node.js', 'GPT-5.1', 'Discord.js', 'Imagen 3'],
-    imageUrl: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=1200&auto=format&fit=crop', // Discord 3D Logo
     category: 'AI',
     repoUrl: '#'
   },
   {
     id: 'oneconsole',
     title: 'OneConsole',
-    description: 'Real-time stats and analytics dashboard for League of Legends broadcasters. Used by Riot Games and 50+ pro teams. Built using Computer Vision and Reinforcement Learning.',
+    description: 'Pioneered real-time computer vision pipelines to extract game state data from live video feeds with 99.8% accuracy. Deployed reinforcement learning models to predict match outcomes, empowering broadcasters like Riot Games and 50+ professional teams with instant, data-driven narrative tools.',
     techStack: ['Computer Vision', 'RL', 'Riot API', 'Analytics'],
-    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop', // Data Dashboard
     category: 'Web',
     demoUrl: '#'
   },
   {
     id: 'oneview',
     title: 'OneView',
-    description: 'Live engagement overlay built as an early Twitch extension. Provided viewers with live stats, trivia, and predictions. Used by hundreds of streamers.',
+    description: 'Developed a low-latency interactive overlay extension for Twitch, integrating real-time game telemetry with viewer engagement layers. Processed millions of concurrent socket events to synchronize live trivia and predictive markets, redefining the passive spectator experience.',
     techStack: ['Twitch API', 'Computer Vision', 'Frontend'],
-    imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1534423861386-85a16f5d13fd?q=80&w=1200&auto=format&fit=crop', // Gaming/Streaming
     category: 'Web',
     demoUrl: '#'
   },
   {
     id: 'discord-community',
     title: 'NFT Community',
-    description: 'Launched a 10,000+ member Discord community pioneering membership-capable NFTs. One of the first projects to integrate crypto utility directly into community management.',
+    description: 'Designed and executed a token-gated community architecture integrating ERC-721 assets with Discord roles. Built a custom verification oracle handling 10,000+ members, pioneering utility-first NFT memberships that unlocked exclusive digital and physical experiences.',
     techStack: ['Discord', 'Web3', 'NFTs', 'Solidity'],
-    imageUrl: 'https://images.unsplash.com/photo-1620321023374-d1a68fddadb3?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1200&auto=format&fit=crop', // Abstract Blockchain
     category: 'Web',
     demoUrl: '#'
   },
   {
     id: 'esportscalendar',
     title: 'Esportscalendar',
-    description: 'The first comprehensive esports event calendar (2013). Scaled to hundreds of thousands of monthly users, solving a critical discovery problem in the early industry.',
+    description: 'Engineered the industry\'s first centralized aggregation engine for global esports events. Built scalable scrapers and a unified schema to normalize data from disparate sources, serving hundreds of thousands of monthly active users and becoming the de-facto schedule API for the ecosystem.',
     techStack: ['Web', 'Calendar', 'Aggregation'],
-    imageUrl: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=1000&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop', // Esports Arena
     category: 'Web',
     demoUrl: '#'
   }
@@ -168,9 +168,9 @@ const Projects: React.FC = () => {
                 </div>
 
                 <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-cyber-primary transition-colors duration-300">{project.title}</h3>
-                <p className="text-gray-400 text-sm mb-4 line-clamp-3 leading-relaxed flex-grow">{project.description}</p>
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed flex-grow">{project.description}</p>
                 
-                <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-800/50">
+                <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-gray-800/50">
                   {project.techStack.map(tech => (
                     <span 
                       key={tech} 

@@ -12,6 +12,15 @@ const NeuralInterface: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [randomData, setRandomData] = useState('0000');
   const [cpuUsage, setCpuUsage] = useState(12);
+  
+  // Refs for animation system
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const statusRef = useRef(status); // To access status inside requestAnimationFrame
+
+  // Keep status ref in sync
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
 
   // Initialize with a welcome message
   useEffect(() => {
@@ -33,6 +42,117 @@ const NeuralInterface: React.FC = () => {
     }, 500);
     return () => clearInterval(interval);
   }, [isOpen, status]);
+
+  // Particle System Effect
+  useEffect(() => {
+    if (!isOpen) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    const particles: { x: number; y: number; size: number; speedX: number; speedY: number; baseSpeed: number }[] = [];
+    const particleCount = 100;
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: Math.random() * 2,
+            speedX: (Math.random() - 0.5) * 0.5,
+            speedY: (Math.random() - 0.5) * 0.5,
+            baseSpeed: Math.random() * 0.5 + 0.1
+        });
+    }
+
+    let animationFrameId: number;
+
+    const render = () => {
+        ctx.clearRect(0, 0, width, height);
+        const currentStatus = statusRef.current;
+
+        // Determine particle behavior based on status
+        let speedMultiplier = 1;
+        let particleColor = 'rgba(0, 240, 255, 0.3)'; // Default Cyan
+
+        if (currentStatus === 'ANALYZING') {
+            speedMultiplier = 5;
+            particleColor = 'rgba(250, 204, 21, 0.4)'; // Yellow
+        } else if (currentStatus === 'EXECUTING') {
+            speedMultiplier = 8;
+            particleColor = 'rgba(239, 68, 68, 0.4)'; // Red
+        } else if (currentStatus === 'STREAMING') {
+            speedMultiplier = 2;
+            particleColor = 'rgba(16, 185, 129, 0.3)'; // Green
+        }
+
+        ctx.fillStyle = particleColor;
+
+        particles.forEach(p => {
+            p.x += p.speedX * speedMultiplier;
+            p.y += p.speedY * speedMultiplier;
+
+            // Wrap around screen
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
+
+            // Jitter effect during high load
+            if (currentStatus === 'ANALYZING' || currentStatus === 'EXECUTING') {
+                p.x += (Math.random() - 0.5) * 2;
+                p.y += (Math.random() - 0.5) * 2;
+            }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Draw connecting lines if close
+        ctx.strokeStyle = particleColor;
+        ctx.lineWidth = 0.2;
+        
+        // Optimize: only draw connections for a subset or if status is active to save perf
+        if (currentStatus !== 'IDLE') {
+             for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    const handleResize = () => {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+        cancelAnimationFrame(animationFrameId);
+        window.removeEventListener('resize', handleResize);
+    };
+  }, [isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -153,8 +273,25 @@ const NeuralInterface: React.FC = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
       {/* Immersive Background Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        {/* Particle Canvas */}
+        <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-50" />
+
+        {/* Dynamic CPU Heat Gradient */}
+        <div 
+            className="absolute inset-0 z-0 transition-opacity duration-1000"
+            style={{
+                background: `radial-gradient(circle at center, ${
+                    status === 'ANALYZING' ? 'rgba(250, 204, 21, 0.1)' : 
+                    status === 'EXECUTING' ? 'rgba(239, 68, 68, 0.15)' : 
+                    'rgba(0, 240, 255, 0.05)'
+                } 0%, transparent 70%)`,
+                opacity: cpuUsage / 100
+            }}
+        />
+
+        {/* Grid with Glitch Effect */}
+        <div className={`absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] ${status === 'ANALYZING' ? 'animate-[pulse_0.1s_infinite]' : ''}`}></div>
+        
         {/* Scanlines */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] pointer-events-none z-10"></div>
         {/* Vignette */}
