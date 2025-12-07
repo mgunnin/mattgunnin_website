@@ -7,7 +7,7 @@ import Resume from './components/Resume';
 import Projects from './components/Projects';
 import Resources from './components/Resources';
 import Contact from './components/Contact';
-import AIChat from './components/AIChat';
+import NeuralInterface from './components/NeuralInterface'; // Swapped Component
 
 const App: React.FC = () => {
   const [currentSection, setCurrentSection] = useState('hero');
@@ -56,7 +56,7 @@ const App: React.FC = () => {
       <Resources />
       <Contact />
       
-      <AIChat />
+      <NeuralInterface />
 
       <footer className="py-12 text-center text-gray-600 text-sm border-t border-gray-900 bg-black relative z-10">
         <div className="flex justify-center gap-6 mb-4">

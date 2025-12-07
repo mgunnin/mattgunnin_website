@@ -24,6 +24,7 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   isStreaming?: boolean;
+  isThinking?: boolean;
 }
 
 export interface Experience {
@@ -41,3 +42,5 @@ export interface Skill {
   level: number; // 0-100
   category: 'Frontend' | 'Backend' | 'AI' | 'Tools';
 }
+
+export type AgentStatus = 'IDLE' | 'LISTENING' | 'ANALYZING' | 'EXECUTING' | 'STREAMING';
