@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { ExternalLink, Github, Code, Cpu, Globe, Database, Box, Terminal, Zap, Server, LayoutTemplate, Brain, MessageSquare, Image as ImageIcon, Bot, ArrowLeft, Calendar, Trophy, Target, MonitorPlay } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ExternalLink, Code, Cpu, Globe, Database, Box, Terminal, Zap, Server, LayoutTemplate, Brain, MessageSquare, Image as ImageIcon, Bot, ArrowLeft, Calendar, Trophy, Target, MonitorPlay, ChevronRight, Share2 } from 'lucide-react';
 import { Project } from '../types';
 
 const majorProjects: Project[] = [
@@ -135,7 +134,7 @@ const minorProjects: Project[] = [
         'Integrated dynamic image generation and context-aware chat.'
     ],
     techStack: ['Node.js', 'Discord.js', 'GPT-5.1', 'Imagen 3'],
-    imageUrl: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?q=80&w=1200&auto=format&fit=crop', // Discordish theme
+    imageUrl: 'https://images.unsplash.com/brands/new/discord-logo-box-2.png?q=80&w=1200&auto=format&fit=crop', 
     category: 'AI'
   },
   {
@@ -196,6 +195,8 @@ const minorProjects: Project[] = [
   }
 ];
 
+const allProjects = [...majorProjects, ...minorProjects];
+
 const getTechIcon = (tech: string) => {
   const t = tech.toLowerCase();
   
@@ -219,6 +220,71 @@ const getTechIcon = (tech: string) => {
 const Projects: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  // Handle URL state
+  useEffect(() => {
+    // Check URL on mount
+    const params = new URLSearchParams(window.location.search);
+    const projectId = params.get('project');
+    if (projectId) {
+      const project = allProjects.find(p => p.id === projectId);
+      if (project) setSelectedProject(project);
+    }
+
+    // Handle back button
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('project');
+      if (id) {
+        const project = allProjects.find(p => p.id === id);
+        if (project) setSelectedProject(project);
+      } else {
+        setSelectedProject(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleOpenProject = (project: Project) => {
+    setSelectedProject(project);
+    // Push state to URL without reloading
+    const newUrl = `${window.location.pathname}?project=${project.id}`;
+    window.history.pushState({ projectId: project.id }, '', newUrl);
+    window.scrollTo(0, 0); // Reset scroll for the new "page"
+  };
+
+  const handleCloseProject = () => {
+    setSelectedProject(null);
+    // Reset URL
+    window.history.pushState({}, '', window.location.pathname);
+  };
+
+  const navigateProject = (direction: 'next' | 'prev') => {
+    if (!selectedProject) return;
+    const currentIndex = allProjects.findIndex(p => p.id === selectedProject.id);
+    let nextIndex;
+    if (direction === 'next') {
+        nextIndex = (currentIndex + 1) % allProjects.length;
+    } else {
+        nextIndex = (currentIndex - 1 + allProjects.length) % allProjects.length;
+    }
+    handleOpenProject(allProjects[nextIndex]);
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+        navigator.share({
+            title: selectedProject?.title,
+            text: `Check out ${selectedProject?.title} by Matt Gunnin`,
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+    }
+  };
+
   return (
     <section id="projects" className="py-24 px-6 md:px-24 w-full min-h-screen flex flex-col justify-center relative bg-gradient-to-b from-transparent to-black/80">
       <div className="max-w-7xl mx-auto w-full">
@@ -232,96 +298,130 @@ const Projects: React.FC = () => {
         )}
 
         {selectedProject ? (
-          // Detailed Project View
-          <div className="bg-black/80 backdrop-blur-md border border-gray-800 rounded-2xl overflow-hidden animate-[fadeIn_0.3s_ease-out] relative min-h-[80vh]">
+          // Detailed Project View (Virtual Page)
+          <div className="fixed inset-0 z-50 bg-cyber-black overflow-y-auto animate-[fadeIn_0.3s_ease-out] custom-scrollbar">
              
-             {/* Hero Image */}
-             <div className="relative h-64 md:h-96 w-full overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-10" />
+             {/* Sticky Nav Overlay */}
+             <div className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 pointer-events-none">
+                <button 
+                  onClick={handleCloseProject}
+                  className="pointer-events-auto flex items-center gap-2 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full border border-gray-700 hover:border-cyber-primary hover:text-cyber-primary transition-all duration-300 group"
+                >
+                   <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                   <span className="font-mono text-sm hidden md:inline">RETURN TO BASE</span>
+                </button>
+
+                <div className="pointer-events-auto flex gap-2">
+                    <button onClick={handleShare} className="bg-black/50 backdrop-blur-md p-2 rounded-full border border-gray-700 text-gray-400 hover:text-white hover:border-white transition-colors">
+                        <Share2 size={18} />
+                    </button>
+                    <div className="flex bg-black/50 backdrop-blur-md rounded-full border border-gray-700 p-1">
+                        <button onClick={() => navigateProject('prev')} className="p-1.5 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
+                            <ArrowLeft size={16} />
+                        </button>
+                        <button onClick={() => navigateProject('next')} className="p-1.5 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                </div>
+             </div>
+
+             {/* Hero Section */}
+             <div className="relative h-[60vh] w-full overflow-hidden shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-t from-cyber-black via-cyber-black/50 to-transparent z-10" />
+                <div className="absolute inset-0 bg-cyber-primary/10 mix-blend-overlay z-10" />
                 <img 
                   src={selectedProject.imageUrl} 
                   alt={selectedProject.title} 
                   className="w-full h-full object-cover"
                 />
-                
-                {/* Back Button */}
-                <button 
-                  onClick={() => setSelectedProject(null)}
-                  className="absolute top-6 left-6 z-20 flex items-center gap-2 bg-black/50 backdrop-blur text-white px-4 py-2 rounded-full border border-gray-700 hover:border-cyber-primary hover:text-cyber-primary transition-all duration-300 group"
-                >
-                   <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                   <span className="font-mono text-sm">BACK TO INDEX</span>
-                </button>
 
                 {/* Title Overlay */}
-                <div className="absolute bottom-8 left-8 z-20">
-                   <div className="flex items-center gap-3 mb-2">
-                      <span className="bg-cyber-primary text-black text-xs font-bold px-2 py-0.5 rounded uppercase font-mono tracking-wider">
+                <div className="absolute bottom-12 left-6 md:left-24 z-20 max-w-4xl">
+                   <div className="flex items-center gap-3 mb-4 animate-[slideIn_0.5s_ease-out]">
+                      <span className="bg-cyber-primary text-black text-xs font-bold px-3 py-1 rounded uppercase font-mono tracking-wider shadow-[0_0_15px_rgba(0,240,255,0.4)]">
                         {selectedProject.category}
                       </span>
                       {selectedProject.demoUrl && (
-                        <a href={selectedProject.demoUrl} target="_blank" rel="noreferrer" className="text-gray-300 hover:text-white flex items-center gap-1 text-xs">
-                          <ExternalLink size={12} /> Live Site
+                        <a href={selectedProject.demoUrl} target="_blank" rel="noreferrer" className="bg-black/60 backdrop-blur border border-gray-600 px-3 py-1 rounded text-gray-300 hover:text-white hover:border-white flex items-center gap-2 text-xs transition-colors">
+                          <ExternalLink size={12} /> Live Deployment
                         </a>
                       )}
                    </div>
-                   <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 text-shadow-lg">{selectedProject.title}</h1>
+                   <h1 className="text-4xl md:text-8xl font-bold text-white mb-4 tracking-tight animate-[slideIn_0.6s_ease-out] text-shadow-lg">
+                    {selectedProject.title}
+                   </h1>
+                   <div className="flex items-center gap-6 text-gray-400 font-mono text-sm animate-[slideIn_0.7s_ease-out]">
+                      <span className="flex items-center gap-2"><BriefcaseIcon size={14} className="text-cyber-secondary" /> {selectedProject.role}</span>
+                      <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                      <span className="flex items-center gap-2"><Calendar size={14} className="text-cyber-secondary" /> {selectedProject.period}</span>
+                   </div>
                 </div>
              </div>
 
-             <div className="p-8 md:p-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+             <div className="max-w-7xl mx-auto px-6 md:px-24 py-16 grid grid-cols-1 lg:grid-cols-3 gap-16">
                 {/* Left Column: Details */}
-                <div className="lg:col-span-2 space-y-8">
-                   <div className="prose prose-invert prose-lg">
-                      <h3 className="text-2xl font-bold text-white mb-4">Mission Overview</h3>
-                      <p className="text-gray-300 leading-relaxed text-lg">
+                <div className="lg:col-span-2 space-y-12 animate-[fadeIn_0.8s_ease-out]">
+                   <div className="prose prose-invert prose-xl max-w-none">
+                      <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-cyber-primary pl-4">Mission Overview</h3>
+                      <p className="text-gray-300 leading-relaxed text-lg font-light">
                         {selectedProject.description}
                       </p>
                    </div>
 
                    <div>
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <Trophy className="text-cyber-secondary" size={20} /> Key Achievements
+                      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <Trophy className="text-cyber-secondary" size={24} /> Key Achievements
                       </h3>
-                      <ul className="space-y-4">
+                      <div className="grid gap-4">
                         {selectedProject.achievements?.map((achievement, idx) => (
-                           <li key={idx} className="flex items-start gap-3 text-gray-400 bg-gray-900/30 p-4 rounded-lg border border-gray-800 hover:border-cyber-primary/30 transition-colors">
-                              <Target className="text-cyber-primary shrink-0 mt-1" size={18} />
-                              <span>{achievement}</span>
-                           </li>
+                           <div key={idx} className="flex items-start gap-4 bg-gray-900/40 p-6 rounded-xl border border-gray-800 hover:border-cyber-primary/30 transition-colors group">
+                              <div className="mt-1 w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center shrink-0 group-hover:bg-cyber-primary group-hover:text-black transition-colors">
+                                <Target size={16} />
+                              </div>
+                              <span className="text-gray-300 text-lg">{achievement}</span>
+                           </div>
                         ))}
-                      </ul>
+                      </div>
                    </div>
                 </div>
 
-                {/* Right Column: Meta */}
-                <div className="space-y-8">
-                   <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-6">
-                      <h4 className="text-sm font-mono text-gray-500 uppercase mb-4 tracking-wider">Project Metadata</h4>
+                {/* Right Column: Tech Stack & Meta */}
+                <div className="space-y-10 animate-[fadeIn_0.9s_ease-out]">
+                   <div className="bg-gray-900/20 border border-gray-800 rounded-2xl p-8 backdrop-blur-sm sticky top-24">
+                      <h4 className="text-xs font-mono text-cyber-primary uppercase mb-6 tracking-widest border-b border-gray-800 pb-2">Technologies Deployed</h4>
                       
-                      <div className="space-y-4">
-                         <div>
-                            <div className="text-xs text-gray-500 mb-1 flex items-center gap-2"><BriefcaseIcon size={12} /> Role</div>
-                            <div className="text-white font-bold">{selectedProject.role}</div>
-                         </div>
-                         <div>
-                            <div className="text-xs text-gray-500 mb-1 flex items-center gap-2"><Calendar size={12} /> Timeline</div>
-                            <div className="text-white font-bold font-mono text-sm">{selectedProject.period}</div>
-                         </div>
-                      </div>
-                   </div>
-
-                   <div>
-                      <h4 className="text-sm font-mono text-gray-500 uppercase mb-4 tracking-wider">Tech Stack</h4>
                       <div className="flex flex-wrap gap-2">
                          {selectedProject.techStack.map(tech => (
-                           <div key={tech} className="flex items-center gap-2 bg-black border border-gray-800 px-3 py-2 rounded text-sm text-gray-300 hover:border-cyber-primary hover:text-white transition-colors cursor-default">
+                           <div key={tech} className="flex items-center gap-2 bg-black border border-gray-800 px-3 py-2 rounded text-sm text-gray-300 hover:border-cyber-primary hover:text-white hover:shadow-[0_0_10px_rgba(0,240,255,0.2)] transition-all cursor-default">
                               {getTechIcon(tech)}
                               {tech}
                            </div>
                          ))}
                       </div>
+
+                      <div className="mt-8 pt-8 border-t border-gray-800">
+                         <div className="text-xs font-mono text-gray-500 uppercase mb-3">Project Status</div>
+                         <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            <span className="text-white font-bold">{selectedProject.period.includes('Present') ? 'ACTIVE DEVELOPMENT' : 'COMPLETED / ACQUIRED'}</span>
+                         </div>
+                      </div>
                    </div>
+                </div>
+             </div>
+
+             {/* Footer Navigation */}
+             <div className="border-t border-gray-900 bg-black py-12 px-6">
+                <div className="max-w-7xl mx-auto flex justify-between items-center">
+                    <button onClick={() => navigateProject('prev')} className="text-gray-500 hover:text-white transition-colors flex flex-col items-start gap-1">
+                        <span className="text-xs font-mono uppercase tracking-widest">Previous Project</span>
+                        <span className="text-lg font-bold flex items-center gap-2"><ArrowLeft size={16}/> Previous</span>
+                    </button>
+                    <button onClick={() => navigateProject('next')} className="text-gray-500 hover:text-white transition-colors flex flex-col items-end gap-1">
+                        <span className="text-xs font-mono uppercase tracking-widest">Next Project</span>
+                        <span className="text-lg font-bold flex items-center gap-2">Next <ChevronRight size={16}/></span>
+                    </button>
                 </div>
              </div>
           </div>
@@ -331,12 +431,12 @@ const Projects: React.FC = () => {
             {/* Major Ventures Section */}
             <div>
               <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                 <span className="w-8 h-1 bg-cyber-primary inline-block"></span>
+                 <span className="w-8 h-1 bg-cyber-primary inline-block shadow-[0_0_10px_#00f0ff]"></span>
                  MAJOR VENTURES
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {majorProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} onClick={() => setSelectedProject(project)} />
+                  <ProjectCard key={project.id} project={project} onClick={() => handleOpenProject(project)} />
                 ))}
               </div>
             </div>
@@ -344,12 +444,12 @@ const Projects: React.FC = () => {
             {/* Minor Projects Section */}
             <div>
               <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
-                 <span className="w-8 h-1 bg-cyber-secondary inline-block"></span>
+                 <span className="w-8 h-1 bg-cyber-secondary inline-block shadow-[0_0_10px_#7000ff]"></span>
                  SELECTED WORKS
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {minorProjects.map((project) => (
-                  <ProjectCard key={project.id} project={project} onClick={() => setSelectedProject(project)} isCompact />
+                  <ProjectCard key={project.id} project={project} onClick={() => handleOpenProject(project)} isCompact />
                 ))}
               </div>
             </div>
@@ -414,8 +514,8 @@ const ProjectCard: React.FC<{ project: Project; onClick: () => void; isCompact?:
 );
 
 // Helper component for Icon
-const BriefcaseIcon: React.FC<{size?: number}> = ({size=14}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+const BriefcaseIcon: React.FC<{size?: number; className?: string}> = ({size=14, className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
 );
 
 export default Projects;

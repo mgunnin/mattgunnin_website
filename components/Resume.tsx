@@ -153,11 +153,11 @@ const Resume: React.FC = () => {
               <Briefcase className="text-cyber-secondary" /> Experience
             </h3>
             
-            <div className="relative border-l border-gray-800 ml-3 space-y-12">
+            <div className="relative border-l border-gray-800 ml-2 md:ml-3 space-y-12">
               {experiences.map((exp) => (
                 <div 
                   key={exp.id} 
-                  className="relative pl-8 group"
+                  className="relative pl-6 md:pl-8 group"
                   onMouseEnter={() => setHoveredExp(exp.id)}
                   onMouseLeave={() => setHoveredExp(null)}
                 >
@@ -168,19 +168,19 @@ const Resume: React.FC = () => {
                       : 'bg-gray-700'
                   }`} />
 
-                  <div className={`p-6 rounded-xl border transition-all duration-300 ${
+                  <div className={`p-4 md:p-6 rounded-xl border transition-all duration-300 ${
                     hoveredExp === exp.id
                       ? 'bg-gray-900/80 border-cyber-primary/50 translate-x-2'
                       : 'bg-gray-900/30 border-gray-800'
                   }`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
                       <div>
-                        <h4 className="text-xl font-bold text-white group-hover:text-cyber-primary transition-colors">
+                        <h4 className="text-lg md:text-xl font-bold text-white group-hover:text-cyber-primary transition-colors">
                           {exp.role}
                         </h4>
                         <div className="text-cyber-secondary font-mono text-sm">{exp.company}</div>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-500 font-mono text-xs mt-2 sm:mt-0 bg-black/50 px-3 py-1 rounded-full border border-gray-800">
+                      <div className="flex items-center gap-2 text-gray-500 font-mono text-[10px] md:text-xs self-start sm:self-center bg-black/50 px-3 py-1 rounded-full border border-gray-800 shrink-0">
                         <Calendar size={12} />
                         {exp.period}
                       </div>
@@ -190,14 +190,14 @@ const Resume: React.FC = () => {
                       {exp.description.map((desc, i) => (
                         <li key={i} className="text-gray-400 text-sm flex items-start gap-2">
                           <ChevronRight size={14} className="mt-1 text-cyber-primary shrink-0" />
-                          {desc}
+                          <span>{desc}</span>
                         </li>
                       ))}
                     </ul>
 
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-800/50">
                       {exp.tech.map((t) => (
-                        <span key={t} className="text-xs font-mono text-gray-500 bg-black/30 px-2 py-1 rounded hover:text-cyber-primary transition-colors">
+                        <span key={t} className="text-[10px] md:text-xs font-mono text-gray-500 bg-black/30 px-2 py-1 rounded hover:text-cyber-primary transition-colors">
                           {t}
                         </span>
                       ))}
@@ -206,7 +206,7 @@ const Resume: React.FC = () => {
                 </div>
               ))}
               
-              <div className="pl-8 text-gray-500 text-sm italic">
+              <div className="pl-6 md:pl-8 text-gray-500 text-sm italic">
                 ... Previous roles at Lexicom (SysAdmin), Auburn Engineers (IT Manager), Dataracks (COO), GamerToBe (Founder).
               </div>
             </div>

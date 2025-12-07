@@ -5,8 +5,18 @@ const Cursor: React.FC = () => {
   const trailerRef = useRef<HTMLDivElement>(null);
   const [click, setClick] = useState(false);
   const [hover, setHover] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
 
   useEffect(() => {
+    // Detect touch device
+    const checkTouch = () => {
+       setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+    };
+    checkTouch();
+    window.addEventListener('resize', checkTouch);
+
+    if (isTouch) return;
+
     let requestRef: number;
     let mouseX = -100; // Start off screen
     let mouseY = -100;
@@ -65,33 +75,37 @@ const Cursor: React.FC = () => {
     requestRef = requestAnimationFrame(animateTrailer);
 
     return () => {
+      window.removeEventListener('resize', checkTouch);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mouseup', onMouseUp);
       window.removeEventListener('mouseover', onMouseOver);
       cancelAnimationFrame(requestRef);
     };
-  }, []);
+  }, [isTouch]);
+
+  if (isTouch) return null;
 
   return (
     <>
       <style>{`
-        /* Hide default cursor globally */
-        body, a, button, input, textarea { 
-            cursor: none !important; 
+        @media (hover: hover) and (pointer: fine) {
+            body, a, button, input, textarea { 
+                cursor: none !important; 
+            }
         }
       `}</style>
       
       {/* Main Cursor Dot */}
       <div 
         ref={cursorRef}
-        className="fixed top-0 left-0 w-1.5 h-1.5 bg-cyber-primary rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-cyber-primary rounded-full pointer-events-none z-[9999] mix-blend-difference hidden md:block"
       />
       
       {/* Trailing Ring */}
       <div 
         ref={trailerRef}
-        className={`fixed top-0 left-0 pointer-events-none z-[9998] border border-cyber-primary rounded-full transition-all duration-300 ease-out flex items-center justify-center
+        className={`fixed top-0 left-0 pointer-events-none z-[9998] border border-cyber-primary rounded-full transition-all duration-300 ease-out flex items-center justify-center hidden md:flex
             ${hover ? 'w-12 h-12 bg-cyber-primary/10 border-cyber-primary shadow-[0_0_15px_rgba(0,240,255,0.3)]' : 'w-8 h-8 opacity-40'}
             ${click ? 'scale-75 bg-cyber-primary/30' : 'scale-100'}
         `}

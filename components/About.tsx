@@ -85,7 +85,7 @@ const About: React.FC = () => {
     <section id="about" className="py-24 px-6 md:px-24 w-full relative">
        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
          
-         <div className="space-y-8">
+         <div className="space-y-8 order-2 lg:order-1">
             <h2 className="text-4xl md:text-5xl font-bold text-white">
               <span className="text-cyber-primary">01.</span> ABOUT MATT
             </h2>
@@ -102,7 +102,7 @@ const About: React.FC = () => {
                </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 pt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                <div className="p-4 border border-gray-800 bg-gray-900/20 rounded-lg hover:bg-gray-900/50 transition-colors">
                   <Network className="text-cyber-primary mb-3" />
                   <h4 className="text-white font-bold mb-1">Multi-Agent Systems</h4>
@@ -116,12 +116,12 @@ const About: React.FC = () => {
             </div>
          </div>
 
-         <div className="relative h-[500px] w-full hidden lg:block">
+         <div className="relative h-[350px] lg:h-[500px] w-full order-1 lg:order-2">
             {/* Artistic Tech Representation using CSS shapes */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-cyber-primary/20 to-cyber-secondary/20 rounded-full blur-[100px]"></div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-cyber-primary/20 to-cyber-secondary/20 rounded-full blur-[80px] lg:blur-[100px]"></div>
             
             <div className="relative z-10 w-full h-full flex items-center justify-center">
-               <div className="relative w-96 h-[450px] bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl rotate-3 hover:rotate-0 transition-all duration-700 overflow-hidden group">
+               <div className="relative w-72 md:w-96 h-[320px] md:h-[450px] bg-gray-900 rounded-2xl border border-gray-800 shadow-2xl rotate-3 hover:rotate-0 transition-all duration-700 overflow-hidden group">
                   {/* Fake Code Editor Header */}
                   <div className="absolute top-0 w-full h-8 bg-black flex items-center px-3 gap-2 border-b border-gray-800 z-20">
                      <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -131,8 +131,8 @@ const About: React.FC = () => {
                   </div>
 
                   {/* Code Area */}
-                  <div className="p-6 pt-12 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
-                     <div className="font-mono text-xs text-gray-400 whitespace-pre leading-relaxed">
+                  <div className="p-4 md:p-6 pt-12 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
+                     <div className="font-mono text-[10px] md:text-xs text-gray-400 whitespace-pre leading-relaxed">
                         <div dangerouslySetInnerHTML={{ __html: displayedCode }} className="inline" />
                         <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 align-middle animate-pulse"></span>
                      </div>
@@ -142,12 +142,12 @@ const About: React.FC = () => {
                   <div className="absolute bottom-10 -right-10 w-32 h-32 bg-cyber-primary/20 rounded-full blur-xl animate-pulse"></div>
                </div>
                
-               <div className="absolute -bottom-6 -left-6 w-64 h-32 glass-panel rounded-xl p-4 border-l-4 border-cyber-secondary shadow-lg animate-[float_4s_ease-in-out_infinite]">
+               <div className="absolute -bottom-6 -left-2 md:-left-6 w-56 md:w-64 h-24 md:h-32 glass-panel rounded-xl p-3 md:p-4 border-l-4 border-cyber-secondary shadow-lg animate-[float_4s_ease-in-out_infinite]">
                   <div className="flex items-center gap-3 mb-2">
                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                      <span className="text-xs font-mono text-gray-400">LIVE SYSTEM</span>
                   </div>
-                  <div className="text-white font-bold text-lg">
+                  <div className="text-white font-bold text-sm md:text-lg">
                     {snippetIndex === 0 ? "Deploying Agents..." : snippetIndex === 1 ? "Neural Uplink..." : "Verifying Contract..."}
                   </div>
                   <div className="w-full bg-gray-800 h-1 mt-3 rounded-full overflow-hidden">

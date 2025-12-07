@@ -296,7 +296,7 @@ const NeuralInterface: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 md:bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-50" />
@@ -317,14 +317,14 @@ const NeuralInterface: React.FC = () => {
       </div>
 
       {/* Main Interface Window */}
-      <div className="relative w-full max-w-5xl h-[90vh] bg-black/80 border border-gray-800 rounded-lg shadow-[0_0_50px_rgba(0,240,255,0.1)] flex flex-col overflow-hidden perspective-1000 z-20 backdrop-filter backdrop-blur-xl">
+      <div className="relative w-full h-[100dvh] md:h-[90vh] md:max-w-5xl bg-black md:bg-black/80 border-0 md:border border-gray-800 md:rounded-lg shadow-none md:shadow-[0_0_50px_rgba(0,240,255,0.1)] flex flex-col overflow-hidden perspective-1000 z-20 backdrop-filter backdrop-blur-xl">
         
         {/* Top HUD Bar */}
         <div className="flex items-center justify-between p-3 border-b border-gray-800 bg-gray-900/80">
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6">
             <div className="flex items-center gap-2 text-cyber-primary">
               <Activity className="w-4 h-4" />
-              <span className="font-mono font-bold tracking-[0.2em] text-xs">NEURAL_INTERFACE_V3</span>
+              <span className="font-mono font-bold tracking-[0.2em] text-[10px] md:text-xs">NEURAL_INTERFACE_V3</span>
             </div>
             
             <div className="hidden md:flex items-center gap-4 text-[10px] font-mono text-gray-500">
@@ -343,32 +343,32 @@ const NeuralInterface: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
              <div className={`px-2 py-0.5 border ${getStatusColor()} rounded text-[10px] font-mono font-bold tracking-widest uppercase shadow-[0_0_10px_currentColor] transition-colors duration-300`}>
                 {status}
              </div>
-             <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-red-500 transition-colors">
+             <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-red-500 transition-colors p-2">
                 <Power size={18} />
              </button>
           </div>
         </div>
 
-        {/* Visualization Area */}
-        <div className="relative h-32 bg-black/60 border-b border-gray-800 flex items-center justify-center overflow-hidden shrink-0">
+        {/* Visualization Area - Slightly smaller on mobile */}
+        <div className="relative h-24 md:h-32 bg-black/60 border-b border-gray-800 flex items-center justify-center overflow-hidden shrink-0">
            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#00f0ff_1px,transparent_1px)] bg-[size:16px_16px]"></div>
            <div className="relative z-10 w-full max-w-lg flex items-center justify-center gap-1 h-16">
               {status === 'IDLE' && (
                   <div className="relative flex items-center justify-center">
-                      <div className="absolute w-24 h-24 border border-cyber-primary/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
+                      <div className="absolute w-16 h-16 md:w-24 md:h-24 border border-cyber-primary/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
                       <div className="text-center font-mono">
-                         <div className="text-xl font-bold text-cyber-primary/80 tracking-widest animate-pulse">AWAITING INPUT</div>
+                         <div className="text-sm md:text-xl font-bold text-cyber-primary/80 tracking-widest animate-pulse">AWAITING INPUT</div>
                       </div>
                   </div>
               )}
               {(status !== 'IDLE') && [...Array(32)].map((_, i) => (
                 <div 
                   key={i} 
-                  className={`w-1.5 bg-cyber-primary rounded-sm transition-all duration-75 ${
+                  className={`w-1 md:w-1.5 bg-cyber-primary rounded-sm transition-all duration-75 ${
                     status === 'EXECUTING' ? 'bg-red-500 shadow-[0_0_5px_red]' : 'shadow-[0_0_5px_#00f0ff]'
                   }`}
                   style={{
@@ -381,29 +381,29 @@ const NeuralInterface: React.FC = () => {
         </div>
 
         {/* Chat Stream */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 font-mono custom-scrollbar bg-black/20">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 font-mono custom-scrollbar bg-black/20 pb-20 md:pb-6">
           {messages.map((msg, idx) => (
             <div
               key={msg.id}
-              className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-[slideIn_0.3s_ease-out]`}
+              className={`flex gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-[slideIn_0.3s_ease-out]`}
             >
               {msg.role === 'model' && (
-                <div className="w-8 h-8 rounded bg-cyber-primary/10 border border-cyber-primary/30 flex items-center justify-center shrink-0 mt-1">
-                  <Cpu size={16} className="text-cyber-primary" />
+                <div className="w-6 h-6 md:w-8 md:h-8 rounded bg-cyber-primary/10 border border-cyber-primary/30 flex items-center justify-center shrink-0 mt-1">
+                  <Cpu size={14} className="text-cyber-primary" />
                 </div>
               )}
               
               <div className={`max-w-[85%] relative group`}>
-                <div className={`p-4 rounded-sm border backdrop-blur-sm ${
+                <div className={`p-3 md:p-4 rounded-sm border backdrop-blur-sm ${
                   msg.role === 'user' 
                     ? 'bg-cyber-secondary/10 border-cyber-secondary/30 text-white text-right' 
                     : 'bg-gray-900/80 border-gray-700 text-gray-200 shadow-[0_0_15px_rgba(0,0,0,0.5)]'
                 }`}>
-                  <div className="text-[10px] text-gray-500 mb-2 opacity-50 uppercase tracking-widest flex items-center gap-2">
+                  <div className="text-[8px] md:text-[10px] text-gray-500 mb-2 opacity-50 uppercase tracking-widest flex items-center gap-2">
                      {msg.role === 'model' ? 'AI_CORE' : 'USER_UPLINK'}
                   </div>
                   <div 
-                    className="whitespace-pre-wrap font-sans text-sm leading-relaxed font-light"
+                    className="whitespace-pre-wrap font-sans text-xs md:text-sm leading-relaxed font-light"
                     dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}
                   />
                   {msg.isStreaming && <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 animate-pulse"></span>}
@@ -414,12 +414,12 @@ const NeuralInterface: React.FC = () => {
 
           {/* Quick Action Chips (Only show if history is short) */}
           {messages.length < 3 && status === 'IDLE' && (
-             <div className="flex flex-wrap gap-3 mt-4 ml-12 animate-[fadeIn_1s_ease-out]">
+             <div className="flex flex-wrap gap-2 md:gap-3 mt-4 md:ml-12 animate-[fadeIn_1s_ease-out] pb-4">
                 {starterPrompts.map(prompt => (
                    <button
                      key={prompt.label}
                      onClick={() => handleSend(prompt.query)}
-                     className="px-4 py-2 bg-gray-900/50 border border-gray-700 hover:border-cyber-primary text-xs text-gray-400 hover:text-white rounded-md transition-all duration-300 hover:scale-105 flex items-center gap-2 group"
+                     className="px-3 py-2 bg-gray-900/50 border border-gray-700 hover:border-cyber-primary text-[10px] md:text-xs text-gray-400 hover:text-white rounded-md transition-all duration-300 flex items-center gap-2 group"
                    >
                      <Terminal size={12} className="group-hover:text-cyber-primary transition-colors" />
                      {prompt.label}
@@ -431,12 +431,12 @@ const NeuralInterface: React.FC = () => {
         </div>
 
         {/* Command Input Area */}
-        <div className="p-4 bg-black/90 border-t border-gray-800 relative z-30">
-          <div className="flex gap-4 max-w-4xl mx-auto items-center">
+        <div className="p-3 md:p-4 bg-black/95 md:bg-black/90 border-t border-gray-800 relative z-30 mb-safe">
+          <div className="flex gap-2 md:gap-4 max-w-4xl mx-auto items-center">
             <div className="flex-1 relative group">
               <div className="absolute -inset-0.5 bg-gradient-to-r from-cyber-primary to-cyber-secondary rounded opacity-20 group-hover:opacity-50 transition duration-500 blur-sm"></div>
               <div className="relative flex items-center bg-black border border-gray-800 rounded overflow-hidden">
-                <div className="pl-4 pr-2 text-cyber-primary animate-pulse flex items-center gap-1 font-mono text-xs">
+                <div className="pl-3 pr-2 text-cyber-primary animate-pulse flex items-center gap-1 font-mono text-xs">
                     <ChevronRight size={14} />
                 </div>
                 <input
@@ -444,8 +444,8 @@ const NeuralInterface: React.FC = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Enter query or select a protocol above..."
-                  className="w-full bg-transparent border-none text-white px-2 py-4 focus:ring-0 focus:outline-none font-mono tracking-wider placeholder-gray-700"
+                  placeholder="Enter query..."
+                  className="w-full bg-transparent border-none text-white px-2 py-3 md:py-4 focus:ring-0 focus:outline-none font-mono tracking-wider placeholder-gray-700 text-sm"
                   autoFocus
                   disabled={status !== 'IDLE'}
                 />
@@ -455,11 +455,11 @@ const NeuralInterface: React.FC = () => {
             <button 
               onClick={() => handleSend(input)}
               disabled={!input.trim() || status !== 'IDLE'}
-              className="group relative px-6 py-4 bg-gray-900 border border-gray-700 text-cyber-primary hover:text-black transition-all duration-300 rounded font-mono uppercase text-sm disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+              className="group relative px-4 py-3 md:px-6 md:py-4 bg-gray-900 border border-gray-700 text-cyber-primary hover:text-black transition-all duration-300 rounded font-mono uppercase text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shrink-0"
             >
               <div className="absolute inset-0 bg-cyber-primary translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
               <span className="relative flex items-center gap-2 group-hover:text-black z-10">
-                 EXECUTE <Zap size={14} className={status === 'ANALYZING' ? 'animate-spin' : ''} />
+                 <span className="hidden md:inline">EXECUTE</span> <Zap size={16} className={status === 'ANALYZING' ? 'animate-spin' : ''} />
               </span>
             </button>
           </div>
