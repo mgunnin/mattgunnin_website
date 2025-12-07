@@ -19,7 +19,7 @@ const About: React.FC = () => {
                  With a proven track record as a <span className="text-cyber-primary">5x technical founder</span> with 2 exits, I have raised over <span className="text-white">$7M in venture capital</span> and delivered products used by giants like Riot Games, the NFL, NBA, and Fortune 500 brands.
                </p>
                <p className="leading-relaxed">
-                 Currently, I am the Founder/CEO of <strong className="text-white">Vertical Labs</strong> in Austin, TX, where we are architecting sophisticated AI agents that empower businesses to thrive in an AI-driven world. My passion lies in leveraging cutting-edge frameworks like CrewAI, Eliza, and OpenAI Swarm to create transformative business solutions.
+                 Currently, I am the Founder/CEO of <strong className="text-white">Vertical Labs</strong> in Austin, TX, where we are architecting sophisticated AI agents using <strong className="text-cyber-secondary">GPT-5.1, Claude 4.5, and Gemini 3</strong>. My passion lies in leveraging cutting-edge frameworks like CrewAI, Eliza, and OpenAI Swarm to create transformative business solutions.
                </p>
             </div>
 
@@ -53,7 +53,7 @@ const About: React.FC = () => {
                      <div className="text-purple-400">class <span className="text-yellow-300">VerticalLabs</span>:</div>
                      <div className="pl-4">def <span className="text-blue-400">__init__</span>(self):</div>
                      <div className="pl-8">self.mission = <span className="text-green-300">"Autonomous Future"</span></div>
-                     <div className="pl-8">self.stack = [<span className="text-green-300">"CrewAI"</span>, <span className="text-green-300">"Swarm"</span>, <span className="text-green-300">"RAG"</span>]</div>
+                     <div className="pl-8">self.models = [<span className="text-green-300">"GPT-5.1"</span>, <span className="text-green-300">"Claude-4.5"</span>, <span className="text-green-300">"Gemini-3"</span>]</div>
                      <div className="pl-4">def <span className="text-blue-400">deploy_agent</span>(self, goal):</div>
                      <div className="pl-8 text-gray-500"># Orchestrating intelligence...</div>
                      <div className="pl-8">return <span className="text-blue-300">Agent</span>(goal, autonomy=<span className="text-purple-400">True</span>)</div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Briefcase, Code, Terminal, ChevronRight, Award, School } from 'lucide-react';
 import { Experience, Skill } from '../types';
 
@@ -94,18 +94,38 @@ const experiences: Experience[] = [
 
 const skills: Skill[] = [
   { name: 'Agentic AI / Multi-Agent Systems', level: 98, category: 'AI' },
-  { name: 'LLMs (GPT, Gemini, Claude)', level: 95, category: 'AI' },
-  { name: 'CrewAI / Eliza / Swarm', level: 90, category: 'AI' },
-  { name: 'React / Next.js / TypeScript', level: 92, category: 'Frontend' },
-  { name: 'Python / Django / Flask', level: 88, category: 'Backend' },
+  { name: 'SOTA LLMs (GPT-5.1, Claude 4.5, Gemini 3)', level: 96, category: 'AI' },
+  { name: 'Open Source AI (Llama 4, DeepSeek, Mistral)', level: 92, category: 'AI' },
+  { name: 'CrewAI / Eliza / Swarm / LangChain', level: 94, category: 'AI' },
+  { name: 'React / Next.js 15 / TypeScript', level: 92, category: 'Frontend' },
+  { name: 'Python / Django / FastAPI', level: 88, category: 'Backend' },
   { name: 'Startups & Venture Capital', level: 95, category: 'Tools' },
   { name: 'Product Management', level: 90, category: 'Tools' },
-  { name: 'Computer Vision', level: 80, category: 'AI' },
   { name: 'Web3 / Blockchain / NFTs', level: 85, category: 'Backend' },
 ];
 
 const Resume: React.FC = () => {
   const [hoveredExp, setHoveredExp] = useState<string | null>(null);
+  const [showSkills, setShowSkills] = useState(false);
+  const skillsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShowSkills(true);
+          observer.disconnect(); // Only trigger once
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (skillsRef.current) {
+      observer.observe(skillsRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section id="resume" className="py-24 px-6 md:px-24 w-full relative bg-cyber-black">
@@ -195,12 +215,12 @@ const Resume: React.FC = () => {
           {/* Skills & Certs */}
           <div className="lg:col-span-5 space-y-12">
              {/* Skills */}
-            <div>
+            <div ref={skillsRef}>
               <h3 className="text-2xl font-bold text-white flex items-center gap-2 mb-8">
                 <Code className="text-cyber-primary" /> Skill Matrix
               </h3>
               <div className="grid gap-6">
-                {skills.map((skill) => (
+                {skills.map((skill, index) => (
                   <div key={skill.name} className="group">
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-300 font-mono text-sm group-hover:text-cyber-primary transition-colors">{skill.name}</span>
@@ -208,8 +228,11 @@ const Resume: React.FC = () => {
                     </div>
                     <div className="h-1.5 w-full bg-gray-800 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-cyber-primary to-cyber-secondary relative"
-                        style={{ width: `${skill.level}%` }}
+                        className="h-full bg-gradient-to-r from-cyber-primary to-cyber-secondary relative transition-all duration-1000 ease-out"
+                        style={{ 
+                          width: showSkills ? `${skill.level}%` : '0%',
+                          transitionDelay: `${index * 50}ms`
+                        }}
                       >
                          <div className="absolute top-0 right-0 h-full w-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12" />
                       </div>

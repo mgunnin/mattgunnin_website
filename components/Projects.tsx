@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Github, Code, Cpu, Globe, Database, Box, Terminal, Layers, Zap } from 'lucide-react';
+import { ExternalLink, Github, Code, Cpu, Globe, Database, Box, Terminal, Layers, Zap, Server, Smartphone, LayoutTemplate } from 'lucide-react';
 import { Project } from '../types';
 
 const projects: Project[] = [
@@ -7,7 +7,7 @@ const projects: Project[] = [
     id: 'cainam',
     title: 'Cainam World',
     description: 'AI town simulation framework enabling autonomous agent interactions and emergent behaviors in virtual environments. Built with multi-agent architecture principles.',
-    techStack: ['TypeScript', 'Multi-Agent', 'AI Simulation'],
+    techStack: ['TypeScript', 'Multi-Agent', 'Gemini 3', 'AI Simulation'],
     imageUrl: 'https://picsum.photos/seed/cainam/600/400?grayscale',
     category: 'AI',
     demoUrl: '#',
@@ -16,8 +16,8 @@ const projects: Project[] = [
   {
     id: 'lacra',
     title: 'Lacra Discord Bot',
-    description: 'GPT-powered Discord bot interface featuring chat completions, AI image generation, and automated moderation capabilities.',
-    techStack: ['Node.js', 'GPT-4', 'Discord.js', 'Image Gen'],
+    description: 'Next-gen Discord bot interface featuring chat completions, AI image generation, and automated moderation capabilities using the latest reasoning models.',
+    techStack: ['Node.js', 'GPT-5.1', 'Discord.js', 'Imagen 3'],
     imageUrl: 'https://picsum.photos/seed/lacra/600/400?grayscale',
     category: 'AI',
     repoUrl: '#'
@@ -62,13 +62,26 @@ const projects: Project[] = [
 
 const getTechIcon = (tech: string) => {
   const t = tech.toLowerCase();
-  if (t.includes('ai') || t.includes('gpt') || t.includes('vision') || t.includes('rl') || t.includes('agent') || t.includes('learning')) return <Cpu size={14} className="text-cyber-primary" />;
-  if (t.includes('web') || t.includes('api') || t.includes('http') || t.includes('calendar')) return <Globe size={14} className="text-blue-400" />;
-  if (t.includes('data') || t.includes('analytics') || t.includes('sql') || t.includes('aggregation')) return <Database size={14} className="text-purple-400" />;
-  if (t.includes('nft') || t.includes('web3') || t.includes('solidity') || t.includes('blockchain')) return <Box size={14} className="text-orange-400" />;
-  if (t.includes('node') || t.includes('script') || t.includes('python') || t.includes('discord')) return <Terminal size={14} className="text-green-400" />;
-  if (t.includes('react') || t.includes('vue') || t.includes('next') || t.includes('frontend') || t.includes('design')) return <Layers size={14} className="text-pink-400" />;
-  if (t.includes('gen') || t.includes('image')) return <Zap size={14} className="text-yellow-400" />;
+  
+  // AI & Data Science
+  if (t.includes('ai') || t.includes('gpt') || t.includes('gemini') || t.includes('agent') || t.includes('learning')) return <Cpu size={14} className="text-cyber-primary" />;
+  if (t.includes('vision') || t.includes('rl')) return <Zap size={14} className="text-yellow-400" />;
+  
+  // Web & Backend
+  if (t.includes('web') || t.includes('http') || t.includes('api')) return <Globe size={14} className="text-blue-400" />;
+  if (t.includes('node') || t.includes('server')) return <Server size={14} className="text-green-400" />;
+  if (t.includes('react') || t.includes('next') || t.includes('vue') || t.includes('frontend')) return <LayoutTemplate size={14} className="text-pink-400" />;
+  
+  // Data
+  if (t.includes('data') || t.includes('sql') || t.includes('analytics') || t.includes('aggregation')) return <Database size={14} className="text-purple-400" />;
+  
+  // Web3
+  if (t.includes('nft') || t.includes('web3') || t.includes('solidity') || t.includes('block')) return <Box size={14} className="text-orange-400" />;
+  
+  // Languages & Tools
+  if (t.includes('script') || t.includes('python') || t.includes('discord') || t.includes('terminal')) return <Terminal size={14} className="text-gray-300" />;
+  if (t.includes('gen') || t.includes('image') || t.includes('imagen')) return <Layers size={14} className="text-indigo-400" />;
+  
   return <Code size={14} className="text-gray-400" />;
 };
 
