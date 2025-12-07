@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot, User, Sparkles } from 'lucide-react';
+import { MessageSquare, X, Send, Bot, User, Sparkles, ChevronRight } from 'lucide-react';
 import { sendMessageStream } from '../services/geminiService';
 import { ChatMessage } from '../types';
 import { GenerateContentResponse } from '@google/genai';
@@ -17,6 +17,13 @@ const AIChat: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const quickActions = [
+    { label: "Experience", query: "Tell me about your background and experience." },
+    { label: "Skills", query: "What are your core technical skills?" },
+    { label: "Projects", query: "Show me your major projects." },
+    { label: "Contact", query: "How can I contact you?" },
+  ];
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -25,11 +32,12 @@ const AIChat: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const handleSubmit = async (e?: React.FormEvent, overrideInput?: string) => {
+    if (e) e.preventDefault();
+    const textToSend = overrideInput || input;
+    if (!textToSend.trim() || isLoading) return;
 
-    const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: input };
+    const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: textToSend };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
@@ -109,11 +117,27 @@ const AIChat: React.FC = () => {
                 </div>
               </div>
             ))}
+            
+            {/* Quick Actions (Show only when history is short) */}
+            {messages.length === 1 && !isLoading && (
+              <div className="flex flex-wrap gap-2 mt-2 ml-11">
+                {quickActions.map((action) => (
+                  <button
+                    key={action.label}
+                    onClick={() => handleSubmit(undefined, action.query)}
+                    className="px-3 py-1.5 bg-gray-800 hover:bg-cyber-primary/20 border border-gray-700 hover:border-cyber-primary text-xs text-gray-300 hover:text-cyber-primary rounded-full transition-all duration-200 flex items-center gap-1"
+                  >
+                    {action.label} <ChevronRight size={10} />
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
-          <form onSubmit={handleSubmit} className="p-4 bg-black/40 border-t border-gray-800 flex gap-2">
+          <form onSubmit={(e) => handleSubmit(e)} className="p-4 bg-black/40 border-t border-gray-800 flex gap-2">
             <input
               type="text"
               value={input}

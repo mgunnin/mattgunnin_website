@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, Github, Linkedin, Twitter } from 'lucide-react';
+import { ChevronDown, Github, Linkedin } from 'lucide-react';
 
 const Hero: React.FC = () => {
   return (
@@ -30,10 +30,14 @@ const Hero: React.FC = () => {
           >
             View Projects
           </button>
-          <div className="flex gap-6">
+          <div className="flex gap-6 items-center">
             <a href="https://github.com/mgunnin" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-cyber-primary transition-colors"><Github /></a>
             <a href="https://linkedin.com/in/matthewgunnin" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-cyber-primary transition-colors"><Linkedin /></a>
-            <a href="https://twitter.com/mattgunnin" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-cyber-primary transition-colors"><Twitter /></a>
+            <a href="https://x.com/matthewgunnin" target="_blank" rel="noreferrer" className="text-gray-400 hover:text-cyber-primary transition-colors">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
+              </svg>
+            </a>
           </div>
         </div>
       </div>

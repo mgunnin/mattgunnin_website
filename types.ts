@@ -1,12 +1,16 @@
+
 export interface Project {
   id: string;
   title: string;
+  role: string;
+  period: string;
   description: string;
+  achievements: string[];
   techStack: string[];
   imageUrl: string;
   demoUrl?: string;
   repoUrl?: string;
-  category: 'AI' | 'Web' | 'Mobile' | 'Design';
+  category: 'AI' | 'Web' | 'Mobile' | 'Design' | 'Esports' | 'Crypto';
 }
 
 export interface Resource {

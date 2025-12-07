@@ -1,8 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, X, Cpu, Activity, Zap, Terminal, Navigation as NavIcon, Power, Wifi, Shield, Lock, ChevronRight, Minimize2, Maximize2 } from 'lucide-react';
+import { Power, Wifi, Shield, Cpu, Activity, Zap, ChevronRight, Terminal } from 'lucide-react';
 import { sendMessageStream } from '../services/geminiService';
 import { ChatMessage, AgentStatus } from '../types';
 import { GenerateContentResponse } from '@google/genai';
+
+// Helper to parse basic markdown for better readability
+const renderMarkdown = (text: string) => {
+  let formatted = text
+    // Code blocks
+    .replace(/```([\s\S]*?)```/g, '<div class="bg-black/50 p-2 rounded border border-gray-700 font-mono text-xs my-2 overflow-x-auto">$1</div>')
+    // Bold
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyber-primary">$1</strong>')
+    // Italic
+    .replace(/\*(.*?)\*/g, '<em class="text-cyber-secondary">$1</em>')
+    // Lists
+    .replace(/^\s*-\s+(.*)/gm, '<li class="ml-4 list-disc text-gray-300">$1</li>')
+    // Line breaks
+    .replace(/\n/g, '<br />');
+    
+  return formatted;
+};
 
 const NeuralInterface: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,7 +32,15 @@ const NeuralInterface: React.FC = () => {
   
   // Refs for animation system
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const statusRef = useRef(status); // To access status inside requestAnimationFrame
+  const statusRef = useRef(status); 
+
+  // Quick Action Chips
+  const starterPrompts = [
+    { label: "🏗️ Agent Architecture", query: "How do you architect multi-agent systems using CrewAI?" },
+    { label: "💰 Fundraising Strategy", query: "What is your strategy for raising capital for AI startups?" },
+    { label: "🚀 Vertical Labs Vision", query: "What is the mission of Vertical Labs?" },
+    { label: "🛠️ Tech Stack", query: "What is your preferred stack for building autonomous agents?" },
+  ];
 
   // Keep status ref in sync
   useEffect(() => {
@@ -28,7 +53,7 @@ const NeuralInterface: React.FC = () => {
       setMessages([{
         id: 'init',
         role: 'model',
-        text: "NEURAL LINK ESTABLISHED.\nIDENTITY VERIFIED: GUEST_USER.\n\nI am the digital construct of Matt Gunnin (v3.0). \nI have full autonomous control over this portfolio. \n\nQuery my database or issue a navigational command."
+        text: "NEURAL LINK ESTABLISHED.\nIDENTITY VERIFIED: GUEST_USER.\n\nI am the digital construct of Matt Gunnin (v3.0). \nI possess Matt's professional cognition regarding AI Architecture, Startup Strategy, and Engineering.\n\nSelect a protocol below or query directly."
       }]);
     }
   }, [isOpen]);
@@ -118,7 +143,6 @@ const NeuralInterface: React.FC = () => {
         ctx.strokeStyle = particleColor;
         ctx.lineWidth = 0.2;
         
-        // Optimize: only draw connections for a subset or if status is active to save perf
         if (currentStatus !== 'IDLE') {
              for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
@@ -169,10 +193,10 @@ const NeuralInterface: React.FC = () => {
       const sectionId = args.sectionId;
       setStatus('EXECUTING');
       
-      // Execute the scroll
       const element = document.getElementById(sectionId);
       if (element) {
-        setIsOpen(false); // Close interface to show the site
+        // We do NOT close the modal here anymore, so the user can see the confirmation.
+        // setIsOpen(false); 
         setTimeout(() => {
           element.scrollIntoView({ behavior: 'smooth' });
         }, 300);
@@ -182,11 +206,10 @@ const NeuralInterface: React.FC = () => {
     return { result: 'Unknown function' };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || status !== 'IDLE') return;
+  const handleSend = async (text: string) => {
+    if (!text.trim() || status !== 'IDLE') return;
 
-    const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: input };
+    const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: text };
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setStatus('ANALYZING');
@@ -195,6 +218,7 @@ const NeuralInterface: React.FC = () => {
       const stream = await sendMessageStream(userMsg.text);
       
       const botMsgId = (Date.now() + 1).toString();
+      // Initialize with an empty string, but check for streaming updates
       setMessages(prev => [...prev, { id: botMsgId, role: 'model', text: '', isStreaming: true }]);
       setStatus('STREAMING');
 
@@ -203,14 +227,17 @@ const NeuralInterface: React.FC = () => {
       for await (const chunk of stream) {
         const content = chunk as GenerateContentResponse;
         
-        // Handle Tool Calls in the stream
+        // Check for Tool Calls (Function Calls)
         const fc = content.candidates?.[0]?.content?.parts?.find(p => p.functionCall);
         if (fc && fc.functionCall) {
             await handleToolCall(fc.functionCall);
              const sectionId = fc.functionCall.args['sectionId'] as string;
+             const toolMsg = `\n> *INITIATING NAVIGATION PROTOCOL: ${sectionId?.toUpperCase()}...*`;
+             fullText += toolMsg;
+             
              setMessages(prev => prev.map(msg => 
               msg.id === botMsgId 
-                ? { ...msg, text: fullText + `\n[EXECUTING PROTOCOL: NAVIGATE TO ${sectionId?.toUpperCase()}]` } 
+                ? { ...msg, text: fullText } 
                 : msg
             ));
             continue;
@@ -238,7 +265,13 @@ const NeuralInterface: React.FC = () => {
     }
   };
 
-  // Status visual configurations
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend(input);
+    }
+  };
+
   const getStatusColor = () => {
     switch(status) {
         case 'ANALYZING': return 'text-yellow-400 border-yellow-400';
@@ -257,13 +290,6 @@ const NeuralInterface: React.FC = () => {
         <div className="absolute inset-0 bg-cyber-primary opacity-20 rounded-full animate-ping group-hover:opacity-40"></div>
         <div className="relative w-16 h-16 bg-black border-2 border-cyber-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.3)] hover:scale-110 transition-transform duration-300 overflow-hidden backdrop-blur-md">
            <Cpu className="text-cyber-primary w-8 h-8 animate-[pulse_3s_infinite]" />
-           <div className="absolute inset-0 bg-gradient-to-t from-cyber-primary/20 to-transparent pointer-events-none"></div>
-        </div>
-        <div className="absolute right-20 bg-black/90 border border-cyber-primary text-cyber-primary px-4 py-2 text-xs font-mono uppercase tracking-widest rounded opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap translate-x-4 group-hover:translate-x-0 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-            Initialize Agent
-          </div>
         </div>
       </button>
     );
@@ -271,12 +297,9 @@ const NeuralInterface: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
-      {/* Immersive Background Effects */}
+      {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Particle Canvas */}
         <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-50" />
-
-        {/* Dynamic CPU Heat Gradient */}
         <div 
             className="absolute inset-0 z-0 transition-opacity duration-1000"
             style={{
@@ -288,13 +311,8 @@ const NeuralInterface: React.FC = () => {
                 opacity: cpuUsage / 100
             }}
         />
-
-        {/* Grid with Glitch Effect */}
         <div className={`absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] ${status === 'ANALYZING' ? 'animate-[pulse_0.1s_infinite]' : ''}`}></div>
-        
-        {/* Scanlines */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] pointer-events-none z-10"></div>
-        {/* Vignette */}
         <div className="absolute inset-0 bg-radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.8)_100%)"></div>
       </div>
 
@@ -329,33 +347,24 @@ const NeuralInterface: React.FC = () => {
              <div className={`px-2 py-0.5 border ${getStatusColor()} rounded text-[10px] font-mono font-bold tracking-widest uppercase shadow-[0_0_10px_currentColor] transition-colors duration-300`}>
                 {status}
              </div>
-             <div className="h-4 w-px bg-gray-700"></div>
              <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-red-500 transition-colors">
                 <Power size={18} />
              </button>
           </div>
         </div>
 
-        {/* Visualization & Status Area */}
-        <div className="relative h-48 bg-black/60 border-b border-gray-800 flex items-center justify-center overflow-hidden shrink-0">
-           {/* Animated Background Mesh in Visualization */}
+        {/* Visualization Area */}
+        <div className="relative h-32 bg-black/60 border-b border-gray-800 flex items-center justify-center overflow-hidden shrink-0">
            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#00f0ff_1px,transparent_1px)] bg-[size:16px_16px]"></div>
-           
-           {/* Center Visualizer */}
-           <div className="relative z-10 w-full max-w-lg flex items-center justify-center gap-1 h-24">
-              {/* If IDLE, show a slow breathing circle or lines */}
+           <div className="relative z-10 w-full max-w-lg flex items-center justify-center gap-1 h-16">
               {status === 'IDLE' && (
                   <div className="relative flex items-center justify-center">
-                      <div className="absolute w-32 h-32 border border-cyber-primary/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
-                      <div className="absolute w-24 h-24 border border-cyber-primary/40 rounded-full animate-[spin_5s_linear_infinite_reverse]"></div>
+                      <div className="absolute w-24 h-24 border border-cyber-primary/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
                       <div className="text-center font-mono">
-                         <div className="text-2xl font-bold text-cyber-primary/80 tracking-widest animate-pulse">AWAITING INPUT</div>
-                         <div className="text-[10px] text-gray-600 mt-2">MEM_ADDR: {randomData}</div>
+                         <div className="text-xl font-bold text-cyber-primary/80 tracking-widest animate-pulse">AWAITING INPUT</div>
                       </div>
                   </div>
               )}
-
-              {/* If ACTIVE, show equalizer */}
               {(status !== 'IDLE') && [...Array(32)].map((_, i) => (
                 <div 
                   key={i} 
@@ -369,16 +378,6 @@ const NeuralInterface: React.FC = () => {
                 />
               ))}
            </div>
-           
-           {/* Corner Decorations */}
-           <div className="absolute top-2 left-2 text-[8px] font-mono text-gray-700">
-              SEQ_ID: {randomData}<br/>
-              BUFFER: CLEAR
-           </div>
-           <div className="absolute bottom-2 right-2 text-[8px] font-mono text-gray-700 text-right">
-              LATENCY: 12ms<br/>
-              GEMINI-3-PRO
-           </div>
         </div>
 
         {/* Chat Stream */}
@@ -387,74 +386,74 @@ const NeuralInterface: React.FC = () => {
             <div
               key={msg.id}
               className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-[slideIn_0.3s_ease-out]`}
-              style={{ animationDelay: `${idx * 0.05}s` }}
             >
               {msg.role === 'model' && (
-                <div className="w-8 h-8 rounded bg-cyber-primary/10 border border-cyber-primary/30 flex items-center justify-center shrink-0 mt-1 shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+                <div className="w-8 h-8 rounded bg-cyber-primary/10 border border-cyber-primary/30 flex items-center justify-center shrink-0 mt-1">
                   <Cpu size={16} className="text-cyber-primary" />
                 </div>
               )}
               
-              <div className={`max-w-[80%] relative group`}>
+              <div className={`max-w-[85%] relative group`}>
                 <div className={`p-4 rounded-sm border backdrop-blur-sm ${
                   msg.role === 'user' 
                     ? 'bg-cyber-secondary/10 border-cyber-secondary/30 text-white text-right' 
-                    : 'bg-gray-900/80 border-gray-700 text-cyber-primary shadow-[0_0_15px_rgba(0,0,0,0.5)]'
+                    : 'bg-gray-900/80 border-gray-700 text-gray-200 shadow-[0_0_15px_rgba(0,0,0,0.5)]'
                 }`}>
-                  <div className="text-[10px] text-gray-500 mb-1 opacity-50 uppercase tracking-widest flex items-center gap-2">
+                  <div className="text-[10px] text-gray-500 mb-2 opacity-50 uppercase tracking-widest flex items-center gap-2">
                      {msg.role === 'model' ? 'AI_CORE' : 'USER_UPLINK'}
-                     <span className="w-full h-px bg-gray-800/50"></span>
                   </div>
-                  <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed font-medium font-sans">
-                    {msg.text}
-                    {msg.isStreaming && <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 animate-pulse shadow-[0_0_5px_#00f0ff]"></span>}
-                  </pre>
+                  <div 
+                    className="whitespace-pre-wrap font-sans text-sm leading-relaxed font-light"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}
+                  />
+                  {msg.isStreaming && <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 animate-pulse"></span>}
                 </div>
-                {/* Decorative corner markers for messages */}
-                <div className={`absolute top-0 w-2 h-2 border-t border-l ${msg.role === 'user' ? 'border-cyber-secondary -right-1' : 'border-cyber-primary -left-1'}`}></div>
-                <div className={`absolute bottom-0 w-2 h-2 border-b border-r ${msg.role === 'user' ? 'border-cyber-secondary -right-1' : 'border-cyber-primary -left-1'}`}></div>
               </div>
-
-              {msg.role === 'user' && (
-                <div className="w-8 h-8 rounded bg-cyber-secondary/10 border border-cyber-secondary/30 flex items-center justify-center shrink-0 mt-1 shadow-[0_0_10px_rgba(112,0,255,0.1)]">
-                  <Terminal size={16} className="text-cyber-secondary" />
-                </div>
-              )}
             </div>
           ))}
+
+          {/* Quick Action Chips (Only show if history is short) */}
+          {messages.length < 3 && status === 'IDLE' && (
+             <div className="flex flex-wrap gap-3 mt-4 ml-12 animate-[fadeIn_1s_ease-out]">
+                {starterPrompts.map(prompt => (
+                   <button
+                     key={prompt.label}
+                     onClick={() => handleSend(prompt.query)}
+                     className="px-4 py-2 bg-gray-900/50 border border-gray-700 hover:border-cyber-primary text-xs text-gray-400 hover:text-white rounded-md transition-all duration-300 hover:scale-105 flex items-center gap-2 group"
+                   >
+                     <Terminal size={12} className="group-hover:text-cyber-primary transition-colors" />
+                     {prompt.label}
+                   </button>
+                ))}
+             </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Command Input Area */}
         <div className="p-4 bg-black/90 border-t border-gray-800 relative z-30">
-          <form onSubmit={handleSubmit} className="flex gap-4 max-w-4xl mx-auto items-center">
+          <div className="flex gap-4 max-w-4xl mx-auto items-center">
             <div className="flex-1 relative group">
-              {/* Input Glow Effect */}
               <div className="absolute -inset-0.5 bg-gradient-to-r from-cyber-primary to-cyber-secondary rounded opacity-20 group-hover:opacity-50 transition duration-500 blur-sm"></div>
-              
               <div className="relative flex items-center bg-black border border-gray-800 rounded overflow-hidden">
                 <div className="pl-4 pr-2 text-cyber-primary animate-pulse flex items-center gap-1 font-mono text-xs">
                     <ChevronRight size={14} />
-                    <span>CMD:</span>
                 </div>
                 <input
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Enter query or navigation protocol..."
+                  onKeyDown={handleKeyDown}
+                  placeholder="Enter query or select a protocol above..."
                   className="w-full bg-transparent border-none text-white px-2 py-4 focus:ring-0 focus:outline-none font-mono tracking-wider placeholder-gray-700"
                   autoFocus
                   disabled={status !== 'IDLE'}
                 />
-                {/* Random decor inside input */}
-                <div className="pr-4 text-[10px] text-gray-800 font-mono select-none">
-                    {input.length}/128
-                </div>
               </div>
             </div>
             
             <button 
-              type="submit" 
+              onClick={() => handleSend(input)}
               disabled={!input.trim() || status !== 'IDLE'}
               className="group relative px-6 py-4 bg-gray-900 border border-gray-700 text-cyber-primary hover:text-black transition-all duration-300 rounded font-mono uppercase text-sm disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
             >
@@ -463,41 +462,9 @@ const NeuralInterface: React.FC = () => {
                  EXECUTE <Zap size={14} className={status === 'ANALYZING' ? 'animate-spin' : ''} />
               </span>
             </button>
-          </form>
-          
-          {/* Footer Metadata */}
-          <div className="flex justify-between items-center mt-3 text-[10px] text-gray-600 font-mono px-2">
-            <div>
-                 SESSION_ID: {Date.now().toString(36).toUpperCase()}
-            </div>
-            <div className="flex gap-4">
-                 <span>ENCRYPTION: AES-256-GCM</span>
-                 <span>LATENCY: 14ms</span>
-            </div>
           </div>
         </div>
-
       </div>
-      
-      <style>{`
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(0,0,0,0.5);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #333;
-          border-radius: 2px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #00f0ff;
-        }
-      `}</style>
     </div>
   );
 };
