@@ -62,6 +62,18 @@ const Blog: React.FC = () => {
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 });
 
+  // SEO: Dynamic Document Title
+  useEffect(() => {
+    if (selectedPost) {
+      document.title = `${selectedPost.title} | Matt Gunnin`;
+    } else {
+      document.title = "Matt Gunnin | Agentic AI Architect & Founder";
+    }
+    return () => {
+      document.title = "Matt Gunnin | Agentic AI Architect & Founder";
+    };
+  }, [selectedPost]);
+
   // Extract unique tags from all posts
   const allTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
 

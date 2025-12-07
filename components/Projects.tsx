@@ -220,6 +220,18 @@ const getTechIcon = (tech: string) => {
 const Projects: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
+  // SEO: Dynamic Document Title
+  useEffect(() => {
+    if (selectedProject) {
+      document.title = `${selectedProject.title} | Matt Gunnin`;
+    } else {
+      document.title = "Matt Gunnin | Agentic AI Architect & Founder";
+    }
+    return () => {
+      document.title = "Matt Gunnin | Agentic AI Architect & Founder";
+    };
+  }, [selectedProject]);
+
   // Handle URL state
   useEffect(() => {
     // Check URL on mount
