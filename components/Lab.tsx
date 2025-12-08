@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cpu, Terminal, ArrowRight, Activity, Zap, Layers, Lock, RotateCcw, Check, FileText, Search, MonitorPlay, BarChart2 } from 'lucide-react';
-import { generateAgentArchitecture, optimizePrompt, analyzeDocument, predictMatch } from '../services/geminiService';
-import { AgentNode, AgentFlow, ArchitectureResult, PromptResult, RAGResult, PredictionResult } from '../types';
+import { Cpu, Terminal, ArrowRight, Activity, Zap, Layers, Lock, RotateCcw, Check, FileText, Search, MonitorPlay, BarChart2, Scissors, RefreshCw, Copy, Database, AlertCircle } from 'lucide-react';
+import { generateAgentArchitecture, optimizePrompt, compressContext, predictMatch } from '../services/geminiService';
+import { AgentNode, AgentFlow, ArchitectureResult, PromptResult, PredictionResult } from '../types';
 
 const MAX_FREE_USES = 3;
 
@@ -57,7 +57,7 @@ const Lab: React.FC = () => {
             </h2>
             <p className="text-gray-400 max-w-xl">
               Interactive demonstrations of Vertical Labs' core technologies. 
-              Experiment with agent orchestration, RAG pipelines, and predictive models.
+              Experiment with agent orchestration, token optimization, and predictive models.
             </p>
           </div>
           
@@ -324,12 +324,17 @@ const PromptForge: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) =>
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<PromptResult | null>(null);
+  const [options, setOptions] = useState<string[]>([]);
+  
+  const toggleOption = (opt: string) => {
+     setOptions(prev => prev.includes(opt) ? prev.filter(o => o !== opt) : [...prev, opt]);
+  };
 
   const handleOptimize = async () => {
     if (!input.trim() || !onInteract()) return;
     setLoading(true);
     try {
-      const res = await optimizePrompt(input);
+      const res = await optimizePrompt(input, options);
       setResult(res);
     } catch (e) {
       console.error(e);
@@ -337,6 +342,8 @@ const PromptForge: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) =>
       setLoading(false);
     }
   };
+  
+  const estimateTokens = (txt: string) => Math.ceil(txt.length / 4);
 
   return (
      <motion.div 
@@ -349,19 +356,41 @@ const PromptForge: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) =>
           <div className="space-y-4 flex flex-col">
              <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white">Input Prompt</h3>
-                <button 
-                   onClick={() => setInput("Write a blog post about AI.")}
-                   className="text-xs text-cyber-primary hover:underline"
-                >
-                   Load Example
-                </button>
+                <div className="flex gap-2">
+                   <button 
+                      onClick={() => setInput("Write a python script to scrape data from a website and save it to a CSV.")}
+                      className="text-xs text-cyber-primary hover:underline"
+                   >
+                      Load Example
+                   </button>
+                   <span className="text-xs text-gray-500">|</span>
+                   <span className="text-xs text-gray-500 font-mono">~{estimateTokens(input)} tokens</span>
+                </div>
              </div>
+             
              <textarea 
                value={input}
                onChange={e => setInput(e.target.value)}
                className="flex-1 bg-black/50 border border-gray-700 rounded-lg p-4 text-gray-300 focus:border-cyber-primary outline-none resize-none font-mono text-sm min-h-[200px]"
                placeholder="Paste your raw prompt here..."
              />
+             
+             <div className="flex flex-wrap gap-2">
+                {['Clarity', 'Brevity', 'Chain-of-Thought', 'JSON Output', 'Persona'].map(opt => (
+                   <button
+                     key={opt}
+                     onClick={() => toggleOption(opt)}
+                     className={`px-3 py-1 text-xs rounded-full border transition-all ${
+                        options.includes(opt) 
+                        ? 'bg-cyber-primary text-black border-cyber-primary font-bold' 
+                        : 'bg-gray-900 text-gray-400 border-gray-700 hover:border-cyber-primary/50'
+                     }`}
+                   >
+                      {opt}
+                   </button>
+                ))}
+             </div>
+
              <button 
               onClick={handleOptimize}
               disabled={loading || !input.trim()}
@@ -386,12 +415,13 @@ const PromptForge: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) =>
                             Prompt<br/>Quality Score
                          </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex items-center gap-2">
+                         <span className="text-xs text-gray-500 font-mono">~{estimateTokens(result.optimized)} tokens</span>
                          <button 
                            onClick={() => {navigator.clipboard.writeText(result.optimized)}}
                            className="text-xs bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 rounded flex items-center gap-2 transition-colors"
                          >
-                            <Check size={12} /> Copy
+                            <Copy size={12} /> Copy
                          </button>
                       </div>
                    </div>
@@ -417,7 +447,10 @@ const PromptForge: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) =>
                 </div>
              ) : (
                 <div className="flex-1 bg-gray-900/20 border border-gray-800 border-dashed rounded-lg flex items-center justify-center text-gray-600">
-                   <p className="font-mono text-sm">AWAITING INPUT...</p>
+                   <div className="text-center">
+                     <Terminal size={48} className="mx-auto mb-4 opacity-20" />
+                     <p className="font-mono text-sm">AWAITING INPUT...</p>
+                   </div>
                 </div>
              )}
           </div>
@@ -426,37 +459,35 @@ const PromptForge: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) =>
   );
 };
 
-// --- CONTEXT WINDOW (RAG) COMPONENT ---
+// --- CONTEXT WINDOW CALCULATOR COMPONENT ---
 
 const ContextWindow: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) => {
-  const [docText, setDocText] = useState('');
-  const [query, setQuery] = useState('');
+  const [text, setText] = useState('');
+  const [selectedModel, setSelectedModel] = useState('gpt-4o');
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<RAGResult | null>(null);
-
-  const handleAnalyze = async () => {
-     if (!docText.trim() || !query.trim() || !onInteract()) return;
+  
+  const models = [
+    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', limit: 2000000, color: '#00f0ff' },
+    { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', limit: 200000, color: '#d97706' },
+    { id: 'gpt-4o', name: 'GPT-4o', limit: 128000, color: '#10b981' },
+    { id: 'llama-3.1', name: 'Llama 3.1 405B', limit: 128000, color: '#3b82f6' },
+  ];
+  
+  const activeModel = models.find(m => m.id === selectedModel) || models[0];
+  const tokenCount = Math.ceil(text.length / 4);
+  const usagePercent = Math.min(100, (tokenCount / activeModel.limit) * 100);
+  
+  const handleCompress = async () => {
+     if (!text.trim() || !onInteract()) return;
      setLoading(true);
      try {
-        const res = await analyzeDocument(docText, query);
-        setResult(res);
+        const compressed = await compressContext(text);
+        setText(compressed);
      } catch(e) {
         console.error(e);
      } finally {
         setLoading(false);
      }
-  };
-
-  const highlightCitations = (text: string, citations: string[]) => {
-      if (!citations || citations.length === 0) return text;
-      // Simple highlighting logic (note: sensitive to exact string matches)
-      let highlighted = text;
-      citations.forEach((cite, idx) => {
-         // Escape regex special characters
-         const escapedCite = cite.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-         highlighted = highlighted.replace(new RegExp(escapedCite, 'g'), `<span class="bg-cyber-primary/20 text-cyber-primary font-bold border-b border-cyber-primary" title="Citation ${idx+1}">${cite}</span>`);
-      });
-      return highlighted;
   };
 
   return (
@@ -469,68 +500,115 @@ const ContextWindow: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) 
        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
           <div className="flex flex-col space-y-4">
              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2"><FileText size={18} /> Knowledge Base</h3>
-                <button onClick={() => setDocText("Vertical Labs uses Swarm Intelligence to automate enterprise workflows. Unlike traditional chatbots, our agents have distinct roles: Researcher, Analyst, and Executor. This separation of concerns reduces hallucination by 40% and increases task completion rates.")} className="text-xs text-cyber-primary hover:underline">Load Sample Data</button>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2"><Database size={18} /> Context Manager</h3>
+                <div className="flex gap-2">
+                    <button onClick={() => setText("")} className="text-xs text-red-400 hover:text-white flex items-center gap-1"><RefreshCw size={10} /> Clear</button>
+                    <span className="text-gray-600">|</span>
+                    <button onClick={() => setText("The history of artificial intelligence begins in antiquity, with myths, stories and rumors of artificial beings endowed with intelligence or consciousness by master craftsmen. The seeds of modern AI were planted by classical philosophers who attempted to describe the process of human thinking as the mechanical manipulation of symbols. This work culminated in the invention of the programmable digital computer in the 1940s, a machine based on the abstract essence of mathematical reasoning. This device and the ideas behind it inspired a handful of scientists to begin seriously discussing the possibility of building an electronic brain. The field of AI research was founded at a workshop held on the campus of Dartmouth College in the summer of 1956. Those who attended would become the leaders of AI research for decades.")} className="text-xs text-cyber-primary hover:underline">Load Sample</button>
+                </div>
              </div>
-             <textarea 
-                value={docText}
-                onChange={e => setDocText(e.target.value)}
-                placeholder="Paste document text here (Legal, Technical, Financial)..."
-                className="flex-1 bg-black/50 border border-gray-700 rounded-lg p-4 text-gray-300 focus:border-cyber-primary outline-none resize-none font-mono text-xs custom-scrollbar"
-             />
-             <div className="space-y-2">
-                 <div className="relative">
-                    <Search className="absolute left-3 top-3 text-gray-500" size={16} />
-                    <input 
-                       type="text" 
-                       value={query}
-                       onChange={e => setQuery(e.target.value)}
-                       placeholder="Ask a question about the document..."
-                       className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white focus:border-cyber-primary outline-none"
-                    />
-                 </div>
+             
+             <div className="relative flex-1">
+                <textarea 
+                    value={text}
+                    onChange={e => setText(e.target.value)}
+                    placeholder="Paste your document, code, or prompt context here to calculate tokens..."
+                    className="w-full h-full min-h-[300px] bg-black/50 border border-gray-700 rounded-lg p-4 text-gray-300 focus:border-cyber-primary outline-none resize-none font-mono text-xs custom-scrollbar"
+                />
+                <div className="absolute bottom-4 right-4 bg-black/80 backdrop-blur px-3 py-1 rounded border border-gray-700 text-xs font-mono text-white">
+                   {text.length} chars
+                </div>
+             </div>
+
+             <div className="flex gap-2">
                  <button 
-                    onClick={handleAnalyze}
-                    disabled={loading || !query.trim() || !docText.trim()}
-                    className="w-full bg-cyber-primary text-black font-bold py-3 rounded-lg hover:bg-white transition-colors disabled:opacity-50"
+                    onClick={handleCompress}
+                    disabled={loading || !text.trim()}
+                    className="flex-1 bg-gray-800 border border-gray-700 hover:bg-gray-700 hover:border-cyber-primary/50 text-white py-3 rounded-lg font-mono font-bold transition-all flex items-center justify-center gap-2 group"
                  >
-                    {loading ? 'ANALYZING...' : 'RUN RAG PIPELINE'}
+                    {loading ? <Scissors className="animate-spin" /> : <Scissors />}
+                    {loading ? 'COMPRESSING...' : 'COMPRESS TOKENS'}
                  </button>
              </div>
           </div>
 
-          <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6 overflow-y-auto custom-scrollbar">
-             {result ? (
-                <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
-                   <div>
-                      <h4 className="text-xs font-mono text-gray-500 uppercase mb-2">Answer Generation</h4>
-                      <p className="text-lg text-white leading-relaxed font-light">{result.answer}</p>
-                   </div>
-                   
-                   <div className="flex items-center gap-4 py-4 border-y border-gray-800">
-                      <div className="flex flex-col">
-                         <span className="text-xs text-gray-500 uppercase">Confidence</span>
-                         <span className="text-2xl font-bold text-cyber-primary">{result.confidence}%</span>
-                      </div>
-                      <div className="flex flex-col">
-                         <span className="text-xs text-gray-500 uppercase">Citations Found</span>
-                         <span className="text-2xl font-bold text-white">{result.citations.length}</span>
-                      </div>
-                   </div>
+          <div className="flex flex-col gap-6">
+             <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                   <h3 className="text-sm font-mono text-gray-400 uppercase">Target Model</h3>
+                   <select 
+                      value={selectedModel}
+                      onChange={e => setSelectedModel(e.target.value)}
+                      className="bg-black border border-gray-700 rounded px-2 py-1 text-white text-xs font-mono focus:border-cyber-primary outline-none"
+                   >
+                      {models.map(m => (
+                         <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                   </select>
+                </div>
 
-                   <div>
-                      <h4 className="text-xs font-mono text-gray-500 uppercase mb-2">Source Attribution</h4>
-                      <div className="text-xs text-gray-400 font-mono leading-relaxed bg-black p-4 rounded border border-gray-800">
-                         <div dangerouslySetInnerHTML={{ __html: highlightCode(highlightCitations(docText, result.citations)) }} />
+                <div className="mb-2 flex justify-between items-end">
+                   <span className="text-4xl font-bold text-white tracking-tighter">{tokenCount.toLocaleString()}</span>
+                   <span className="text-xs font-mono text-gray-500 mb-1">/ {activeModel.limit.toLocaleString()} limit</span>
+                </div>
+
+                {/* Visual Bar */}
+                <div className="h-4 bg-black rounded-full overflow-hidden border border-gray-700 relative mb-2">
+                   {/* Tick marks */}
+                   <div className="absolute top-0 left-1/4 h-full w-px bg-gray-800"></div>
+                   <div className="absolute top-0 left-1/2 h-full w-px bg-gray-800"></div>
+                   <div className="absolute top-0 left-3/4 h-full w-px bg-gray-800"></div>
+                   
+                   <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${usagePercent}%` }}
+                      transition={{ type: 'spring', damping: 20 }}
+                      className={`h-full relative ${
+                         usagePercent > 90 ? 'bg-red-500' : 
+                         usagePercent > 70 ? 'bg-yellow-500' : 
+                         'bg-cyber-primary'
+                      }`}
+                      style={{ backgroundColor: usagePercent > 90 ? '#ef4444' : usagePercent > 70 ? '#eab308' : activeModel.color }}
+                   >
+                       <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[size:1rem_1rem] opacity-30"></div>
+                   </motion.div>
+                </div>
+                
+                <div className="flex justify-between text-[10px] font-mono uppercase text-gray-500">
+                   <span>0%</span>
+                   <span>50%</span>
+                   <span>100%</span>
+                </div>
+             </div>
+
+             <div className="bg-gray-900/30 border border-gray-800 rounded-xl p-6 flex-1">
+                <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                   <AlertCircle size={14} className="text-cyber-secondary" /> Optimization Strategies
+                </h3>
+                <ul className="space-y-4">
+                   <li className="flex gap-3 text-sm text-gray-400">
+                      <div className="mt-1 w-1.5 h-1.5 rounded-full bg-cyber-primary shrink-0"></div>
+                      <div>
+                         <strong className="text-gray-200">Remove Stopwords</strong>
+                         <p className="text-xs text-gray-500 mt-1">Filtering common words like "the", "a", "is" can reduce token count by 15-20% without losing meaning.</p>
                       </div>
-                   </div>
-                </div>
-             ) : (
-                <div className="h-full flex items-center justify-center text-gray-600 flex-col gap-4">
-                   <Layers size={48} className="opacity-20" />
-                   <p className="font-mono text-sm">UPLOAD DOC TO INITIALIZE RAG...</p>
-                </div>
-             )}
+                   </li>
+                   <li className="flex gap-3 text-sm text-gray-400">
+                      <div className="mt-1 w-1.5 h-1.5 rounded-full bg-cyber-primary shrink-0"></div>
+                      <div>
+                         <strong className="text-gray-200">Format Stripping</strong>
+                         <p className="text-xs text-gray-500 mt-1">Excessive JSON keys or HTML tags consume valuable context. Use minimalist formats like YAML or Markdown tables.</p>
+                      </div>
+                   </li>
+                   <li className="flex gap-3 text-sm text-gray-400">
+                      <div className="mt-1 w-1.5 h-1.5 rounded-full bg-cyber-primary shrink-0"></div>
+                      <div>
+                         <strong className="text-gray-200">RAG Filtering</strong>
+                         <p className="text-xs text-gray-500 mt-1">Don't dump entire documents. Use semantic search to extract only the relevant chunks (chunks of ~512 tokens).</p>
+                      </div>
+                   </li>
+                </ul>
+             </div>
           </div>
        </div>
     </motion.div>

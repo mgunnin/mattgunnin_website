@@ -99,7 +99,7 @@ const About: React.FC = () => {
                  With a proven track record as a <span className="text-cyber-primary">5x technical founder</span> with 2 exits, I have raised over <span className="text-white">$10M+ in venture capital</span> and delivered products used by giants like Riot Games, the NFL, NBA, and Fortune 500 brands.
                </p>
                <p className="leading-relaxed">
-                 Currently, I am the Founder/CEO of <strong className="text-white">Vertical Labs</strong> in Austin, TX, where we are architecting sophisticated AI agents using <strong className="text-cyber-secondary">GPT-5.1, Claude 4.5, and Gemini 3</strong>. My passion lies in leveraging cutting-edge frameworks like CrewAI, Eliza, and OpenAI Swarm to create transformative business solutions.
+                 Currently, I am the Founder/CEO of <a href="https://verticallabs.ai" target="_blank" rel="noreferrer" className="text-white font-bold hover:text-cyber-primary transition-colors border-b border-white/20 hover:border-cyber-primary">Vertical Labs</a> in Austin, TX, where we are architecting sophisticated AI agents using <strong className="text-cyber-secondary">GPT-5.1, Claude 4.5, and Gemini 3</strong>. My passion lies in leveraging cutting-edge frameworks like CrewAI, Eliza, and OpenAI Swarm to create transformative business solutions.
                </p>
             </div>
 
@@ -132,7 +132,7 @@ const About: React.FC = () => {
                   </div>
 
                   {/* Code Area */}
-                  <div className="px-4 pb-4 md:px-6 md:pb-6 pt-24 md:pt-14 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
+                  <div className="px-4 pb-4 md:px-6 md:pb-6 pt-24 md:pt-28 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
                      <div className="font-mono text-[10px] md:text-xs text-gray-400 whitespace-pre-wrap break-words leading-relaxed">
                         <div dangerouslySetInnerHTML={{ __html: displayedCode }} className="inline" />
                         <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 align-middle animate-pulse"></span>

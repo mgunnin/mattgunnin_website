@@ -182,7 +182,7 @@ export const generateAgentArchitecture = async (goal: string): Promise<Architect
   throw new Error("Failed to generate architecture");
 };
 
-export const optimizePrompt = async (prompt: string): Promise<PromptResult> => {
+export const optimizePrompt = async (prompt: string, options: string[] = []): Promise<PromptResult> => {
   const schema: Schema = {
     type: Type.OBJECT,
     properties: {
@@ -195,10 +195,15 @@ export const optimizePrompt = async (prompt: string): Promise<PromptResult> => {
     required: ["original", "optimized", "score", "critique", "changes"]
   };
 
+  const focusInstruction = options.length > 0 
+    ? `Prioritize the following attributes: ${options.join(', ')}.` 
+    : '';
+
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
     contents: `Act as a Senior Prompt Engineer. Analyze the following prompt and optimize it for a Large Language Model (like GPT-4 or Gemini 1.5).
     Apply techniques like: Chain of Thought, Persona adoption, Delimiters, Output formatting.
+    ${focusInstruction}
     
     Input Prompt: "${prompt}"`,
     config: {
@@ -212,6 +217,22 @@ export const optimizePrompt = async (prompt: string): Promise<PromptResult> => {
     return JSON.parse(response.text) as PromptResult;
   }
   throw new Error("Failed to optimize prompt");
+};
+
+export const compressContext = async (text: string): Promise<string> => {
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `You are a Context Optimizer. Your goal is to reduce the token count of the following text by 30-50% without losing any key information, facts, or semantic meaning.
+    Remove filler words, redundant phrasing, and excessive formatting. Keep code snippets intact.
+    
+    Input Text:
+    """${text.substring(0, 30000)}"""`,
+    config: {
+      temperature: 0.2
+    }
+  });
+
+  return response.text || text;
 };
 
 export const analyzeDocument = async (text: string, query: string): Promise<RAGResult> => {

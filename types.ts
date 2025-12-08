@@ -1,4 +1,5 @@
 
+
 export interface Project {
   id: string;
   title: string;
@@ -19,11 +20,20 @@ export interface Resource {
   title: string;
   description: string;
   type: 'Guide' | 'Tool' | 'Post' | 'Newsletter';
-  url: string;
+  slug: string;
   date: string;
+  readTime?: string;
+  author?: {
+    name: string;
+    role: string;
+    avatar: string;
+  };
+  content?: string; // HTML content
+  toc?: { id: string; title: string }[];
   tags?: string[];
   accessLevel?: 'Public' | 'Locked';
   category?: ContentPillar;
+  url?: string; // External link fallback
 }
 
 export type ContentPillar = 'AgenticAI' | 'FounderOS' | 'EsportsIntel' | 'Web3Community';
@@ -55,11 +65,14 @@ export interface Skill {
 export interface BlogPost {
   id: string;
   title: string;
+  slug: string;
   date: string;
   excerpt: string;
   content: string;
   author: string;
   tags: string[];
+  readTime: string;
+  image?: string;
 }
 
 export type AgentStatus = 'IDLE' | 'LISTENING' | 'ANALYZING' | 'EXECUTING' | 'STREAMING';
