@@ -22,10 +22,10 @@ const experiences: Experience[] = [
     company: 'Esports One',
     period: '2016 - 2023',
     description: [
-      'Founded and led a tech startup raising $7M+ from top VCs (Eniac, XSeed, Quake).',
+      'Founded and led a tech startup raising $10M+ from top VCs (Eniac, XSeed, Quake).',
       'Spearheaded Computer Vision & RL tech implementation for real-time data capture.',
       'Developed stats dashboards for Riot Games, NBA, NFL, and Fortune 500 brands.',
-      'Grew platform to 150k+ MAU with NFT membership passes (92k+ minted).'
+      'Scaled portfolio platforms to reach over 10M+ monthly users.'
     ],
     tech: ['Computer Vision', 'Reinforcement Learning', 'Web3', 'Blockchain', 'Analytics']
   },

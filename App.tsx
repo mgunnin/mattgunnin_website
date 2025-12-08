@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
 import Background from './components/Background';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
+import SocialProof from './components/SocialProof';
 import About from './components/About';
 import Resume from './components/Resume';
 import Projects from './components/Projects';
 import Resources from './components/Resources';
+import Lab from './components/Lab';
 import Contact from './components/Contact';
 import NeuralInterface from './components/NeuralInterface';
 import Cursor from './components/Cursor';
@@ -18,7 +21,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['hero', 'about', 'resume', 'projects', 'resources', 'blog', 'contact'];
+      const sections = ['hero', 'about', 'resume', 'projects', 'resources', 'lab', 'blog', 'contact'];
       // Using a slightly lower threshold for better UX on mobile
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
@@ -51,6 +54,7 @@ const App: React.FC = () => {
     { id: 'resume', label: 'Resume' },
     { id: 'projects', label: 'Work' },
     { id: 'resources', label: 'Lab' },
+    { id: 'lab', label: 'AI Lab' },
     { id: 'blog', label: 'Blog' },
     { id: 'contact', label: 'Contact' },
   ];
@@ -92,10 +96,12 @@ const App: React.FC = () => {
       )}
 
       <Hero />
+      <SocialProof />
       <About />
       <Resume />
       <Projects />
       <Resources />
+      <Lab />
       <Blog />
       <Contact />
       

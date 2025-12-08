@@ -8,11 +8,32 @@ const majorProjects: Project[] = [
     title: 'Vertical Labs',
     role: 'Founder/CEO',
     period: '2024 - Present',
-    description: 'A first-of-its-kind AI agency and innovation partner specializing in agentic AI. We are moving beyond simple chatbots to architect sophisticated multi-agent systems that empower businesses to thrive in an AI-driven world. We view AI not just as tools, but as autonomous teammates.',
+    description: 'A first-of-its-kind AI agency and innovation partner specializing in agentic AI. We are moving beyond simple chatbots to architect sophisticated multi-agent systems that empower businesses to thrive in an AI-driven world.',
+    caseStudy: `
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Agentic Moment</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        The "Chatbot Era" is ending. Businesses no longer just want AI that talks; they want AI that <strong>works</strong>. We founded Vertical Labs to capitalize on the emergence of Agentic AI—systems capable of reasoning, planning, and executing tasks autonomously, rather than just generating text.
+      </p>
+
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Architecture</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        We architect sophisticated multi-agent systems using cutting-edge frameworks like <strong>CrewAI</strong>, <strong>Eliza</strong>, and <strong>OpenAI Swarm</strong>. Unlike monolithic LLM applications, our agents operate in collaborative swarms:
+      </p>
+      <ul class="list-disc pl-6 mb-6 space-y-2 text-gray-400">
+        <li><strong>Researcher Agents:</strong> Scour internal vector databases (RAG) for context.</li>
+        <li><strong>Analyst Agents:</strong> Process data patterns and insights.</li>
+        <li><strong>Executor Agents:</strong> Trigger API calls to perform actions (e.g., booking, coding, deployment).</li>
+      </ul>
+
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">Service-as-Software</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        We are pioneering a new delivery model. Instead of selling tools for humans to use (SaaS), we build <strong>autonomous digital employees</strong> that integrate directly into enterprise workflows. This shift from SaaS to "Service-as-Software" dramatically increases ROI by reducing human operational overhead.
+      </p>
+    `,
     achievements: [
       'Architecting custom AI agents for business use cases — from operations automation to market intelligence.',
-      'Designing intelligent dashboards and UIs for real-time agent oversight, powered by smart search, insights, and action flows.',
-      'Driving innovation with R&D projects in human-digital interaction, UGC AI avatars, and verticalized assistant experiences.',
+      'Designing intelligent dashboards and UIs for real-time agent oversight.',
+      'Driving innovation with R&D projects in human-digital interaction and UGC AI avatars.',
       'Deploying solutions using cutting-edge frameworks including CrewAI, Eliza, and OpenAI Swarm.'
     ],
     techStack: ['Agentic AI', 'CrewAI', 'OpenAI Swarm', 'Python', 'RAG', 'Vector DB', 'Next.js'],
@@ -25,13 +46,41 @@ const majorProjects: Project[] = [
     title: 'Esports One',
     role: 'Founder/CEO',
     period: '2016 - 2023',
-    description: 'Founded and led a pioneering technology startup from ideation to successful rounds of funding, focusing on advanced analytics and real-time data solutions for the esports industry. We revolutionized how data was captured and consumed in competitive gaming.',
+    description: 'Founded and led a pioneering technology startup focusing on advanced analytics and real-time data solutions for the esports industry. Revolutionized data capture using Computer Vision.',
+    caseStudy: `
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Problem</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        In 2016, esports data was trapped in video pixels. Unlike traditional sports which had robust APIs for every play, esports data existed only on the screen. Teams, broadcasters, and fantasy platforms lacked a real-time "source of truth."
+      </p>
+
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">AI Innovation</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        We built proprietary <strong>Computer Vision and Reinforcement Learning</strong> pipelines capable of ingesting live game feeds and extracting complex state data with <strong>99.8% accuracy</strong>. This technology powered real-time dashboards for partners like Riot Games, the NBA, and the NFL.
+      </p>
+
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Web3 Pivot & Community</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        Recognizing the shift towards digital ownership, we expanded into Web3, launching NFT membership passes that granted access to advanced fantasy tools. This initiative resulted in:
+      </p>
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="bg-black/40 p-3 rounded border border-gray-800">
+          <div class="text-cyber-primary font-bold text-xl">92,000+</div>
+          <div class="text-xs text-gray-500 uppercase">NFTs Minted</div>
+        </div>
+        <div class="bg-black/40 p-3 rounded border border-gray-800">
+          <div class="text-cyber-primary font-bold text-xl">10,000+</div>
+          <div class="text-xs text-gray-500 uppercase">Discord Members</div>
+        </div>
+      </div>
+      <p class="text-gray-300 leading-relaxed">
+        We successfully raised <strong>$10M+</strong> from Tier 1 VCs (Eniac, XSeed, Quake) and scaled our platforms to reach over <strong>10 million users</strong> across the portfolio.
+      </p>
+    `,
     achievements: [
-      'Raised over $7 million from top Venture Capital firms and Angel Investors (Eniac Ventures, Quake Capital, XSeed Capital).',
-      'Spearheaded the implementation of Computer Vision and Reinforcement Learning to capture real-time data with 99.8% accuracy.',
-      'Delivered analytics to Riot Games, Acer, Blizzard, EA, TakeTwo, Epic Games, NFL, and NBA.',
-      'Grew platform to over 150,000 monthly active users and $140,000+ in monthly recurring revenue.',
-      'Launched successful NFT membership passes across Twitch and Discord (92,000+ minted).'
+      'Raised over $10 million from top Venture Capital firms (Eniac Ventures, Quake Capital, XSeed Capital).',
+      'Spearheaded the implementation of Computer Vision and Reinforcement Learning with 99.8% accuracy.',
+      'Delivered analytics to Riot Games, Acer, Blizzard, EA, NFL, and NBA.',
+      'Scaled portfolio of platforms to serve over 10 million monthly active users.'
     ],
     techStack: ['Computer Vision', 'Reinforcement Learning', 'Blockchain', 'NFTs', 'Real-time Analytics', 'AWS'],
     imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop',
@@ -43,11 +92,30 @@ const majorProjects: Project[] = [
     title: 'Leaguepedia',
     role: 'Founder/CEO',
     period: '2011 - 2014',
-    description: 'Founded the global go-to resource for competitive League of Legends, which became the standard for esports information. The platform was architected from the ground up to serve millions of passionate users.',
+    description: 'Founded the global go-to resource for competitive League of Legends. Architected from the ground up to serve millions of passionate users.',
+    caseStudy: `
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Problem</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        In 2011, the esports landscape was fragmented. Information about tournaments, player rosters, and match statistics was scattered across reddit threads and outdated fan sites. There was no single record of history for the booming League of Legends ecosystem.
+      </p>
+
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Solution</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        Leaguepedia was architected as the first comprehensive, community-driven encyclopedia for competitive League of Legends. We democratized data access, allowing anyone to contribute while maintaining strict editorial standards.
+      </p>
+
+      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">Scale & Exit</h3>
+      <p class="text-gray-300 leading-relaxed mb-6">
+        Leveraging a customized MediaWiki framework and aggressive growth hacking strategies, we grew to <strong>12 million monthly pageviews</strong> and <strong>3 million MAUs</strong> within the first year. 
+      </p>
+      <p class="text-gray-300 leading-relaxed">
+        The platform became indispensable to the ecosystem, leading to its acquisition by <strong>Curse Inc.</strong> (later acquired by Amazon/Twitch). This exit validated the thesis that community-curated data is a valuable asset class in esports.
+      </p>
+    `,
     achievements: [
       'Doubled site traffic to 12 million monthly pageviews and 3 million MAUs within the first year.',
       'Acquired by Curse Inc. (later acquired by Twitch/Amazon) in 2014.',
-      'Organized multiple charity tournaments raising tens of thousands of dollars with 190k concurrent viewers.',
+      'Organized multiple charity tournaments raising tens of thousands of dollars.',
       'Expanded reach by acquiring multiple companies including LoLVODs and League Fantasy.'
     ],
     techStack: ['Wiki Framework', 'PHP', 'SQL', 'Community Growth', 'Scale'],
@@ -134,7 +202,7 @@ const minorProjects: Project[] = [
         'Integrated dynamic image generation and context-aware chat.'
     ],
     techStack: ['Node.js', 'Discord.js', 'GPT-5.1', 'Imagen 3'],
-    imageUrl: 'https://images.unsplash.com/brands/new/discord-logo-box-2.png?q=80&w=1200&auto=format&fit=crop', 
+    imageUrl: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=1200&auto=format&fit=crop', 
     category: 'AI'
   },
   {
@@ -176,7 +244,7 @@ const minorProjects: Project[] = [
         'Seamless verification for thousands of users.'
     ],
     techStack: ['Solidity', 'Web3.js', 'Discord', 'Community'],
-    imageUrl: 'https://images.unsplash.com/photo-1621504450168-b8c4d2992561?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1644361566696-3d442b5b482a?q=80&w=1200&auto=format&fit=crop',
     category: 'Crypto'
   },
   {
@@ -374,11 +442,17 @@ const Projects: React.FC = () => {
              <div className="max-w-7xl mx-auto px-6 md:px-24 py-16 grid grid-cols-1 lg:grid-cols-3 gap-16">
                 {/* Left Column: Details */}
                 <div className="lg:col-span-2 space-y-12 animate-[fadeIn_0.8s_ease-out]">
-                   <div className="prose prose-invert prose-xl max-w-none">
-                      <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-cyber-primary pl-4">Mission Overview</h3>
-                      <p className="text-gray-300 leading-relaxed text-lg font-light">
-                        {selectedProject.description}
-                      </p>
+                   <div className="prose prose-invert prose-lg md:prose-xl max-w-none prose-headings:text-white prose-p:text-gray-300 prose-strong:text-cyber-primary prose-li:text-gray-300">
+                      {selectedProject.caseStudy ? (
+                        <div dangerouslySetInnerHTML={{ __html: selectedProject.caseStudy }} />
+                      ) : (
+                        <>
+                            <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-cyber-primary pl-4">Mission Overview</h3>
+                            <p className="text-gray-300 leading-relaxed text-lg font-light">
+                                {selectedProject.description}
+                            </p>
+                        </>
+                      )}
                    </div>
 
                    <div>

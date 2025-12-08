@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Power, Wifi, Shield, Cpu, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Download, Copy, Hexagon } from 'lucide-react';
+import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles } from 'lucide-react';
 import { sendMessageStream } from '../services/geminiService';
 import { ChatMessage, AgentStatus, CognitiveMode, NeuralInterfaceProps } from '../types';
 import { GenerateContentResponse } from '@google/genai';
@@ -23,6 +23,12 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   const [status, setStatus] = useState<AgentStatus>('IDLE');
   const [mode, setMode] = useState<CognitiveMode>('STRATEGIC');
   const [isMuted, setIsMuted] = useState(false);
+  
+  // HUD Stats
+  const [cpuUsage, setCpuUsage] = useState(12);
+  const [memUsage, setMemUsage] = useState(24);
+  const [latency, setLatency] = useState(45);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Refs for animation system
@@ -48,13 +54,24 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
     }
   }, []);
 
+  // Update HUD Stats randomly
+  useEffect(() => {
+    if (!isOpen) return;
+    const interval = setInterval(() => {
+        setCpuUsage(prev => Math.min(100, Math.max(5, prev + (Math.random() - 0.5) * 10)));
+        setMemUsage(prev => Math.min(64, Math.max(16, prev + (Math.random() - 0.5) * 5)));
+        setLatency(prev => Math.min(120, Math.max(20, prev + (Math.random() - 0.5) * 20)));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [isOpen]);
+
   // Initialize
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setMessages([{
         id: 'init',
         role: 'model',
-        text: `NEURAL LINK ESTABLISHED.\nIDENTITY VERIFIED: GUEST_USER.\n\nI am the digital construct of Matt Gunnin (v4.0). \nRunning in **${mode}** mode.\n\nSelect a protocol below or query directly.`
+        text: `NEURAL UPLINK ESTABLISHED.\n\nHello, I am **Ella**, Matt Gunnin's autonomous AI partner. \nRunning in **${mode}** mode.\n\nI can navigate this system, discuss architectural patterns, or schedule a connection.`
       }]);
     }
   }, [isOpen]);
@@ -163,12 +180,12 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
     const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/[*#`]/g, '');
     
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.pitch = 0.9; // Lower pitch for "AI" feel
-    utterance.rate = 1.1;  // Faster rate
+    utterance.pitch = 1.0; 
+    utterance.rate = 1.0; 
     
     const voices = synthesisRef.current.getVoices();
-    // Try to find a "futuristic" or "digital" sounding voice
-    const preferredVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha'));
+    // Try to find a high quality voice
+    const preferredVoice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Samantha') || v.name.includes('Microsoft Zira'));
     if (preferredVoice) utterance.voice = preferredVoice;
 
     synthesisRef.current.speak(utterance);
@@ -180,6 +197,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
     if (functionCall.name === 'navigate_site') {
       const sectionId = args.sectionId;
       setStatus('EXECUTING');
+      setIsOpen(false); // Close interface when navigating
       setTimeout(() => {
         document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
       }, 500);
@@ -199,7 +217,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
 
     if (functionCall.name === 'copy_email') {
         setStatus('EXECUTING');
-        navigator.clipboard.writeText('matt@mattgunnin.com');
+        navigator.clipboard.writeText('mg@mattgunnin.com');
         return { result: 'Email copied to clipboard' };
     }
 
@@ -297,18 +315,19 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
         className="fixed bottom-8 right-8 z-50 group flex items-center justify-center"
       >
         <div className="absolute inset-0 bg-cyber-primary opacity-20 rounded-full animate-ping group-hover:opacity-40"></div>
-        <div className="relative w-16 h-16 bg-black border-2 border-cyber-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.3)] hover:scale-110 transition-transform duration-300 overflow-hidden backdrop-blur-md">
-           <Hexagon className="text-cyber-primary w-8 h-8 animate-[spin_10s_linear_infinite]" />
-           <div className="absolute inset-0 flex items-center justify-center">
-             <Cpu size={16} className="text-white animate-pulse" />
-           </div>
+        <div className="relative w-16 h-16 bg-black border-2 border-cyber-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(0,240,255,0.3)] hover:scale-110 transition-transform duration-300 overflow-hidden backdrop-blur-md group-hover:border-white">
+           <Hexagon size={32} className="text-cyber-primary absolute animate-[spin_10s_linear_infinite] opacity-50" />
+           <Sparkles size={20} className="text-white relative z-10 animate-pulse" />
         </div>
       </button>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 md:bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+    <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 md:bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
+        onClick={() => setIsOpen(false)} // Click outside to close
+    >
       {/* Background Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <canvas ref={canvasRef} className="absolute inset-0 z-0 opacity-50" />
@@ -317,27 +336,53 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
       </div>
 
       {/* Main Interface Window */}
-      <div className="relative w-full h-[100dvh] md:h-[90vh] md:max-w-5xl bg-black md:bg-black/90 border-0 md:border border-gray-800 md:rounded-lg shadow-[0_0_50px_rgba(0,240,255,0.1)] flex flex-col overflow-hidden z-20 backdrop-filter backdrop-blur-xl">
+      <div 
+        className="relative w-full h-[100dvh] md:h-[90vh] md:max-w-5xl bg-black md:bg-black/90 border-0 md:border border-gray-800 md:rounded-lg shadow-[0_0_50px_rgba(0,240,255,0.1)] flex flex-col overflow-hidden z-20 backdrop-filter backdrop-blur-xl"
+        onClick={(e) => e.stopPropagation()} // Prevent close on inner click
+      >
         
         {/* Top HUD Bar */}
         <div className="flex items-center justify-between p-3 border-b border-gray-800 bg-gray-900/90 font-mono">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-cyber-primary">
               <Activity className="w-4 h-4" />
-              <span className="font-bold tracking-[0.2em] text-[10px] md:text-xs">NEURAL_INTERFACE_V4</span>
+              <span className="font-bold tracking-[0.2em] text-[10px] md:text-xs">ELLA_INTERFACE_V1</span>
             </div>
             
-            {/* Mode Toggle */}
-            <button 
+            {/* System Stats HUD */}
+            <div className="hidden lg:flex items-center gap-4 px-4 border-l border-gray-700 ml-4">
+               <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                  <span>CPU</span>
+                  <div className="w-12 h-1 bg-gray-800 rounded-full overflow-hidden">
+                     <div className="h-full bg-cyber-primary transition-all duration-500" style={{width: `${cpuUsage}%`}}></div>
+                  </div>
+                  <span className="text-white w-6">{cpuUsage.toFixed(0)}%</span>
+               </div>
+               <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                  <span>MEM</span>
+                  <div className="w-12 h-1 bg-gray-800 rounded-full overflow-hidden">
+                     <div className="h-full bg-cyber-secondary transition-all duration-500" style={{width: `${memUsage}%`}}></div>
+                  </div>
+                  <span className="text-white w-6">{memUsage.toFixed(0)}GB</span>
+               </div>
+               <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                  <span>NET</span>
+                  <span className={`w-2 h-2 rounded-full ${latency < 50 ? 'bg-green-500' : 'bg-yellow-500'} animate-pulse`}></span>
+                  <span className="text-white w-6">{latency.toFixed(0)}ms</span>
+               </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+             {/* Mode Toggle */}
+             <button 
                 onClick={toggleMode}
-                className="hidden md:flex items-center gap-2 px-3 py-1 bg-gray-800 border border-gray-700 rounded hover:border-cyber-primary transition-colors group"
+                className="hidden md:flex items-center gap-2 px-3 py-1 bg-gray-800 border border-gray-700 rounded hover:border-cyber-primary transition-colors group mr-2"
             >
                 <Layers size={12} className="text-gray-400 group-hover:text-cyber-primary" />
                 <span className="text-[10px] text-gray-300 group-hover:text-white">{mode} MODE</span>
             </button>
-          </div>
 
-          <div className="flex items-center gap-3">
              {/* Audio Toggle */}
              <button onClick={() => setIsMuted(!isMuted)} className="text-gray-500 hover:text-cyber-primary transition-colors">
                  {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -363,7 +408,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
                   <div className="relative flex items-center justify-center animate-[pulse_3s_infinite]">
                       <div className="absolute w-20 h-20 border border-cyber-primary/20 rotate-45"></div>
                       <div className="absolute w-16 h-16 border border-cyber-primary/40 -rotate-12"></div>
-                      <div className="text-xs text-cyber-primary/80 tracking-widest">SYSTEM READY</div>
+                      <div className="text-xs text-cyber-primary/80 tracking-widest">ELLA ONLINE</div>
                   </div>
               )}
               
@@ -414,7 +459,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
                     : 'bg-gray-900/80 border-gray-700 text-gray-200 shadow-[0_0_15px_rgba(0,0,0,0.5)] font-mono text-sm tracking-wide'
                 }`}>
                   <div className="text-[8px] md:text-[10px] text-gray-500 mb-1 opacity-50 uppercase tracking-widest flex items-center gap-2 font-mono">
-                     {msg.role === 'model' ? 'AI_CORE' : 'USER_UPLINK'}
+                     {msg.role === 'model' ? 'ELLA_CORE' : 'USER_UPLINK'}
                   </div>
                   <div 
                     className="whitespace-pre-wrap leading-relaxed"
