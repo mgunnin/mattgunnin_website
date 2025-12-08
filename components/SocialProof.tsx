@@ -8,10 +8,13 @@ const partners = [
   { name: 'MIT', type: 'Partner' },
   { name: 'ENIAC VENTURES', type: 'Investor' },
   { name: 'ACER', type: 'Client' },
+  { name: 'KAMP', type: 'Partner' },
   { name: 'NFL', type: 'Partner' },
   { name: 'VERIZON', type: 'Partner' },
+  { name: 'IBYTE', type: 'Partner' },
   { name: 'XSEED CAPITAL', type: 'Investor' },
   { name: 'CURSE GAMING', type: 'Partner' },
+  { name: 'SEARCHEYE', type: 'Partner' },
   { name: 'NBA', type: 'Partner' },
   { name: 'TWITCH', type: 'Partner' },
   { name: 'QUAKE CAPITAL', type: 'Investor' },
@@ -233,3 +236,4 @@ const TestimonialSlider: React.FC = () => {
 }
 
 export default SocialProof;
+    

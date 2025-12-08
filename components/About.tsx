@@ -132,7 +132,7 @@ const About: React.FC = () => {
                   </div>
 
                   {/* Code Area */}
-                  <div className="px-4 pb-4 md:px-6 md:pb-6 pt-24 md:pt-28 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
+                  <div className="px-4 pb-4 md:px-6 md:pb-6 pt-12 md:pt-14 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
                      <div className="font-mono text-[10px] md:text-xs text-gray-400 whitespace-pre-wrap break-words leading-relaxed">
                         <div dangerouslySetInnerHTML={{ __html: displayedCode }} className="inline" />
                         <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 align-middle animate-pulse"></span>

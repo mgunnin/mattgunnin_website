@@ -463,14 +463,14 @@ const PromptForge: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) =>
 
 const ContextWindow: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) => {
   const [text, setText] = useState('');
-  const [selectedModel, setSelectedModel] = useState('gpt-4o');
+  const [selectedModel, setSelectedModel] = useState('gpt-5.1');
   const [loading, setLoading] = useState(false);
   
   const models = [
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', limit: 2000000, color: '#00f0ff' },
-    { id: 'claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', limit: 200000, color: '#d97706' },
-    { id: 'gpt-4o', name: 'GPT-4o', limit: 128000, color: '#10b981' },
-    { id: 'llama-3.1', name: 'Llama 3.1 405B', limit: 128000, color: '#3b82f6' },
+    { id: 'gemini-3-pro', name: 'Gemini 3 Pro', limit: 2000000, color: '#00f0ff' },
+    { id: 'claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', limit: 500000, color: '#d97706' },
+    { id: 'gpt-5.1', name: 'GPT-5.1', limit: 128000, color: '#10b981' },
+    { id: 'llama-4', name: 'Llama 4 405B', limit: 128000, color: '#3b82f6' },
   ];
   
   const activeModel = models.find(m => m.id === selectedModel) || models[0];

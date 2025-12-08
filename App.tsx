@@ -8,6 +8,7 @@ import About from './components/About';
 import Resume from './components/Resume';
 import Projects from './components/Projects';
 import Resources from './components/Resources';
+import Tools from './components/Tools';
 import Lab from './components/Lab';
 import Contact from './components/Contact';
 import NeuralInterface from './components/NeuralInterface';
@@ -20,8 +21,22 @@ const App: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    // Check for direct route access to tools or blog posts on load
+    const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+    
+    if (path.includes('/tools')) {
+        setTimeout(() => document.getElementById('tools')?.scrollIntoView(), 100);
+    } else if (params.get('post')) {
+        setTimeout(() => document.getElementById('blog')?.scrollIntoView(), 100);
+    } else if (params.get('resource')) {
+        setTimeout(() => document.getElementById('resources')?.scrollIntoView(), 100);
+    } else if (params.get('project')) {
+        setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 100);
+    }
+
     const handleScroll = () => {
-      const sections = ['hero', 'about', 'resume', 'projects', 'resources', 'lab', 'blog', 'contact'];
+      const sections = ['hero', 'about', 'resume', 'projects', 'resources', 'tools', 'lab', 'blog', 'contact'];
       // Using a slightly lower threshold for better UX on mobile
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
@@ -53,7 +68,8 @@ const App: React.FC = () => {
     { id: 'about', label: 'About' },
     { id: 'resume', label: 'Resume' },
     { id: 'projects', label: 'Work' },
-    { id: 'resources', label: 'Lab' },
+    { id: 'resources', label: 'Reading' },
+    { id: 'tools', label: 'Tools' },
     { id: 'lab', label: 'AI Lab' },
     { id: 'blog', label: 'Blog' },
     { id: 'contact', label: 'Contact' },
@@ -101,6 +117,7 @@ const App: React.FC = () => {
       <Resume />
       <Projects />
       <Resources />
+      <Tools />
       <Lab />
       <Blog />
       <Contact />
