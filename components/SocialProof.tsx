@@ -1,12 +1,17 @@
+
 import React, { useRef, useEffect } from 'react';
 import { motion, useInView, useAnimation } from 'framer-motion';
 import { Quote, Award, Mic, Users, Coins, Layers, ArrowUpRight } from 'lucide-react';
 
 const partners = [
   { name: 'RIOT GAMES', type: 'Client' },
+  { name: 'MIT', type: 'Partner' },
   { name: 'ENIAC VENTURES', type: 'Investor' },
+  { name: 'ACER', type: 'Client' },
   { name: 'NFL', type: 'Partner' },
+  { name: 'VERIZON', type: 'Partner' },
   { name: 'XSEED CAPITAL', type: 'Investor' },
+  { name: 'CURSE GAMING', type: 'Partner' },
   { name: 'NBA', type: 'Partner' },
   { name: 'TWITCH', type: 'Partner' },
   { name: 'QUAKE CAPITAL', type: 'Investor' },

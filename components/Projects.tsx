@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Code, Cpu, Globe, Database, Box, Terminal, Zap, Server, LayoutTemplate, Brain, MessageSquare, Image as ImageIcon, Bot, ArrowLeft, Calendar, Trophy, Target, MonitorPlay, ChevronRight, Share2 } from 'lucide-react';
 import { Project } from '../types';
@@ -244,7 +245,7 @@ const minorProjects: Project[] = [
         'Seamless verification for thousands of users.'
     ],
     techStack: ['Solidity', 'Web3.js', 'Discord', 'Community'],
-    imageUrl: 'https://images.unsplash.com/photo-1644361566696-3d442b5b482a?q=80&w=1200&auto=format&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=1200',
     category: 'Crypto'
   },
   {

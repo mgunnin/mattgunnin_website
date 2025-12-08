@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Github, Linkedin, Calendar, FileText, Target, Database, ArrowRight, Terminal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Hero: React.FC = () => {
   const [textIndex, setTextIndex] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const achievements = [
     "$10M+ raised from Eniac, XSeed, Quake",
@@ -17,6 +18,58 @@ const Hero: React.FC = () => {
       setTextIndex((prev) => (prev + 1) % achievements.length);
     }, 4000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Matrix Rain Effect
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    const columns = Math.floor(width / 20);
+    const drops: number[] = [];
+
+    for (let i = 0; i < columns; i++) {
+        drops[i] = 1;
+    }
+
+    const chars = "MATTGUNNINVERTICALABS01";
+    
+    const draw = () => {
+        ctx.fillStyle = 'rgba(10, 10, 10, 0.05)';
+        ctx.fillRect(0, 0, width, height);
+        
+        ctx.fillStyle = '#00f0ff'; // Cyber primary
+        ctx.font = '15px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = chars.charAt(Math.floor(Math.random() * chars.length));
+            ctx.globalAlpha = Math.random() * 0.5 + 0.5; // Random opacity for glimmer
+            ctx.fillText(text, i * 20, drops[i] * 20);
+            
+            if (drops[i] * 20 > height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    };
+
+    const interval = setInterval(draw, 50);
+
+    const handleResize = () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+        clearInterval(interval);
+        window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const stats = [
@@ -42,8 +95,14 @@ const Hero: React.FC = () => {
   return (
     <section id="hero" className="relative h-screen min-h-[800px] w-full flex flex-col items-center justify-center overflow-hidden bg-cyber-black">
       
+      {/* Matrix Rain Canvas */}
+      <canvas 
+        ref={canvasRef}
+        className="absolute inset-0 z-0 opacity-15 pointer-events-none"
+      />
+
       {/* Background Gradient & Grid */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/80 z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/90 z-0 pointer-events-none"></div>
       <div 
         className="absolute inset-0 z-0 opacity-20 pointer-events-none"
         style={{

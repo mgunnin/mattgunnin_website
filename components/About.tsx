@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Network, Zap } from 'lucide-react';
 
@@ -95,7 +96,7 @@ const About: React.FC = () => {
                  I am an AI entrepreneur and technology leader specializing in <span className="text-white font-bold">agentic AI systems</span>, <span className="text-white font-bold">multi-agent architectures</span>, and autonomous solutions. 
                </p>
                <p className="leading-relaxed">
-                 With a proven track record as a <span className="text-cyber-primary">5x technical founder</span> with 2 exits, I have raised over <span className="text-white">$7M in venture capital</span> and delivered products used by giants like Riot Games, the NFL, NBA, and Fortune 500 brands.
+                 With a proven track record as a <span className="text-cyber-primary">5x technical founder</span> with 2 exits, I have raised over <span className="text-white">$10M+ in venture capital</span> and delivered products used by giants like Riot Games, the NFL, NBA, and Fortune 500 brands.
                </p>
                <p className="leading-relaxed">
                  Currently, I am the Founder/CEO of <strong className="text-white">Vertical Labs</strong> in Austin, TX, where we are architecting sophisticated AI agents using <strong className="text-cyber-secondary">GPT-5.1, Claude 4.5, and Gemini 3</strong>. My passion lies in leveraging cutting-edge frameworks like CrewAI, Eliza, and OpenAI Swarm to create transformative business solutions.
@@ -131,8 +132,8 @@ const About: React.FC = () => {
                   </div>
 
                   {/* Code Area */}
-                  <div className="p-4 md:p-6 pt-12 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
-                     <div className="font-mono text-[10px] md:text-xs text-gray-400 whitespace-pre leading-relaxed">
+                  <div className="px-4 pb-4 md:px-6 md:pb-6 pt-24 md:pt-14 h-full bg-black/80 backdrop-blur-sm overflow-hidden">
+                     <div className="font-mono text-[10px] md:text-xs text-gray-400 whitespace-pre-wrap break-words leading-relaxed">
                         <div dangerouslySetInnerHTML={{ __html: displayedCode }} className="inline" />
                         <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 align-middle animate-pulse"></span>
                      </div>
