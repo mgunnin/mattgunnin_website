@@ -1,8 +1,29 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Calendar, User, ArrowRight, ChevronLeft, Filter, Tag } from 'lucide-react';
 import { BlogPost } from '../types';
 
 const blogPosts: BlogPost[] = [
+  {
+    id: '4',
+    title: 'The Vertical Integration of Intelligence',
+    date: 'Dec 8, 2025',
+    excerpt: 'Why horizontal LLMs are hitting a ceiling, and how vertical agentic architectures are unlocking the next trillion dollars in enterprise value.',
+    content: `
+      <p>The "Generalist Trap" is becoming obvious. While GPT-5 and Gemini 3 are marvels of engineering, they remain horizontally focused. They know a little bit about everything, but they cannot run your logistics supply chain out of the box.</p>
+      <h3>The Value Shift</h3>
+      <p>In 2023, the value was in the Model. In 2024, it was in the Context. Now, in late 2025, the value has decisively shifted to the <strong>Orchestration Layer</strong>.</p>
+      <p>At Vertical Labs, we are seeing a massive pivot among enterprise clients. They no longer want "Chat with PDF" solutions. They want:</p>
+      <ul>
+        <li><strong>Proprietary Tool Use:</strong> Agents that can hit internal APIs to execute trades or update CRMs.</li>
+        <li><strong>Narrow Guardrails:</strong> Systems that refuse to hallucinate because they are constrained by strict topology.</li>
+        <li><strong>Vertical Context:</strong> Embeddings trained specifically on their institutional knowledge, not just the open web.</li>
+      </ul>
+      <p>The next trillion dollars of value won't come from a better chatbot; it will come from the vertical integration of intelligence into specific business verticals.</p>
+    `,
+    author: 'Matt Gunnin',
+    tags: ['AI', 'Strategy', 'Enterprise']
+  },
   {
     id: '1',
     title: 'Building Agentic Systems: A Vertical Approach',
