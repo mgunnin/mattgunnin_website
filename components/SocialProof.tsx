@@ -52,6 +52,72 @@ const testimonials = [
   }
 ];
 
+const MetricCard: React.FC<{ metric: any, delay: number }> = ({ metric, delay }) => {
+    return (
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay, duration: 0.5 }}
+            className="p-6 bg-gray-900/20 border border-gray-800 rounded-xl hover:bg-gray-900/40 hover:border-cyber-primary/30 transition-all duration-300 group"
+        >
+            <metric.icon className="w-8 h-8 text-gray-600 group-hover:text-cyber-primary mb-4 transition-colors" />
+            <div className="text-3xl md:text-4xl font-bold text-white mb-1 group-hover:scale-105 transition-transform origin-left">{metric.value}</div>
+            <div className="text-sm font-bold text-gray-400 group-hover:text-gray-300">{metric.label}</div>
+            <div className="text-xs text-gray-600 font-mono mt-2">{metric.desc}</div>
+        </motion.div>
+    );
+}
+
+const TestimonialSlider: React.FC = () => {
+    const [index, setIndex] = React.useState(0);
+
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            setIndex((prev) => (prev + 1) % testimonials.length);
+        }, 6000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="relative min-h-[200px] flex flex-col justify-between">
+            <div className="relative h-full">
+                {testimonials.map((t, i) => (
+                    <div 
+                        key={i}
+                        className={`absolute top-0 left-0 w-full transition-all duration-700 ease-in-out ${
+                            i === index ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'
+                        }`}
+                    >
+                        <p className="text-gray-300 text-lg leading-relaxed italic mb-6">"{t.text}"</p>
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-black border border-gray-600 flex items-center justify-center font-bold text-gray-400">
+                                {t.author.charAt(0)}
+                            </div>
+                            <div>
+                                <div className="text-white font-bold">{t.author}</div>
+                                <div className="text-cyber-primary text-xs font-mono">{t.role} @ {t.company}</div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            
+            <div className="flex gap-2 mt-auto pt-8">
+                {testimonials.map((_, i) => (
+                    <button 
+                        key={i}
+                        onClick={() => setIndex(i)}
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                            i === index ? 'w-8 bg-cyber-primary' : 'w-2 bg-gray-700 hover:bg-gray-600'
+                        }`}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
 const SocialProof: React.FC = () => {
   return (
     <section className="py-20 bg-black border-y border-gray-900 relative overflow-hidden">
@@ -169,71 +235,4 @@ const SocialProof: React.FC = () => {
   );
 };
 
-const MetricCard: React.FC<{ metric: any, delay: number }> = ({ metric, delay }) => {
-    return (
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay, duration: 0.5 }}
-            className="p-6 bg-gray-900/20 border border-gray-800 rounded-xl hover:bg-gray-900/40 hover:border-cyber-primary/30 transition-all duration-300 group"
-        >
-            <metric.icon className="w-8 h-8 text-gray-600 group-hover:text-cyber-primary mb-4 transition-colors" />
-            <div className="text-3xl md:text-4xl font-bold text-white mb-1 group-hover:scale-105 transition-transform origin-left">{metric.value}</div>
-            <div className="text-sm font-bold text-gray-400 group-hover:text-gray-300">{metric.label}</div>
-            <div className="text-xs text-gray-600 font-mono mt-2">{metric.desc}</div>
-        </motion.div>
-    );
-}
-
-const TestimonialSlider: React.FC = () => {
-    const [index, setIndex] = React.useState(0);
-
-    React.useEffect(() => {
-        const interval = setInterval(() => {
-            setIndex((prev) => (prev + 1) % testimonials.length);
-        }, 6000);
-        return () => clearInterval(interval);
-    }, []);
-
-    return (
-        <div className="relative min-h-[200px] flex flex-col justify-between">
-            <div className="relative h-full">
-                {testimonials.map((t, i) => (
-                    <div 
-                        key={i}
-                        className={`absolute top-0 left-0 w-full transition-all duration-700 ease-in-out ${
-                            i === index ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'
-                        }`}
-                    >
-                        <p className="text-gray-300 text-lg leading-relaxed italic mb-6">"{t.text}"</p>
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-700 to-black border border-gray-600 flex items-center justify-center font-bold text-gray-400">
-                                {t.author.charAt(0)}
-                            </div>
-                            <div>
-                                <div className="text-white font-bold">{t.author}</div>
-                                <div className="text-cyber-primary text-xs font-mono">{t.role} @ {t.company}</div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-            
-            <div className="flex gap-2 mt-auto pt-8">
-                {testimonials.map((_, i) => (
-                    <button 
-                        key={i}
-                        onClick={() => setIndex(i)}
-                        className={`h-1 rounded-full transition-all duration-300 ${
-                            i === index ? 'w-8 bg-cyber-primary' : 'w-2 bg-gray-700 hover:bg-gray-600'
-                        }`}
-                    />
-                ))}
-            </div>
-        </div>
-    );
-}
-
 export default SocialProof;
-    

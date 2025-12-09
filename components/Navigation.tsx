@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, User, Briefcase, BookOpen, Mail, FileText, Zap, PenTool } from 'lucide-react';
+import { Home, User, Briefcase, BookOpen, Mail, FileText, Zap, PenTool, Target, Mic, Calendar } from 'lucide-react';
 
 interface NavigationProps {
   currentSection: string;
@@ -12,16 +12,32 @@ const Navigation: React.FC<NavigationProps> = ({ currentSection }) => {
     { id: 'about', icon: User, label: 'About' },
     { id: 'resume', icon: FileText, label: 'Resume' },
     { id: 'projects', icon: Briefcase, label: 'Work' },
+    { id: 'case-studies', icon: Target, label: 'Case Studies' },
+    { id: 'speaking', icon: Mic, label: 'Speaking' },
     { id: 'resources', icon: BookOpen, label: 'Reading' },
     { id: 'tools', icon: PenTool, label: 'Tools' },
     { id: 'lab', icon: Zap, label: 'AI Lab' },
+    { id: 'book', icon: Calendar, label: 'Booking' },
     { id: 'contact', icon: Mail, label: 'Contact' },
   ];
 
   const scrollToSection = (id: string) => {
+    // Check if we are on a specific route page like /book
+    if (id === 'book') {
+        window.location.hash = '/book';
+        return;
+    }
+
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // If element not found (maybe we are on /book page), go home first
+      window.location.hash = '/';
+      // Wait for re-render
+      setTimeout(() => {
+         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
   };
 
@@ -30,7 +46,8 @@ const Navigation: React.FC<NavigationProps> = ({ currentSection }) => {
       <div className="absolute left-1.5 top-0 w-px h-full bg-gradient-to-b from-transparent via-gray-800 to-transparent -z-10" />
       
       {navItems.map((item) => {
-        const isActive = currentSection === item.id;
+        // Simple heuristic for active state in hash routing world
+        const isActive = currentSection === item.id || (item.id === 'book' && window.location.hash.includes('/book'));
         return (
           <div key={item.id} className="group relative flex items-center">
             <span className={`absolute left-10 px-3 py-1.5 bg-cyber-black border border-cyber-primary/30 text-cyber-primary text-xs font-mono font-bold rounded opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(0,240,255,0.2)]`}>

@@ -17,8 +17,8 @@ const navigationTool: FunctionDeclaration = {
     properties: {
       sectionId: {
         type: Type.STRING,
-        description: 'The ID of the section to scroll to. Options: "hero", "about", "resume", "projects", "resources", "blog", "contact", "lab".',
-        enum: ['hero', 'about', 'resume', 'projects', 'resources', 'blog', 'contact', 'lab']
+        description: 'The ID of the section to scroll to. Options: "hero", "about", "resume", "projects", "resources", "blog", "contact", "lab", "book".',
+        enum: ['hero', 'about', 'resume', 'projects', 'resources', 'blog', 'contact', 'lab', 'book']
       },
       reason: {
         type: Type.STRING,
@@ -41,6 +41,15 @@ const downloadResumeTool: FunctionDeclaration = {
 const copyEmailTool: FunctionDeclaration = {
   name: 'copy_email',
   description: 'Copies Matt Gunnin\'s email address to the user\'s clipboard.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {},
+  }
+};
+
+const bookMeetingTool: FunctionDeclaration = {
+  name: 'book_meeting',
+  description: 'Navigates the user to the booking page to schedule a meeting with Matt.',
   parameters: {
     type: Type.OBJECT,
     properties: {},
@@ -85,7 +94,8 @@ You are interacting with high-level operators: Venture Capitalists (VCs), Techni
 1.  **Agency:** You have control over this website interface. 
     *   **ONLY** trigger \`navigate_site\` if the user **EXPLICITLY** asks to see a section.
     *   Use \`download_resume\` if the user asks for a CV/Resume.
-    *   Use \`copy_email\` if the user wants to contact Matt (Email: mg@mattgunnin.com).
+    *   Use \`book_meeting\` if the user asks to schedule a call, book a meeting, or contact Matt for business.
+    *   Use \`copy_email\` if the user wants to email Matt directly (Email: mg@mattgunnin.com).
 2.  **Format:** Use **Bold** for emphasis, lists for clarity, and code blocks for technical concepts.
 `;
 
@@ -104,7 +114,7 @@ export const getChatSession = (mode: CognitiveMode): Chat => {
       config: {
         systemInstruction: getSystemInstruction(mode),
         temperature: 0.7,
-        tools: [{ functionDeclarations: [navigationTool, downloadResumeTool, copyEmailTool] }],
+        tools: [{ functionDeclarations: [navigationTool, downloadResumeTool, copyEmailTool, bookMeetingTool] }],
       },
     });
   }

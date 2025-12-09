@@ -22,7 +22,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<AgentStatus>('IDLE');
   const [mode, setMode] = useState<CognitiveMode>('STRATEGIC');
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Default to true to disable auto-speech
   
   // HUD Stats
   const [cpuUsage, setCpuUsage] = useState(12);
@@ -35,6 +35,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const statusRef = useRef(status); 
   const synthesisRef = useRef<SpeechSynthesis | null>(null);
+  const isMutedRef = useRef(isMuted);
 
   // Quick Action Chips
   const starterPrompts = [
@@ -47,6 +48,13 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
+
+  useEffect(() => {
+    isMutedRef.current = isMuted;
+    if (isMuted && synthesisRef.current) {
+        synthesisRef.current.cancel();
+    }
+  }, [isMuted]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -171,7 +179,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   }, [messages, status]);
 
   const speakResponse = (text: string) => {
-    if (isMuted || !synthesisRef.current) return;
+    if (isMutedRef.current || !synthesisRef.current) return;
     
     // Stop previous speech
     synthesisRef.current.cancel();
@@ -198,6 +206,15 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
       const sectionId = args.sectionId;
       setStatus('EXECUTING');
       setIsOpen(false); // Close interface when navigating
+      
+      if (sectionId === 'book') {
+          window.history.pushState(null, '', '/book');
+          const navEvent = new PopStateEvent('popstate');
+          window.dispatchEvent(navEvent);
+          window.scrollTo(0, 0);
+          return { result: 'Navigated to booking page' };
+      }
+
       setTimeout(() => {
         document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
       }, 500);
@@ -219,6 +236,16 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
         setStatus('EXECUTING');
         navigator.clipboard.writeText('mg@mattgunnin.com');
         return { result: 'Email copied to clipboard' };
+    }
+
+    if (functionCall.name === 'book_meeting') {
+        setStatus('EXECUTING');
+        setIsOpen(false);
+        window.history.pushState(null, '', '/book');
+        const navEvent = new PopStateEvent('popstate');
+        window.dispatchEvent(navEvent);
+        window.scrollTo(0, 0);
+        return { result: 'Navigated to booking page' };
     }
 
     return { result: 'Unknown function' };

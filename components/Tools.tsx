@@ -5,45 +5,7 @@ import { Calculator, Layers, FileText, ArrowRight, ArrowLeft, Download, Copy, Ch
 
 type ToolType = 'hub' | 'roi' | 'stack' | 'prompts';
 
-const Tools: React.FC = () => {
-  const [activeTool, setActiveTool] = useState<ToolType>('hub');
-
-  // Handle Routing
-  useEffect(() => {
-    const handleUrlChange = () => {
-        const path = window.location.pathname;
-        if (path.includes('/tools/roi-calculator')) setActiveTool('roi');
-        else if (path.includes('/tools/stack-recommender')) setActiveTool('stack');
-        else if (path.includes('/tools/prompt-templates')) setActiveTool('prompts');
-        else if (path.includes('/tools')) setActiveTool('hub');
-    };
-
-    handleUrlChange();
-    window.addEventListener('popstate', handleUrlChange);
-    return () => window.removeEventListener('popstate', handleUrlChange);
-  }, []);
-
-  const navigateTo = (tool: ToolType, path: string) => {
-    setActiveTool(tool);
-    window.history.pushState({}, '', path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  return (
-    <section id="tools" className="py-24 px-6 md:px-24 w-full bg-cyber-black relative border-t border-gray-900 min-h-screen">
-       <div className="absolute inset-0 bg-[linear-gradient(rgba(112,0,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(112,0,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
-
-       <div className="max-w-7xl mx-auto relative z-10">
-          <AnimatePresence mode="wait">
-             {activeTool === 'hub' && <ToolsHub onNavigate={navigateTo} />}
-             {activeTool === 'roi' && <ROICalculator onBack={() => navigateTo('hub', '/tools')} />}
-             {activeTool === 'stack' && <StackRecommender onBack={() => navigateTo('hub', '/tools')} />}
-             {activeTool === 'prompts' && <PromptLibrary onBack={() => navigateTo('hub', '/tools')} />}
-          </AnimatePresence>
-       </div>
-    </section>
-  );
-};
+// --- SUB COMPONENTS DEFINED FIRST TO AVOID REFERENCE ERRORS ---
 
 const ToolsHub: React.FC<{ onNavigate: (t: ToolType, p: string) => void }> = ({ onNavigate }) => {
     return (
@@ -279,6 +241,13 @@ const ROICalculator: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
 // --- TOOL 2: STACK RECOMMENDER ---
 
+const RecommendationRow: React.FC<{label: string, value: string}> = ({label, value}) => (
+    <div className="flex justify-between items-center border-b border-gray-800 pb-2 last:border-0 last:pb-0">
+        <span className="text-gray-500 text-sm font-mono">{label}</span>
+        <span className="text-white font-bold">{value}</span>
+    </div>
+);
+
 const StackRecommender: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [step, setStep] = useState(0);
     const [answers, setAnswers] = useState<any>({});
@@ -427,13 +396,6 @@ const StackRecommender: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     );
 };
 
-const RecommendationRow: React.FC<{label: string, value: string}> = ({label, value}) => (
-    <div className="flex justify-between items-center border-b border-gray-800 pb-2 last:border-0 last:pb-0">
-        <span className="text-gray-500 text-sm font-mono">{label}</span>
-        <span className="text-white font-bold">{value}</span>
-    </div>
-);
-
 // --- TOOL 3: PROMPT LIBRARY ---
 
 const PromptLibrary: React.FC<{ onBack: () => void }> = ({ onBack }) => {
@@ -560,6 +522,48 @@ const PromptLibrary: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             )}
         </motion.div>
     );
+};
+
+// --- MAIN COMPONENT DEFINED LAST ---
+
+const Tools: React.FC = () => {
+  const [activeTool, setActiveTool] = useState<ToolType>('hub');
+
+  // Handle Routing
+  useEffect(() => {
+    const handleUrlChange = () => {
+        const path = window.location.pathname;
+        if (path.includes('/tools/roi-calculator')) setActiveTool('roi');
+        else if (path.includes('/tools/stack-recommender')) setActiveTool('stack');
+        else if (path.includes('/tools/prompt-templates')) setActiveTool('prompts');
+        else if (path.includes('/tools')) setActiveTool('hub');
+    };
+
+    handleUrlChange();
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, []);
+
+  const navigateTo = (tool: ToolType, path: string) => {
+    setActiveTool(tool);
+    window.history.pushState({}, '', path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <section id="tools" className="py-24 px-6 md:px-24 w-full bg-cyber-black relative border-t border-gray-900 min-h-screen">
+       <div className="absolute inset-0 bg-[linear-gradient(rgba(112,0,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(112,0,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+
+       <div className="max-w-7xl mx-auto relative z-10">
+          <AnimatePresence mode="wait">
+             {activeTool === 'hub' && <ToolsHub onNavigate={navigateTo} />}
+             {activeTool === 'roi' && <ROICalculator onBack={() => navigateTo('hub', '/tools')} />}
+             {activeTool === 'stack' && <StackRecommender onBack={() => navigateTo('hub', '/tools')} />}
+             {activeTool === 'prompts' && <PromptLibrary onBack={() => navigateTo('hub', '/tools')} />}
+          </AnimatePresence>
+       </div>
+    </section>
+  );
 };
 
 export default Tools;

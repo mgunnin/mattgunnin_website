@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, User, ArrowRight, ChevronLeft, Filter, Tag, Share2, Linkedin, Copy, Clock, Hash, ChevronRight } from 'lucide-react';
+import { Calendar, User, ArrowRight, ChevronLeft, Filter, Tag, Share2, Linkedin, Copy, Clock, Hash, ChevronRight, ArrowLeft } from 'lucide-react';
 import { BlogPost } from '../types';
 
 const blogPosts: BlogPost[] = [
@@ -50,7 +50,7 @@ const blogPosts: BlogPost[] = [
       <p>Traditional LLM applications rely on zero-shot or few-shot prompting. While effective for creative writing, it falls apart in complex business logic. A single prompt cannot handle the nuance of a legal discovery process.</p>
       <p>Our approach involves <strong>Swarm Intelligence</strong>. We utilize frameworks like CrewAI and OpenAI Swarm to assign specific roles in a digital assembly line:</p>
       
-      <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg my-6 font-mono text-sm">
+      <div class="code-block">
         <span class="text-gray-500"># Agent Definition Example</span><br/>
         researcher = Agent(<br/>
         &nbsp;&nbsp;role=<span class="text-green-400">'Market Analyst'</span>,<br/>
@@ -135,7 +135,194 @@ const blogPosts: BlogPost[] = [
   }
 ];
 
-const Blog: React.FC = () => {
+// --- SINGLE POST VIEW COMPONENT ---
+
+const SinglePostView: React.FC<{ 
+  post: BlogPost; 
+  onClose: () => void; 
+  onTagClick: (e: any, tag: string) => void;
+  parallaxOffset: {x: number, y: number};
+  handleMouseMove: (e: any) => void;
+  setParallaxOffset: (o: {x: number, y: number}) => void;
+}> = ({ post, onClose, onTagClick, parallaxOffset, handleMouseMove, setParallaxOffset }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = (platform: 'twitter' | 'linkedin' | 'copy') => {
+    const url = window.location.href;
+    const text = `Read "${post.title}" by Matt Gunnin`;
+    
+    if (platform === 'twitter') {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    } else if (platform === 'linkedin') {
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+    } else {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const relatedPosts = blogPosts
+    .filter(p => p.id !== post.id && p.tags.some(t => post.tags.includes(t)))
+    .slice(0, 3);
+
+  return (
+    <div className="animate-[slideUp_0.4s_ease-out] w-full min-h-screen bg-cyber-black pb-24">
+       {/* CSS for Blog Content Formatting */}
+       <style>{`
+        .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; color: #d1d5db; }
+        .blog-content h3 { font-size: 1.75rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1.5rem; color: white; border-left: 4px solid #00f0ff; padding-left: 1rem; }
+        .blog-content ul, .blog-content ol { margin-bottom: 1.5rem; padding-left: 2rem; color: #d1d5db; }
+        .blog-content ul { list-style-type: disc; }
+        .blog-content ol { list-style-type: decimal; }
+        .blog-content li { margin-bottom: 0.75rem; padding-left: 0.5rem; }
+        .blog-content strong { color: #fff; font-weight: 700; }
+        .blog-content blockquote { border-left: 4px solid #7000ff; background: rgba(112,0,255,0.1); padding: 1.5rem; margin: 2rem 0; font-style: italic; color: #e5e7eb; border-radius: 0 8px 8px 0; }
+        .blog-content code { background: #111827; color: #00f0ff; padding: 0.2em 0.4em; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.9em; border: 1px solid #374151; }
+        .blog-content .code-block { background: #050505; padding: 1.5rem; border-radius: 8px; border: 1px solid #333; margin: 2rem 0; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+       `}</style>
+
+       <div className="container mx-auto px-4 md:px-6 py-8">
+           <button 
+             onClick={onClose}
+             className="flex items-center gap-2 text-cyber-primary hover:text-white mb-6 transition-colors font-mono text-sm uppercase tracking-wider group bg-black/50 px-4 py-2 rounded-full border border-gray-800 w-fit"
+           >
+             <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Return to Logs
+           </button>
+
+           <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
+               {/* Parallax Header */}
+               <div 
+                  className="relative h-72 md:h-96 w-full overflow-hidden cursor-crosshair group"
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={() => setParallaxOffset({ x: 0, y: 0 })}
+               >
+                   {/* Background Image if available, else generative pattern */}
+                   {post.image ? (
+                     <div 
+                        className="absolute inset-[-10%]"
+                        style={{
+                            transform: `translate(${parallaxOffset.x * 20}px, ${parallaxOffset.y * 20}px) scale(1.1)`,
+                            backgroundImage: `url(${post.image})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                            filter: 'grayscale(100%) contrast(120%) brightness(50%)'
+                        }}
+                     />
+                   ) : (
+                     <div 
+                        className="absolute inset-[-10%] bg-cyber-black"
+                        style={{
+                            transform: `translate(${parallaxOffset.x * 20}px, ${parallaxOffset.y * 20}px) scale(1.1)`
+                        }}
+                     />
+                   )}
+                   
+                   {/* Overlay Gradients */}
+                   <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
+                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_20%,#111827_100%)] opacity-80" />
+                   
+                   {/* Title Container */}
+                   <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 z-20">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                          {post.tags.map(tag => (
+                          <button 
+                              key={tag} 
+                              onClick={(e) => onTagClick(e, tag)}
+                              className="text-xs font-mono text-cyber-primary bg-black/60 border border-cyber-primary/30 px-2 py-1 rounded backdrop-blur-sm hover:bg-cyber-primary hover:text-black transition-colors"
+                          >
+                              #{tag}
+                          </button>
+                          ))}
+                      </div>
+                      <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight max-w-4xl">{post.title}</h1>
+                   </div>
+               </div>
+
+               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 p-8 md:p-12">
+                   {/* Sidebar Meta */}
+                   <div className="lg:col-span-3 space-y-8 order-2 lg:order-1">
+                      <div className="bg-black/40 border border-gray-800 rounded-xl p-6 backdrop-blur-sm sticky top-24">
+                          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-800">
+                              <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden">
+                                 <img 
+                                    src="/matt.jpg" 
+                                    onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
+                                    alt="Matt Gunnin" 
+                                    className="w-full h-full object-cover" 
+                                 />
+                              </div>
+                              <div>
+                                 <div className="text-white font-bold text-sm">Matt Gunnin</div>
+                                 <div className="text-gray-500 text-xs font-mono">CEO, Vertical Labs</div>
+                              </div>
+                          </div>
+
+                          <div className="space-y-4 mb-8">
+                             <div className="flex items-center gap-3 text-sm text-gray-400">
+                                <Calendar size={16} className="text-cyber-secondary" /> {post.date}
+                             </div>
+                             <div className="flex items-center gap-3 text-sm text-gray-400">
+                                <Clock size={16} className="text-cyber-secondary" /> {post.readTime}
+                             </div>
+                          </div>
+
+                          <h4 className="text-xs font-mono text-gray-500 uppercase mb-3">Share Transmission</h4>
+                          <div className="flex gap-2">
+                             <button onClick={() => handleShare('twitter')} className="p-2 bg-gray-800 hover:bg-[#1DA1F2] hover:text-white text-gray-400 rounded transition-colors"><Share2 size={16} /></button>
+                             <button onClick={() => handleShare('linkedin')} className="p-2 bg-gray-800 hover:bg-[#0077b5] hover:text-white text-gray-400 rounded transition-colors"><Linkedin size={16} /></button>
+                             <button onClick={() => handleShare('copy')} className="p-2 bg-gray-800 hover:bg-green-600 hover:text-white text-gray-400 rounded transition-colors flex items-center gap-2">
+                                {copied ? <span className="text-xs font-bold px-1">COPIED</span> : <Copy size={16} />}
+                             </button>
+                          </div>
+                      </div>
+                   </div>
+
+                   {/* Main Content */}
+                   <div className="lg:col-span-9 order-1 lg:order-2">
+                       <div 
+                          className="blog-content text-gray-300 text-lg leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: post.content }}
+                       />
+                       
+                       {/* Footer Navigation */}
+                       <div className="mt-16 pt-8 border-t border-gray-800">
+                          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                             <Hash className="text-cyber-primary" /> Related Transmissions
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             {relatedPosts.map(rp => (
+                                <a 
+                                   key={rp.id}
+                                   href={`#/blog/${rp.slug}`}
+                                   onClick={(e) => {
+                                      e.preventDefault();
+                                      window.location.hash = `/blog/${rp.slug}`;
+                                   }}
+                                   className="text-left group bg-black/40 border border-gray-800 p-4 rounded-lg hover:border-cyber-primary transition-all hover:-translate-y-1 block"
+                                >
+                                   <div className="text-xs font-mono text-gray-500 mb-2">{rp.date}</div>
+                                   <h4 className="font-bold text-white group-hover:text-cyber-primary transition-colors">{rp.title}</h4>
+                                </a>
+                             ))}
+                             {relatedPosts.length === 0 && (
+                                <p className="text-gray-500 italic text-sm">End of related logs.</p>
+                             )}
+                          </div>
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+    </div>
+  );
+};
+
+interface BlogProps {
+    standalone?: boolean;
+}
+
+const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 });
@@ -144,41 +331,72 @@ const Blog: React.FC = () => {
 
   // Handle URL Routing
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get('post');
-    if (slug) {
-      const post = blogPosts.find(p => p.slug === slug);
-      if (post) {
-        setSelectedPost(post);
-        window.scrollTo(0, 0);
-      }
-    }
+    const handleRoute = () => {
+        const hash = window.location.hash; // e.g. #/blog/slug
+        
+        // Robust hash parsing
+        let path = hash.startsWith('#') ? hash.substring(1) : hash;
+        
+        // CRITICAL: If we are embedded in Home (not standalone), we IGNORE deep links logic for state
+        // This prevents the embedded component from hijacking the view unless the route is explicitly active (handled by App.tsx)
+        if (!standalone && path.startsWith('/blog/')) {
+            setSelectedPost(null);
+            return;
+        }
 
-    const handlePopState = () => {
-      const p = new URLSearchParams(window.location.search);
-      const s = p.get('post');
-      if (s) {
-        const post = blogPosts.find(p => p.slug === s);
-        if (post) setSelectedPost(post);
-      } else {
+        if (path.startsWith('/blog/')) {
+            // Remove /blog/ prefix and potential query params
+            const slug = path.split('/blog/')[1]?.split('?')[0].split('#')[0].replace(/\/$/, '');
+            const post = blogPosts.find(p => p.slug === slug);
+            if (post) {
+                setSelectedPost(post);
+                return;
+            }
+        }
+        
+        // Default to list view if no post found
         setSelectedPost(null);
-      }
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
+    handleRoute();
+    window.addEventListener('hashchange', handleRoute); // Listen for hash changes
+    // Fallback for popstate as well
+    window.addEventListener('popstate', handleRoute);
+    
+    return () => {
+        window.removeEventListener('hashchange', handleRoute);
+        window.removeEventListener('popstate', handleRoute);
+    };
+  }, [standalone]);
 
-  const handleOpenPost = (post: BlogPost) => {
-    setSelectedPost(post);
-    const newUrl = `${window.location.pathname}?post=${post.slug}`;
-    window.history.pushState({ postSlug: post.slug }, '', newUrl);
-    window.scrollTo(0, 0);
+  const handleOpenPost = (e: React.MouseEvent, post: BlogPost) => {
+    e.preventDefault();
+    // Use hash navigation to avoid SecurityErrors with pushState in restricted environments
+    window.location.hash = `/blog/${post.slug}`;
   };
 
   const handleClosePost = () => {
-    setSelectedPost(null);
-    window.history.pushState({}, '', window.location.pathname);
+    // Navigate back to blog root
+    if (standalone) {
+        window.location.hash = '/blog';
+    } else {
+        window.location.hash = '/';
+    }
+  };
+
+  const handleTagClick = (e: React.MouseEvent, tag: string) => {
+    e.stopPropagation();
+    setActiveTag(tag);
+    setPage(1); 
+    if (selectedPost) handleClosePost();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY, currentTarget } = e;
+    const { width, height, left, top } = currentTarget.getBoundingClientRect();
+    const x = (clientX - left) / width - 0.5;
+    const y = (clientY - top) / height - 0.5;
+    setParallaxOffset({ x, y });
   };
 
   // Extract unique tags
@@ -192,31 +410,27 @@ const Blog: React.FC = () => {
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
   const displayPosts = filteredPosts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
 
-  const handleTagClick = (e: React.MouseEvent, tag: string) => {
-    e.stopPropagation();
-    setActiveTag(tag);
-    setPage(1); // Reset to first page on filter
-    if (selectedPost) handleClosePost();
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY, currentTarget } = e;
-    const { width, height, left, top } = currentTarget.getBoundingClientRect();
-    const x = (clientX - left) / width - 0.5;
-    const y = (clientY - top) / height - 0.5;
-    setParallaxOffset({ x, y });
-  };
-
   return (
-    <section id="blog" className="py-24 px-6 md:px-24 w-full bg-cyber-black relative border-t border-gray-900 min-h-screen">
+    <section id="blog" className={`${standalone ? 'min-h-screen pt-24' : 'py-24 border-t border-gray-900'} px-6 md:px-24 w-full bg-cyber-black relative`}>
       <div className="max-w-7xl mx-auto">
         
         {/* Main Header (only show in list view) */}
         {!selectedPost && (
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-[fadeIn_0.5s_ease-out]">
-             <div className="flex items-end gap-4">
-                 <h2 className="text-4xl md:text-5xl font-bold text-white">TRANSMISSIONS</h2>
-                 <span className="text-cyber-secondary font-mono text-lg mb-1 hidden md:inline">/ LOGS_2025</span>
+             <div className="flex flex-col items-start gap-4">
+                 {/* Back to Home Button (Standalone Mode Only) */}
+                 {standalone && (
+                    <button 
+                        onClick={() => window.location.hash = '/'}
+                        className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors group mb-2"
+                    >
+                        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Back to Home
+                    </button>
+                 )}
+                 <div className="flex items-end gap-4">
+                     <h2 className="text-4xl md:text-5xl font-bold text-white">TRANSMISSIONS</h2>
+                     <span className="text-cyber-secondary font-mono text-lg mb-1 hidden md:inline">/ LOGS_2025</span>
+                 </div>
              </div>
 
              {/* Filter Bar */}
@@ -249,17 +463,25 @@ const Blog: React.FC = () => {
         )}
 
         {selectedPost ? (
-          // Single Post View
-          <SinglePostView post={selectedPost} onClose={handleClosePost} onTagClick={handleTagClick} parallaxOffset={parallaxOffset} handleMouseMove={handleMouseMove} setParallaxOffset={setParallaxOffset} />
+          // Single Post View (Full Page or Overlay)
+          <SinglePostView 
+             post={selectedPost} 
+             onClose={handleClosePost} 
+             onTagClick={handleTagClick} 
+             parallaxOffset={parallaxOffset} 
+             handleMouseMove={handleMouseMove} 
+             setParallaxOffset={setParallaxOffset} 
+          />
         ) : (
           // List View
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {displayPosts.length > 0 ? (
                   displayPosts.map((post, idx) => (
-                    <article 
+                    <a 
                       key={post.id}
-                      onClick={() => handleOpenPost(post)}
+                      href={`#/blog/${post.slug}`}
+                      onClick={(e) => handleOpenPost(e, post)}
                       style={{ animationDelay: `${idx * 100}ms` }}
                       className="group bg-gray-900/30 border border-gray-800 hover:border-cyber-primary hover:bg-gray-900/60 p-6 rounded-xl transition-all duration-300 cursor-pointer flex flex-col h-full hover:-translate-y-1 animate-[fadeIn_0.5s_ease-out_both]"
                     >
@@ -290,7 +512,7 @@ const Blog: React.FC = () => {
                         </div>
                         <ArrowRight size={16} className="text-gray-600 group-hover:text-cyber-primary -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                       </div>
-                    </article>
+                    </a>
                   ))
               ) : (
                   <div className="col-span-full py-16 text-center border border-dashed border-gray-800 rounded-xl bg-gray-900/20">
@@ -336,182 +558,6 @@ const Blog: React.FC = () => {
         }
       `}</style>
     </section>
-  );
-};
-
-// --- SINGLE POST VIEW COMPONENT ---
-
-const SinglePostView: React.FC<{ 
-  post: BlogPost; 
-  onClose: () => void; 
-  onTagClick: (e: any, tag: string) => void;
-  parallaxOffset: {x: number, y: number};
-  handleMouseMove: (e: any) => void;
-  setParallaxOffset: (o: {x: number, y: number}) => void;
-}> = ({ post, onClose, onTagClick, parallaxOffset, handleMouseMove, setParallaxOffset }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleShare = (platform: 'twitter' | 'linkedin' | 'copy') => {
-    const url = window.location.href;
-    const text = `Read "${post.title}" by Matt Gunnin`;
-    
-    if (platform === 'twitter') {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-    } else if (platform === 'linkedin') {
-      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-    } else {
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const relatedPosts = blogPosts
-    .filter(p => p.id !== post.id && p.tags.some(t => post.tags.includes(t)))
-    .slice(0, 3);
-
-  return (
-    <div className="animate-[slideUp_0.4s_ease-out]">
-       <button 
-         onClick={onClose}
-         className="flex items-center gap-2 text-cyber-primary hover:text-white mb-6 transition-colors font-mono text-sm uppercase tracking-wider group"
-       >
-         <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Return to Logs
-       </button>
-
-       <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
-           {/* Parallax Header */}
-           <div 
-              className="relative h-72 md:h-96 w-full overflow-hidden cursor-crosshair group"
-              onMouseMove={handleMouseMove}
-              onMouseLeave={() => setParallaxOffset({ x: 0, y: 0 })}
-           >
-               {/* Background Image if available, else generative pattern */}
-               {post.image ? (
-                 <div 
-                    className="absolute inset-[-10%]"
-                    style={{
-                        transform: `translate(${parallaxOffset.x * 20}px, ${parallaxOffset.y * 20}px) scale(1.1)`,
-                        backgroundImage: `url(${post.image})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        filter: 'grayscale(100%) contrast(120%) brightness(50%)'
-                    }}
-                 />
-               ) : (
-                 <div 
-                    className="absolute inset-[-10%] bg-cyber-black"
-                    style={{
-                        transform: `translate(${parallaxOffset.x * 20}px, ${parallaxOffset.y * 20}px) scale(1.1)`
-                    }}
-                 />
-               )}
-               
-               {/* Overlay Gradients */}
-               <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
-               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_20%,#111827_100%)] opacity-80" />
-               
-               {/* Floating Elements for Depth */}
-               <div 
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyber-primary/20 rounded-full blur-[80px]"
-                  style={{
-                      transform: `translate(calc(-50% + ${parallaxOffset.x * -40}px), calc(-50% + ${parallaxOffset.y * -40}px))`
-                  }}
-               />
-               
-               {/* Title Container */}
-               <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 z-20">
-                  <div className="flex flex-wrap gap-2 mb-4">
-                      {post.tags.map(tag => (
-                      <button 
-                          key={tag} 
-                          onClick={(e) => onTagClick(e, tag)}
-                          className="text-xs font-mono text-cyber-primary bg-black/60 border border-cyber-primary/30 px-2 py-1 rounded backdrop-blur-sm hover:bg-cyber-primary hover:text-black transition-colors"
-                      >
-                          #{tag}
-                      </button>
-                      ))}
-                  </div>
-                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight max-w-4xl">{post.title}</h1>
-               </div>
-           </div>
-
-           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 p-8 md:p-12">
-               {/* Sidebar Meta */}
-               <div className="lg:col-span-3 space-y-8 order-2 lg:order-1">
-                  <div className="bg-black/40 border border-gray-800 rounded-xl p-6 backdrop-blur-sm sticky top-24">
-                      <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-800">
-                          <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden">
-                             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100" alt="Matt Gunnin" className="w-full h-full object-cover" />
-                          </div>
-                          <div>
-                             <div className="text-white font-bold text-sm">Matt Gunnin</div>
-                             <div className="text-gray-500 text-xs font-mono">CEO, Vertical Labs</div>
-                          </div>
-                      </div>
-
-                      <div className="space-y-4 mb-8">
-                         <div className="flex items-center gap-3 text-sm text-gray-400">
-                            <Calendar size={16} className="text-cyber-secondary" /> {post.date}
-                         </div>
-                         <div className="flex items-center gap-3 text-sm text-gray-400">
-                            <Clock size={16} className="text-cyber-secondary" /> {post.readTime}
-                         </div>
-                      </div>
-
-                      <h4 className="text-xs font-mono text-gray-500 uppercase mb-3">Share Transmission</h4>
-                      <div className="flex gap-2">
-                         <button onClick={() => handleShare('twitter')} className="p-2 bg-gray-800 hover:bg-[#1DA1F2] hover:text-white text-gray-400 rounded transition-colors"><Share2 size={16} /></button>
-                         <button onClick={() => handleShare('linkedin')} className="p-2 bg-gray-800 hover:bg-[#0077b5] hover:text-white text-gray-400 rounded transition-colors"><Linkedin size={16} /></button>
-                         <button onClick={() => handleShare('copy')} className="p-2 bg-gray-800 hover:bg-green-600 hover:text-white text-gray-400 rounded transition-colors flex items-center gap-2">
-                            {copied ? <span className="text-xs font-bold px-1">COPIED</span> : <Copy size={16} />}
-                         </button>
-                      </div>
-                  </div>
-               </div>
-
-               {/* Main Content */}
-               <div className="lg:col-span-9 order-1 lg:order-2">
-                   <div 
-                      className="prose prose-invert prose-lg max-w-none text-gray-300 prose-headings:text-white prose-a:text-cyber-primary prose-strong:text-white prose-blockquote:border-cyber-primary prose-blockquote:bg-gray-900/50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:not-italic"
-                      dangerouslySetInnerHTML={{ __html: post.content }}
-                   />
-                   
-                   {/* Footer Navigation */}
-                   <div className="mt-16 pt-8 border-t border-gray-800">
-                      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                         <Hash className="text-cyber-primary" /> Related Transmissions
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         {relatedPosts.map(rp => (
-                            <button 
-                               key={rp.id}
-                               onClick={() => {
-                                 onClose(); // Close current to reset scroll/state properly then open new
-                                 setTimeout(() => {
-                                    const newUrl = `${window.location.pathname}?post=${rp.slug}`;
-                                    window.history.pushState({ postSlug: rp.slug }, '', newUrl);
-                                    // Trigger a manual event or reload mechanism if needed, 
-                                    // but since we are inside the same component, we can just call the parent handler if we had access.
-                                    // For now, simpler to just use a link behavior or reload:
-                                    window.location.search = `?post=${rp.slug}`;
-                                 }, 10);
-                               }}
-                               className="text-left group bg-black/40 border border-gray-800 p-4 rounded-lg hover:border-cyber-primary transition-all hover:-translate-y-1"
-                            >
-                               <div className="text-xs font-mono text-gray-500 mb-2">{rp.date}</div>
-                               <h4 className="font-bold text-white group-hover:text-cyber-primary transition-colors">{rp.title}</h4>
-                            </button>
-                         ))}
-                         {relatedPosts.length === 0 && (
-                            <p className="text-gray-500 italic text-sm">End of related logs.</p>
-                         )}
-                      </div>
-                   </div>
-               </div>
-           </div>
-       </div>
-    </div>
   );
 };
 

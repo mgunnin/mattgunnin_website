@@ -7,6 +7,8 @@ import SocialProof from './components/SocialProof';
 import About from './components/About';
 import Resume from './components/Resume';
 import Projects from './components/Projects';
+import CaseStudies from './components/CaseStudies';
+import Speaking from './components/Speaking';
 import Resources from './components/Resources';
 import Tools from './components/Tools';
 import Lab from './components/Lab';
@@ -14,29 +16,65 @@ import Contact from './components/Contact';
 import NeuralInterface from './components/NeuralInterface';
 import Cursor from './components/Cursor';
 import Blog from './components/Blog';
+import Booking from './components/Booking';
+import Footer from './components/Footer';
 import { Menu, X } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentSection, setCurrentSection] = useState('hero');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [pageMode, setPageMode] = useState<'home' | 'booking' | 'blog' | 'case-studies'>('home');
 
   useEffect(() => {
-    // Check for direct route access to tools or blog posts on load
-    const path = window.location.pathname;
-    const params = new URLSearchParams(window.location.search);
-    
-    if (path.includes('/tools')) {
-        setTimeout(() => document.getElementById('tools')?.scrollIntoView(), 100);
-    } else if (params.get('post')) {
-        setTimeout(() => document.getElementById('blog')?.scrollIntoView(), 100);
-    } else if (params.get('resource')) {
-        setTimeout(() => document.getElementById('resources')?.scrollIntoView(), 100);
-    } else if (params.get('project')) {
-        setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 100);
-    }
+    // Check for direct route access via Hash or Path
+    const checkRoute = () => {
+        // Prioritize Hash routing for restricted environments (Blob/Sandboxed)
+        const hash = window.location.hash;
+        const path = hash.length > 1 ? hash.substring(1) : window.location.pathname;
+        
+        if (path === '/book' || path.startsWith('/book')) {
+            setPageMode('booking');
+            window.scrollTo(0, 0);
+            return;
+        } 
+        
+        if (path.startsWith('/blog')) {
+            setPageMode('blog');
+            window.scrollTo(0, 0);
+            return;
+        }
+
+        if (path.startsWith('/case-studies')) {
+            setPageMode('case-studies');
+            window.scrollTo(0, 0);
+            return;
+        }
+
+        setPageMode('home');
+
+        // Handle anchor/deep links if on home page
+        // We use a small timeout to allow rendering
+        if (path.includes('/tools')) {
+            setTimeout(() => document.getElementById('tools')?.scrollIntoView(), 100);
+        } else if (path.includes('/case-studies') && path === '/case-studies') {
+             setTimeout(() => document.getElementById('case-studies')?.scrollIntoView(), 100);
+        } else if (path.includes('/speaking')) {
+            setTimeout(() => document.getElementById('speaking')?.scrollIntoView(), 100);
+        } else if (path.includes('/resources')) {
+            setTimeout(() => document.getElementById('resources')?.scrollIntoView(), 100);
+        } else if (new URLSearchParams(window.location.search).get('project')) {
+            setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 100);
+        }
+    };
+
+    checkRoute();
+    window.addEventListener('popstate', checkRoute);
+    window.addEventListener('hashchange', checkRoute); // Listen for hash changes
 
     const handleScroll = () => {
-      const sections = ['hero', 'about', 'resume', 'projects', 'resources', 'tools', 'lab', 'blog', 'contact'];
+      if (pageMode !== 'home') return;
+
+      const sections = ['hero', 'about', 'resume', 'projects', 'case-studies', 'speaking', 'resources', 'tools', 'lab', 'blog', 'contact'];
       // Using a slightly lower threshold for better UX on mobile
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
@@ -52,15 +90,62 @@ const App: React.FC = () => {
     };
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    return () => {
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('popstate', checkRoute);
+        window.removeEventListener('hashchange', checkRoute);
+    };
+  }, [pageMode]);
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setIsMobileMenuOpen(false);
+    // Handle booking navigation
+    if (id === 'book') {
+        window.location.hash = '/book';
+        setIsMobileMenuOpen(false);
+        return;
     }
+
+    // Handle blog navigation
+    if (id === 'blog') {
+        if (pageMode !== 'home') {
+             window.location.hash = '/'; // Go home first
+             setTimeout(() => {
+                document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth' });
+             }, 100);
+        } else {
+             document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        setIsMobileMenuOpen(false);
+        return;
+    }
+
+    // Handle case studies navigation from menu
+    if (id === 'case-studies') {
+        if (pageMode !== 'home') {
+             window.location.hash = '/'; // Go home first
+             setTimeout(() => {
+                document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' });
+             }, 100);
+        } else {
+             document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        setIsMobileMenuOpen(false);
+        return;
+    }
+
+    // If we are on a different page mode, go home first
+    if (pageMode !== 'home') {
+        window.location.hash = '/';
+        setTimeout(() => {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    } else {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+    setIsMobileMenuOpen(false);
   };
 
   const navItems = [
@@ -68,18 +153,21 @@ const App: React.FC = () => {
     { id: 'about', label: 'About' },
     { id: 'resume', label: 'Resume' },
     { id: 'projects', label: 'Work' },
+    { id: 'case-studies', label: 'Case Studies' },
+    { id: 'speaking', label: 'Speaking' },
     { id: 'resources', label: 'Reading' },
     { id: 'tools', label: 'Tools' },
     { id: 'lab', label: 'AI Lab' },
     { id: 'blog', label: 'Blog' },
     { id: 'contact', label: 'Contact' },
+    { id: 'book', label: 'Book' },
   ];
 
   return (
     <main className="min-h-screen bg-cyber-black text-gray-200 selection:bg-cyber-primary selection:text-black font-sans overflow-x-hidden cursor-auto md:cursor-none">
       <Cursor />
       <Background />
-      <Navigation currentSection={currentSection} />
+      {pageMode === 'home' && <Navigation currentSection={currentSection} />}
       
       {/* Sticky Header Mobile */}
       <div className="fixed top-0 w-full z-40 flex items-center justify-between p-4 bg-black/80 backdrop-blur-md lg:hidden border-b border-white/5">
@@ -111,27 +199,34 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <Hero />
-      <SocialProof />
-      <About />
-      <Resume />
-      <Projects />
-      <Resources />
-      <Tools />
-      <Lab />
-      <Blog />
-      <Contact />
+      {pageMode === 'booking' ? (
+        <Booking onBack={() => {
+            window.location.hash = '/';
+        }} />
+      ) : pageMode === 'blog' ? (
+        <Blog standalone={true} />
+      ) : pageMode === 'case-studies' ? (
+        <CaseStudies standalone={true} />
+      ) : (
+        <>
+            <Hero />
+            <SocialProof />
+            <About />
+            <Resume />
+            <Projects />
+            <CaseStudies />
+            <Speaking />
+            <Resources />
+            <Tools />
+            <Lab />
+            <Blog />
+            <Contact />
+        </>
+      )}
       
-      <NeuralInterface currentSection={currentSection} />
+      <NeuralInterface currentSection={pageMode === 'home' ? currentSection : pageMode} />
 
-      <footer className="py-12 text-center text-gray-600 text-sm border-t border-gray-900 bg-black relative z-10 px-4">
-        <div className="flex justify-center gap-6 mb-4">
-          <a href="https://linkedin.com/in/matthewgunnin" target="_blank" rel="noreferrer" className="hover:text-cyber-primary transition-colors">LinkedIn</a>
-          <a href="https://github.com/mgunnin" target="_blank" rel="noreferrer" className="hover:text-cyber-primary transition-colors">GitHub</a>
-          <a href="https://x.com/matthewgunnin" target="_blank" rel="noreferrer" className="hover:text-cyber-primary transition-colors">X</a>
-        </div>
-        <p>© {new Date().getFullYear()} Matt Gunnin. Architected with React, Tailwind & Gemini AI.</p>
-      </footer>
+      <Footer />
     </main>
   );
 };

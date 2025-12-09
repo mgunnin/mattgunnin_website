@@ -286,6 +286,63 @@ const getTechIcon = (tech: string) => {
   return <Code size={14} className="text-gray-500" />;
 };
 
+// Helper component for Icon
+const BriefcaseIcon: React.FC<{size?: number; className?: string}> = ({size=14, className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+);
+
+const ProjectCard: React.FC<{ project: Project; onClick: () => void; isCompact?: boolean }> = ({ project, onClick, isCompact }) => (
+  <div 
+    onClick={onClick}
+    className={`group relative bg-gray-900 border border-gray-800 hover:border-cyber-primary/50 transition-all duration-500 overflow-hidden rounded-lg flex flex-col cursor-pointer hover:-translate-y-2 ${isCompact ? 'opacity-90 hover:opacity-100' : ''}`}
+  >
+    {/* Image Container */}
+    <div className={`${isCompact ? 'h-40' : 'h-56'} overflow-hidden relative shrink-0`}>
+      <div className="absolute inset-0 bg-cyber-secondary/10 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
+      <img 
+        src={project.imageUrl} 
+        alt={project.title} 
+        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 grayscale group-hover:grayscale-0"
+      />
+      <div className="absolute top-3 right-3 z-20 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-mono text-cyber-primary border border-gray-700">
+          {project.period}
+      </div>
+    </div>
+    
+    <div className={`p-6 relative flex flex-col flex-grow ${isCompact ? 'p-4' : 'p-6'}`}>
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs font-mono text-cyber-primary px-2 py-1 border border-cyber-primary/30 rounded backdrop-blur-sm bg-black/30">
+          {project.category}
+        </span>
+      </div>
+
+      <h3 className={`${isCompact ? 'text-xl' : 'text-2xl'} font-bold text-white mb-1 group-hover:text-cyber-primary transition-colors duration-300`}>{project.title}</h3>
+      <div className="text-sm text-gray-500 font-mono mb-3">{project.role}</div>
+      
+      {!isCompact && (
+        <p className="text-gray-400 text-sm mb-6 leading-relaxed flex-grow line-clamp-3">
+          {project.description}
+        </p>
+      )}
+      
+      <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-gray-800/50">
+        {project.techStack.slice(0, isCompact ? 2 : 3).map(tech => (
+          <span 
+            key={tech} 
+            className="flex items-center gap-1.5 text-xs text-gray-500 font-mono bg-black/40 px-2 py-1 rounded border border-gray-800"
+          >
+            {getTechIcon(tech)}
+            {tech}
+          </span>
+        ))}
+        {project.techStack.length > (isCompact ? 2 : 3) && (
+          <span className="text-xs text-gray-600 font-mono py-1 px-1">+{project.techStack.length - (isCompact ? 2 : 3)}</span>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
 const Projects: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
@@ -547,62 +604,5 @@ const Projects: React.FC = () => {
     </section>
   );
 };
-
-const ProjectCard: React.FC<{ project: Project; onClick: () => void; isCompact?: boolean }> = ({ project, onClick, isCompact }) => (
-  <div 
-    onClick={onClick}
-    className={`group relative bg-gray-900 border border-gray-800 hover:border-cyber-primary/50 transition-all duration-500 overflow-hidden rounded-lg flex flex-col cursor-pointer hover:-translate-y-2 ${isCompact ? 'opacity-90 hover:opacity-100' : ''}`}
-  >
-    {/* Image Container */}
-    <div className={`${isCompact ? 'h-40' : 'h-56'} overflow-hidden relative shrink-0`}>
-      <div className="absolute inset-0 bg-cyber-secondary/10 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
-      <img 
-        src={project.imageUrl} 
-        alt={project.title} 
-        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 grayscale group-hover:grayscale-0"
-      />
-      <div className="absolute top-3 right-3 z-20 bg-black/60 backdrop-blur px-2 py-1 rounded text-[10px] font-mono text-cyber-primary border border-gray-700">
-          {project.period}
-      </div>
-    </div>
-    
-    <div className={`p-6 relative flex flex-col flex-grow ${isCompact ? 'p-4' : 'p-6'}`}>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-xs font-mono text-cyber-primary px-2 py-1 border border-cyber-primary/30 rounded backdrop-blur-sm bg-black/30">
-          {project.category}
-        </span>
-      </div>
-
-      <h3 className={`${isCompact ? 'text-xl' : 'text-2xl'} font-bold text-white mb-1 group-hover:text-cyber-primary transition-colors duration-300`}>{project.title}</h3>
-      <div className="text-sm text-gray-500 font-mono mb-3">{project.role}</div>
-      
-      {!isCompact && (
-        <p className="text-gray-400 text-sm mb-6 leading-relaxed flex-grow line-clamp-3">
-          {project.description}
-        </p>
-      )}
-      
-      <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-gray-800/50">
-        {project.techStack.slice(0, isCompact ? 2 : 3).map(tech => (
-          <span 
-            key={tech} 
-            className="flex items-center gap-1.5 text-xs text-gray-500 font-mono bg-black/40 px-2 py-1 rounded border border-gray-800"
-          >
-            {getTechIcon(tech)}
-            {tech}
-          </span>
-        ))}
-        {project.techStack.length > (isCompact ? 2 : 3) && (
-          <span className="text-xs text-gray-600 font-mono py-1 px-1">+{project.techStack.length - (isCompact ? 2 : 3)}</span>
-        )}
-      </div>
-    </div>
-  </div>
-);
-
-// Helper component for Icon
-const BriefcaseIcon: React.FC<{size?: number; className?: string}> = ({size=14, className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-);
 
 export default Projects;

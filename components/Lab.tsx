@@ -7,135 +7,89 @@ import { AgentNode, AgentFlow, ArchitectureResult, PromptResult, PredictionResul
 
 const MAX_FREE_USES = 3;
 
-const Lab: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'architect' | 'forge' | 'context' | 'oracle'>('architect');
-  const [uses, setUses] = useState(0);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [showEmailModal, setShowEmailModal] = useState(false);
-  const [email, setEmail] = useState('');
+// --- AGENT GRAPH COMPONENT (Must be defined before AgentArchitect) ---
 
-  // Check usage on mount
-  useEffect(() => {
-    const storedUses = localStorage.getItem('lab_uses');
-    const storedUnlock = localStorage.getItem('lab_unlocked');
-    if (storedUses) setUses(parseInt(storedUses));
-    if (storedUnlock === 'true') setIsUnlocked(true);
-  }, []);
+// Simple Graph Visualizer
+const AgentGraph: React.FC<{ agents: AgentNode[], flow: AgentFlow[] }> = ({ agents, flow }) => {
+   // Simple force-directed-like layout calculation (static for stability)
+   const centerX = 50; 
+   const centerY = 50;
+   const radius = 35;
+   
+   return (
+     <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+        <defs>
+           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="28" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#4b5563" />
+           </marker>
+        </defs>
 
-  const incrementUsage = () => {
-    if (isUnlocked) return true;
-    
-    if (uses >= MAX_FREE_USES) {
-      setShowEmailModal(true);
-      return false;
-    }
-    
-    const newUses = uses + 1;
-    setUses(newUses);
-    localStorage.setItem('lab_uses', newUses.toString());
-    return true;
-  };
+        {/* Connections */}
+        {flow.map((edge, i) => {
+           const fromIndex = agents.findIndex(a => a.id === edge.from);
+           const toIndex = agents.findIndex(a => a.id === edge.to);
+           if(fromIndex === -1 || toIndex === -1) return null;
 
-  const handleUnlock = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setIsUnlocked(true);
-      localStorage.setItem('lab_unlocked', 'true');
-      setShowEmailModal(false);
-    }
-  };
+           const fromAngle = (fromIndex / agents.length) * Math.PI * 2 - Math.PI / 2;
+           const toAngle = (toIndex / agents.length) * Math.PI * 2 - Math.PI / 2;
 
-  return (
-    <section id="lab" className="py-24 px-6 md:px-24 w-full bg-black relative border-t border-gray-900">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+           const x1 = centerX + radius * Math.cos(fromAngle);
+           const y1 = centerY + radius * Math.sin(fromAngle);
+           const x2 = centerX + radius * Math.cos(toAngle);
+           const y2 = centerY + radius * Math.sin(toAngle);
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center gap-3">
-              <span className="text-cyber-primary">03.</span> AI LAB <Zap className="text-yellow-400 fill-yellow-400/20" />
-            </h2>
-            <p className="text-gray-400 max-w-xl">
-              Interactive demonstrations of Vertical Labs' core technologies. 
-              Experiment with agent orchestration, token optimization, and predictive models.
-            </p>
-          </div>
-          
-          {!isUnlocked && (
-            <div className="bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 flex items-center gap-3 text-xs font-mono text-gray-400">
-              <Activity size={14} className={uses >= MAX_FREE_USES ? 'text-red-500' : 'text-green-500'} />
-              <span>SYSTEM CREDITS: {Math.max(0, MAX_FREE_USES - uses)}/{MAX_FREE_USES}</span>
-            </div>
-          )}
-        </div>
+           return (
+              <g key={i}>
+                 <motion.path 
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                    d={`M ${x1} ${y1} Q ${centerX} ${centerY} ${x2} ${y2}`}
+                    fill="none"
+                    stroke="#374151"
+                    strokeWidth="0.5"
+                    markerEnd="url(#arrowhead)"
+                 />
+                 {/* Moving Particle */}
+                 <circle r="1" fill="#00f0ff">
+                    <animateMotion 
+                       dur="2s" 
+                       repeatCount="indefinite"
+                       path={`M ${x1} ${y1} Q ${centerX} ${centerY} ${x2} ${y2}`}
+                    />
+                 </circle>
+              </g>
+           );
+        })}
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-800 pb-1">
-          {[
-             { id: 'architect', icon: Cpu, label: 'AGENT_ARCHITECT' },
-             { id: 'forge', icon: Terminal, label: 'PROMPT_FORGE' },
-             { id: 'context', icon: Layers, label: 'CONTEXT_WINDOW' },
-             { id: 'oracle', icon: MonitorPlay, label: 'ESPORTS_ORACLE' }
-          ].map(tab => (
-            <button 
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-t-lg font-mono text-xs md:text-sm transition-all ${
-                activeTab === tab.id 
-                  ? 'bg-cyber-primary/10 text-cyber-primary border-b-2 border-cyber-primary' 
-                  : 'text-gray-500 hover:text-white'
-              }`}
-            >
-              <tab.icon size={16} /> {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Nodes */}
+        {agents.map((agent, i) => {
+           const angle = (i / agents.length) * Math.PI * 2 - Math.PI / 2;
+           const x = centerX + radius * Math.cos(angle);
+           const y = centerY + radius * Math.sin(angle);
 
-        <div className="min-h-[600px] bg-gray-900/20 border border-gray-800 rounded-2xl overflow-hidden backdrop-blur-sm relative">
-           <AnimatePresence mode="wait">
-             {activeTab === 'architect' && <AgentArchitect key="architect" onInteract={incrementUsage} />}
-             {activeTab === 'forge' && <PromptForge key="forge" onInteract={incrementUsage} />}
-             {activeTab === 'context' && <ContextWindow key="context" onInteract={incrementUsage} />}
-             {activeTab === 'oracle' && <EsportsOracle key="oracle" onInteract={incrementUsage} />}
-           </AnimatePresence>
-
-           {/* Locked Overlay */}
-           {showEmailModal && (
-             <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-                <motion.div 
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,240,255,0.1)]"
-                >
-                   <Lock className="w-12 h-12 text-cyber-primary mx-auto mb-6" />
-                   <h3 className="text-2xl font-bold text-white text-center mb-2">System Limit Reached</h3>
-                   <p className="text-gray-400 text-center mb-6 text-sm">
-                     To conserve GPU resources, guest access is limited. Enter your email to unlock unlimited access to the AI Lab.
-                   </p>
-                   
-                   <form onSubmit={handleUnlock} className="space-y-4">
-                     <input 
-                       type="email" 
-                       required
-                       placeholder="Enter your email"
-                       value={email}
-                       onChange={e => setEmail(e.target.value)}
-                       className="w-full bg-black border border-gray-700 rounded px-4 py-3 text-white focus:border-cyber-primary outline-none"
-                     />
-                     <button className="w-full bg-cyber-primary text-black font-bold py-3 rounded hover:bg-white transition-colors">
-                       UNLOCK ACCESS
-                     </button>
-                   </form>
-                   <p className="text-xs text-gray-600 text-center mt-4">
-                     No spam. Just access to demos and occasional updates on Vertical Labs.
-                   </p>
-                </motion.div>
-             </div>
-           )}
-        </div>
-      </div>
-    </section>
-  );
+           return (
+              <motion.g 
+                 key={agent.id}
+                 initial={{ scale: 0, opacity: 0 }}
+                 animate={{ scale: 1, opacity: 1 }}
+                 transition={{ delay: i * 0.1 }}
+                 className="cursor-pointer hover:opacity-80"
+              >
+                 <circle cx={x} cy={y} r="8" fill="#111827" stroke={agent.color} strokeWidth="0.5" />
+                 <circle cx={x} cy={y} r="2" fill={agent.color} className="animate-pulse" />
+                 
+                 <text x={x} y={y + 12} textAnchor="middle" fill="white" fontSize="3" fontWeight="bold">
+                    {agent.name}
+                 </text>
+                 <text x={x} y={y + 15} textAnchor="middle" fill="#9ca3af" fontSize="2">
+                    {agent.role}
+                 </text>
+              </motion.g>
+           );
+        })}
+     </svg>
+   );
 };
 
 // --- AGENT ARCHITECT COMPONENT ---
@@ -233,89 +187,6 @@ const AgentArchitect: React.FC<{ onInteract: () => boolean }> = ({ onInteract })
       </div>
     </motion.div>
   );
-};
-
-// Simple Graph Visualizer
-const AgentGraph: React.FC<{ agents: AgentNode[], flow: AgentFlow[] }> = ({ agents, flow }) => {
-   // Simple force-directed-like layout calculation (static for stability)
-   const centerX = 50; 
-   const centerY = 50;
-   const radius = 35;
-   
-   return (
-     <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
-        <defs>
-           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="28" refY="3.5" orient="auto">
-              <polygon points="0 0, 10 3.5, 0 7" fill="#4b5563" />
-           </marker>
-        </defs>
-
-        {/* Connections */}
-        {flow.map((edge, i) => {
-           const fromIndex = agents.findIndex(a => a.id === edge.from);
-           const toIndex = agents.findIndex(a => a.id === edge.to);
-           if(fromIndex === -1 || toIndex === -1) return null;
-
-           const fromAngle = (fromIndex / agents.length) * Math.PI * 2 - Math.PI / 2;
-           const toAngle = (toIndex / agents.length) * Math.PI * 2 - Math.PI / 2;
-
-           const x1 = centerX + radius * Math.cos(fromAngle);
-           const y1 = centerY + radius * Math.sin(fromAngle);
-           const x2 = centerX + radius * Math.cos(toAngle);
-           const y2 = centerY + radius * Math.sin(toAngle);
-
-           return (
-              <g key={i}>
-                 <motion.path 
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                    d={`M ${x1} ${y1} Q ${centerX} ${centerY} ${x2} ${y2}`}
-                    fill="none"
-                    stroke="#374151"
-                    strokeWidth="0.5"
-                    markerEnd="url(#arrowhead)"
-                 />
-                 {/* Moving Particle */}
-                 <circle r="1" fill="#00f0ff">
-                    <animateMotion 
-                       dur="2s" 
-                       repeatCount="indefinite"
-                       path={`M ${x1} ${y1} Q ${centerX} ${centerY} ${x2} ${y2}`}
-                    />
-                 </circle>
-              </g>
-           );
-        })}
-
-        {/* Nodes */}
-        {agents.map((agent, i) => {
-           const angle = (i / agents.length) * Math.PI * 2 - Math.PI / 2;
-           const x = centerX + radius * Math.cos(angle);
-           const y = centerY + radius * Math.sin(angle);
-
-           return (
-              <motion.g 
-                 key={agent.id}
-                 initial={{ scale: 0, opacity: 0 }}
-                 animate={{ scale: 1, opacity: 1 }}
-                 transition={{ delay: i * 0.1 }}
-                 className="cursor-pointer hover:opacity-80"
-              >
-                 <circle cx={x} cy={y} r="8" fill="#111827" stroke={agent.color} strokeWidth="0.5" />
-                 <circle cx={x} cy={y} r="2" fill={agent.color} className="animate-pulse" />
-                 
-                 <text x={x} y={y + 12} textAnchor="middle" fill="white" fontSize="3" fontWeight="bold">
-                    {agent.name}
-                 </text>
-                 <text x={x} y={y + 15} textAnchor="middle" fill="#9ca3af" fontSize="2">
-                    {agent.role}
-                 </text>
-              </motion.g>
-           );
-        })}
-     </svg>
-   );
 };
 
 // --- PROMPT FORGE COMPONENT ---
@@ -749,10 +620,137 @@ const EsportsOracle: React.FC<{ onInteract: () => boolean }> = ({ onInteract }) 
    );
 }
 
-// Helpers
-const highlightCode = (code: string) => {
-   // Basic HTML sanitization should happen here in prod
-   return code; 
+// --- MAIN LAB COMPONENT (Must be defined last) ---
+
+const Lab: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'architect' | 'forge' | 'context' | 'oracle'>('architect');
+  const [uses, setUses] = useState(0);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [email, setEmail] = useState('');
+
+  // Check usage on mount
+  useEffect(() => {
+    const storedUses = localStorage.getItem('lab_uses');
+    const storedUnlock = localStorage.getItem('lab_unlocked');
+    if (storedUses) setUses(parseInt(storedUses));
+    if (storedUnlock === 'true') setIsUnlocked(true);
+  }, []);
+
+  const incrementUsage = () => {
+    if (isUnlocked) return true;
+    
+    if (uses >= MAX_FREE_USES) {
+      setShowEmailModal(true);
+      return false;
+    }
+    
+    const newUses = uses + 1;
+    setUses(newUses);
+    localStorage.setItem('lab_uses', newUses.toString());
+    return true;
+  };
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      setIsUnlocked(true);
+      localStorage.setItem('lab_unlocked', 'true');
+      setShowEmailModal(false);
+    }
+  };
+
+  return (
+    <section id="lab" className="py-24 px-6 md:px-24 w-full bg-black relative border-t border-gray-900">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center gap-3">
+              <span className="text-cyber-primary">03.</span> AI LAB <Zap className="text-yellow-400 fill-yellow-400/20" />
+            </h2>
+            <p className="text-gray-400 max-w-xl">
+              Interactive demonstrations of Vertical Labs' core technologies. 
+              Experiment with agent orchestration, token optimization, and predictive models.
+            </p>
+          </div>
+          
+          {!isUnlocked && (
+            <div className="bg-gray-900/50 border border-gray-800 rounded-full px-4 py-2 flex items-center gap-3 text-xs font-mono text-gray-400">
+              <Activity size={14} className={uses >= MAX_FREE_USES ? 'text-red-500' : 'text-green-500'} />
+              <span>SYSTEM CREDITS: {Math.max(0, MAX_FREE_USES - uses)}/{MAX_FREE_USES}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-800 pb-1">
+          {[
+             { id: 'architect', icon: Cpu, label: 'AGENT_ARCHITECT' },
+             { id: 'forge', icon: Terminal, label: 'PROMPT_FORGE' },
+             { id: 'context', icon: Layers, label: 'CONTEXT_WINDOW' },
+             { id: 'oracle', icon: MonitorPlay, label: 'ESPORTS_ORACLE' }
+          ].map(tab => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-t-lg font-mono text-xs md:text-sm transition-all ${
+                activeTab === tab.id 
+                  ? 'bg-cyber-primary/10 text-cyber-primary border-b-2 border-cyber-primary' 
+                  : 'text-gray-500 hover:text-white'
+              }`}
+            >
+              <tab.icon size={16} /> {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="min-h-[600px] bg-gray-900/20 border border-gray-800 rounded-2xl overflow-hidden backdrop-blur-sm relative">
+           <AnimatePresence mode="wait">
+             {activeTab === 'architect' && <AgentArchitect key="architect" onInteract={incrementUsage} />}
+             {activeTab === 'forge' && <PromptForge key="forge" onInteract={incrementUsage} />}
+             {activeTab === 'context' && <ContextWindow key="context" onInteract={incrementUsage} />}
+             {activeTab === 'oracle' && <EsportsOracle key="oracle" onInteract={incrementUsage} />}
+           </AnimatePresence>
+
+           {/* Locked Overlay */}
+           {showEmailModal && (
+             <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="bg-gray-900 border border-gray-700 rounded-2xl p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,240,255,0.1)]"
+                >
+                   <Lock className="w-12 h-12 text-cyber-primary mx-auto mb-6" />
+                   <h3 className="text-2xl font-bold text-white text-center mb-2">System Limit Reached</h3>
+                   <p className="text-gray-400 text-center mb-6 text-sm">
+                     To conserve GPU resources, guest access is limited. Enter your email to unlock unlimited access to the AI Lab.
+                   </p>
+                   
+                   <form onSubmit={handleUnlock} className="space-y-4">
+                     <input 
+                       type="email" 
+                       required
+                       placeholder="Enter your email"
+                       value={email}
+                       onChange={e => setEmail(e.target.value)}
+                       className="w-full bg-black border border-gray-700 rounded px-4 py-3 text-white focus:border-cyber-primary outline-none"
+                     />
+                     <button className="w-full bg-cyber-primary text-black font-bold py-3 rounded hover:bg-white transition-colors">
+                       UNLOCK ACCESS
+                     </button>
+                   </form>
+                   <p className="text-xs text-gray-600 text-center mt-4">
+                     No spam. Just access to demos and occasional updates on Vertical Labs.
+                   </p>
+                </motion.div>
+             </div>
+           )}
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Lab;

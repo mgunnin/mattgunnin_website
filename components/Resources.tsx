@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Book, PenTool, Newspaper, Search, Send, Zap, CloudRain, Clock, User, Share2, ArrowLeft, List, ChevronRight, X, Copy, Check, Calendar } from 'lucide-react';
+import { ArrowRight, Book, PenTool, Newspaper, Search, Send, CloudRain, Clock, User, Share2, ArrowLeft, List, Check, Calendar } from 'lucide-react';
 import { Resource } from '../types';
 
 const resourcesData: Resource[] = [
@@ -26,7 +26,7 @@ const resourcesData: Resource[] = [
     author: {
       name: 'Matt Gunnin',
       role: 'CEO, Vertical Labs',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+      avatar: '/matt.jpg'
     },
     tags: ['AI', 'Agents', 'Architecture'],
     toc: [
@@ -78,7 +78,7 @@ const resourcesData: Resource[] = [
     author: {
       name: 'Matt Gunnin',
       role: 'CEO, Vertical Labs',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+      avatar: '/matt.jpg'
     },
     tags: ['AI', 'Prompting', 'Dev'],
     toc: [
@@ -124,7 +124,7 @@ const resourcesData: Resource[] = [
     author: {
       name: 'Matt Gunnin',
       role: 'Founder, Esports One',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+      avatar: '/matt.jpg'
     },
     tags: ['Esports', 'AI', 'CV'],
     toc: [
@@ -152,7 +152,7 @@ const resourcesData: Resource[] = [
     author: {
       name: 'Matt Gunnin',
       role: 'Founder, Esports One',
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=100'
+      avatar: '/matt.jpg'
     },
     tags: ['Web3', 'Community', 'NFT'],
     toc: [
@@ -166,6 +166,212 @@ const resourcesData: Resource[] = [
     `
   }
 ];
+
+// --- REUSABLE RESOURCE DETAIL TEMPLATE ---
+
+const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> = ({ resource, onClose }) => {
+  const [copied, setCopied] = useState(false);
+  const isRaindrop = resource.slug === 'raindrop';
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const scrollToHeading = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  if (isRaindrop) {
+    return (
+      <div className="w-full min-h-screen animate-[fadeIn_0.3s_ease-out]">
+        {/* Navigation Header */}
+        <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+          <button onClick={onClose} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="font-mono text-sm uppercase">Back to Hub</span>
+          </button>
+          <h2 className="text-sm font-bold text-white hidden md:block">{resource.title}</h2>
+          <div className="flex gap-2">
+            <button onClick={handleShare} className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
+               {copied ? <Check size={18} /> : <Share2 size={18} />}
+            </button>
+          </div>
+        </div>
+        
+        <div className="w-full h-[calc(100vh-64px)] bg-white">
+             <iframe 
+                src="https://raindrop.io/esports/public" 
+                className="w-full h-full border-0" 
+                title="Raindrop Collection"
+                allowFullScreen 
+             />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto animate-[fadeIn_0.3s_ease-out] pb-24">
+      {/* Navigation Header */}
+      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800 py-4 mb-8 flex items-center justify-between">
+         <button onClick={onClose} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="font-mono text-sm uppercase">Back to Hub</span>
+         </button>
+         <div className="flex gap-2">
+            <button onClick={handleShare} className="flex items-center gap-2 px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-full text-gray-400 hover:text-white hover:border-gray-600 transition-all text-xs">
+               {copied ? <Check size={14} /> : <Share2 size={14} />}
+               {copied ? 'COPIED' : 'SHARE'}
+            </button>
+         </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+         {/* Main Content */}
+         <div className="lg:col-span-8 space-y-8">
+            {/* Header Section */}
+            <div>
+               <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="text-xs font-mono text-cyber-primary bg-cyber-primary/10 border border-cyber-primary/20 px-2 py-1 rounded uppercase">
+                     {resource.type}
+                  </span>
+                  {resource.tags?.map(tag => (
+                     <span key={tag} className="text-xs font-mono text-gray-500 bg-gray-900 px-2 py-1 rounded">#{tag}</span>
+                  ))}
+               </div>
+               <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                  {resource.title}
+               </h1>
+               <div className="flex items-center gap-6 text-sm text-gray-400 font-mono border-b border-gray-800 pb-8">
+                  <div className="flex items-center gap-2">
+                     <Clock size={14} /> {resource.readTime}
+                  </div>
+                  <div className="flex items-center gap-2">
+                     <Calendar size={14} /> {resource.date}
+                  </div>
+               </div>
+            </div>
+
+            {/* Author Block Mobile */}
+            <div className="lg:hidden flex items-center gap-4 bg-gray-900/30 p-4 rounded-xl border border-gray-800">
+                <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden">
+                   {resource.author?.avatar && (
+                     <img 
+                        src={resource.author.avatar} 
+                        onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
+                        alt={resource.author.name} 
+                        className="w-full h-full object-cover" 
+                     />
+                   )}
+                </div>
+                <div>
+                   <div className="text-white font-bold text-sm">{resource.author?.name}</div>
+                   <div className="text-cyber-secondary text-xs">{resource.author?.role}</div>
+                </div>
+            </div>
+
+            {/* Content Body */}
+            <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-gray-300 prose-a:text-cyber-primary hover:prose-a:text-white prose-code:text-cyber-secondary prose-code:bg-gray-900 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800">
+               {resource.content && <div dangerouslySetInnerHTML={{ __html: resource.content }} />}
+               {!resource.content && <p className="text-gray-500 italic">Content loading...</p>}
+            </div>
+
+            {/* Newsletter CTA Bottom */}
+            <div className="mt-16 bg-gradient-to-br from-gray-900 to-black border border-gray-800 p-8 rounded-2xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <Send size={100} />
+               </div>
+               <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Subscribe to the Neural Network</h3>
+               <p className="text-gray-400 mb-6 relative z-10 max-w-md">
+                  Get notified about new guides on Agentic AI, Multi-Agent Systems, and the future of autonomous software.
+               </p>
+               <div className="flex gap-2 relative z-10 max-w-md">
+                   <input 
+                     type="email" 
+                     placeholder="email@domain.com" 
+                     className="flex-1 bg-black border border-gray-700 rounded px-4 py-3 text-white focus:border-cyber-primary outline-none transition-colors"
+                   />
+                   <button className="bg-cyber-primary text-black font-bold px-6 py-3 rounded hover:bg-white transition-colors">
+                     SUBSCRIBE
+                   </button>
+               </div>
+            </div>
+         </div>
+
+         {/* Sidebar */}
+         <div className="lg:col-span-4 space-y-8">
+            {/* Author Widget */}
+            <div className="hidden lg:block bg-gray-900/30 p-6 rounded-2xl border border-gray-800 sticky top-32">
+               <h3 className="text-xs font-mono text-gray-500 uppercase mb-4">Written By</h3>
+               <div className="flex items-center gap-4 mb-4">
+                   <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
+                      {resource.author?.avatar && (
+                        <img 
+                            src={resource.author.avatar} 
+                            onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
+                            alt={resource.author.name} 
+                            className="w-full h-full object-cover" 
+                        />
+                      )}
+                   </div>
+                   <div>
+                      <div className="text-white font-bold">{resource.author?.name}</div>
+                      <div className="text-cyber-secondary text-xs">{resource.author?.role}</div>
+                   </div>
+               </div>
+               <p className="text-sm text-gray-400 leading-relaxed mb-4">
+                  Architecting autonomous AI systems and building the future of work at Vertical Labs.
+               </p>
+               <div className="flex gap-2">
+                  <button className="p-2 bg-black border border-gray-800 rounded hover:border-cyber-primary hover:text-cyber-primary text-gray-500 transition-colors"><User size={14}/></button>
+                  <button className="p-2 bg-black border border-gray-800 rounded hover:border-cyber-primary hover:text-cyber-primary text-gray-500 transition-colors"><Send size={14}/></button>
+               </div>
+            </div>
+
+            {/* Table of Contents */}
+            {resource.toc && (
+               <div className="hidden lg:block">
+                  <h3 className="text-xs font-mono text-gray-500 uppercase mb-4 flex items-center gap-2">
+                     <List size={14} /> Table of Contents
+                  </h3>
+                  <div className="space-y-1 border-l border-gray-800 ml-1">
+                     {resource.toc.map(item => (
+                        <button 
+                           key={item.id}
+                           onClick={() => scrollToHeading(item.id)}
+                           className="block w-full text-left pl-4 py-2 text-sm text-gray-400 hover:text-cyber-primary hover:border-l hover:border-cyber-primary -ml-px transition-all"
+                        >
+                           {item.title}
+                        </button>
+                     ))}
+                  </div>
+               </div>
+            )}
+         </div>
+      </div>
+      
+      <style>{`
+         .code-block {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #e0e0e0;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+         }
+         .keyword { color: #c678dd; }
+         .string { color: #98c379; }
+         .comment { color: #5c6370; font-style: italic; display: block; margin-bottom: 0.5rem; }
+      `}</style>
+    </div>
+  );
+};
 
 const Resources: React.FC = () => {
   const [filter, setFilter] = useState<'All' | 'Guide' | 'Tool' | 'Post' | 'Newsletter'>('All');
@@ -325,198 +531,6 @@ const Resources: React.FC = () => {
         </div>
       )}
     </section>
-  );
-};
-
-// --- REUSABLE RESOURCE DETAIL TEMPLATE ---
-
-const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> = ({ resource, onClose }) => {
-  const [copied, setCopied] = useState(false);
-  const isRaindrop = resource.slug === 'raindrop';
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const scrollToHeading = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  if (isRaindrop) {
-    return (
-      <div className="w-full min-h-screen animate-[fadeIn_0.3s_ease-out]">
-        {/* Navigation Header */}
-        <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-          <button onClick={onClose} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-mono text-sm uppercase">Back to Hub</span>
-          </button>
-          <h2 className="text-sm font-bold text-white hidden md:block">{resource.title}</h2>
-          <div className="flex gap-2">
-            <button onClick={handleShare} className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
-               {copied ? <Check size={18} /> : <Share2 size={18} />}
-            </button>
-          </div>
-        </div>
-        
-        <div className="w-full h-[calc(100vh-64px)] bg-white">
-             <iframe 
-                src="https://raindrop.io/esports/public" 
-                className="w-full h-full border-0" 
-                title="Raindrop Collection"
-                allowFullScreen 
-             />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-5xl mx-auto animate-[fadeIn_0.3s_ease-out] pb-24">
-      {/* Navigation Header */}
-      <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800 py-4 mb-8 flex items-center justify-between">
-         <button onClick={onClose} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-mono text-sm uppercase">Back to Hub</span>
-         </button>
-         <div className="flex gap-2">
-            <button onClick={handleShare} className="flex items-center gap-2 px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-full text-gray-400 hover:text-white hover:border-gray-600 transition-all text-xs">
-               {copied ? <Check size={14} /> : <Share2 size={14} />}
-               {copied ? 'COPIED' : 'SHARE'}
-            </button>
-         </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-         {/* Main Content */}
-         <div className="lg:col-span-8 space-y-8">
-            {/* Header Section */}
-            <div>
-               <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="text-xs font-mono text-cyber-primary bg-cyber-primary/10 border border-cyber-primary/20 px-2 py-1 rounded uppercase">
-                     {resource.type}
-                  </span>
-                  {resource.tags?.map(tag => (
-                     <span key={tag} className="text-xs font-mono text-gray-500 bg-gray-900 px-2 py-1 rounded">#{tag}</span>
-                  ))}
-               </div>
-               <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
-                  {resource.title}
-               </h1>
-               <div className="flex items-center gap-6 text-sm text-gray-400 font-mono border-b border-gray-800 pb-8">
-                  <div className="flex items-center gap-2">
-                     <Clock size={14} /> {resource.readTime}
-                  </div>
-                  <div className="flex items-center gap-2">
-                     <Calendar size={14} /> {resource.date}
-                  </div>
-               </div>
-            </div>
-
-            {/* Author Block Mobile */}
-            <div className="lg:hidden flex items-center gap-4 bg-gray-900/30 p-4 rounded-xl border border-gray-800">
-                <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden">
-                   {resource.author?.avatar && <img src={resource.author.avatar} alt={resource.author.name} className="w-full h-full object-cover" />}
-                </div>
-                <div>
-                   <div className="text-white font-bold text-sm">{resource.author?.name}</div>
-                   <div className="text-cyber-secondary text-xs">{resource.author?.role}</div>
-                </div>
-            </div>
-
-            {/* Content Body */}
-            <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-gray-300 prose-a:text-cyber-primary hover:prose-a:text-white prose-code:text-cyber-secondary prose-code:bg-gray-900 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800">
-               {resource.content && <div dangerouslySetInnerHTML={{ __html: resource.content }} />}
-               {!resource.content && <p className="text-gray-500 italic">Content loading...</p>}
-            </div>
-
-            {/* Newsletter CTA Bottom */}
-            <div className="mt-16 bg-gradient-to-br from-gray-900 to-black border border-gray-800 p-8 rounded-2xl relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <Send size={100} />
-               </div>
-               <h3 className="text-2xl font-bold text-white mb-2 relative z-10">Subscribe to the Neural Network</h3>
-               <p className="text-gray-400 mb-6 relative z-10 max-w-md">
-                  Get notified about new guides on Agentic AI, Multi-Agent Systems, and the future of autonomous software.
-               </p>
-               <div className="flex gap-2 relative z-10 max-w-md">
-                   <input 
-                     type="email" 
-                     placeholder="email@domain.com" 
-                     className="flex-1 bg-black border border-gray-700 rounded px-4 py-3 text-white focus:border-cyber-primary outline-none transition-colors"
-                   />
-                   <button className="bg-cyber-primary text-black font-bold px-6 py-3 rounded hover:bg-white transition-colors">
-                     SUBSCRIBE
-                   </button>
-               </div>
-            </div>
-         </div>
-
-         {/* Sidebar */}
-         <div className="lg:col-span-4 space-y-8">
-            {/* Author Widget */}
-            <div className="hidden lg:block bg-gray-900/30 p-6 rounded-2xl border border-gray-800 sticky top-32">
-               <h3 className="text-xs font-mono text-gray-500 uppercase mb-4">Written By</h3>
-               <div className="flex items-center gap-4 mb-4">
-                   <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
-                      {resource.author?.avatar && <img src={resource.author.avatar} alt={resource.author.name} className="w-full h-full object-cover" />}
-                   </div>
-                   <div>
-                      <div className="text-white font-bold">{resource.author?.name}</div>
-                      <div className="text-cyber-secondary text-xs">{resource.author?.role}</div>
-                   </div>
-               </div>
-               <p className="text-sm text-gray-400 leading-relaxed mb-4">
-                  Architecting autonomous AI systems and building the future of work at Vertical Labs.
-               </p>
-               <div className="flex gap-2">
-                  <button className="p-2 bg-black border border-gray-800 rounded hover:border-cyber-primary hover:text-cyber-primary text-gray-500 transition-colors"><User size={14}/></button>
-                  <button className="p-2 bg-black border border-gray-800 rounded hover:border-cyber-primary hover:text-cyber-primary text-gray-500 transition-colors"><Send size={14}/></button>
-               </div>
-            </div>
-
-            {/* Table of Contents */}
-            {resource.toc && (
-               <div className="hidden lg:block">
-                  <h3 className="text-xs font-mono text-gray-500 uppercase mb-4 flex items-center gap-2">
-                     <List size={14} /> Table of Contents
-                  </h3>
-                  <div className="space-y-1 border-l border-gray-800 ml-1">
-                     {resource.toc.map(item => (
-                        <button 
-                           key={item.id}
-                           onClick={() => scrollToHeading(item.id)}
-                           className="block w-full text-left pl-4 py-2 text-sm text-gray-400 hover:text-cyber-primary hover:border-l hover:border-cyber-primary -ml-px transition-all"
-                        >
-                           {item.title}
-                        </button>
-                     ))}
-                  </div>
-               </div>
-            )}
-         </div>
-      </div>
-      
-      <style>{`
-         .code-block {
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.85rem;
-            color: #e0e0e0;
-            margin: 1.5rem 0;
-            overflow-x: auto;
-         }
-         .keyword { color: #c678dd; }
-         .string { color: #98c379; }
-         .comment { color: #5c6370; font-style: italic; display: block; margin-bottom: 0.5rem; }
-      `}</style>
-    </div>
   );
 };
 

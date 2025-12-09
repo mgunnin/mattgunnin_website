@@ -36,6 +36,40 @@ export interface Resource {
   url?: string; // External link fallback
 }
 
+export interface CaseStudy {
+  id: string;
+  title: string;
+  subtitle: string;
+  challenge: string;
+  solution: string;
+  technologies: string[];
+  industry: string;
+  year: string;
+  metrics: { label: string; value: string; icon?: any }[];
+  architecture: {
+    nodes: { id: string; label: string; type: 'client' | 'service' | 'db' | 'ai'; x: number; y: number }[];
+    connections: { from: string; to: string; label?: string }[];
+  }; 
+  timeline: { phase: string; date: string; description: string }[];
+  teamSize?: number;
+  lessonsLearned: string[];
+  imageUrl: string;
+  slug: string;
+}
+
+export interface SpeakingEngagement {
+  id: string;
+  event: string;
+  date: string;
+  location: string;
+  topic: string;
+  audienceSize?: string;
+  type: 'Keynote' | 'Panel' | 'Workshop';
+  videoUrl?: string;
+  imageUrl?: string;
+  description?: string;
+}
+
 export type ContentPillar = 'AgenticAI' | 'FounderOS' | 'EsportsIntel' | 'Web3Community';
 
 export interface ChatMessage {

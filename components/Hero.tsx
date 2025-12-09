@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Github, Linkedin, Calendar, FileText, Target, Database, ArrowRight, Terminal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -81,6 +82,13 @@ const Hero: React.FC = () => {
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const navigateToBook = () => {
+    window.history.pushState(null, '', '/book');
+    const navEvent = new PopStateEvent('popstate');
+    window.dispatchEvent(navEvent);
+    window.scrollTo(0, 0);
   };
 
   const handleDownloadResume = () => {
@@ -228,9 +236,9 @@ const Hero: React.FC = () => {
             className="flex flex-wrap justify-center gap-6 md:gap-12"
         >
             {[
-                { icon: Calendar, label: "Book a Call", action: () => scrollTo('contact') },
+                { icon: Calendar, label: "Book a Call", action: navigateToBook },
                 { icon: FileText, label: "Download Resume", action: handleDownloadResume },
-                { icon: Target, label: "Case Studies", action: () => scrollTo('projects') },
+                { icon: Target, label: "Case Studies", action: () => scrollTo('case-studies') },
                 { icon: Database, label: "AI Resources", action: () => scrollTo('resources') }
             ].map((link, i) => (
                 <button 
