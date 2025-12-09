@@ -405,6 +405,14 @@ const CaseStudies: React.FC<CaseStudiesProps> = ({ standalone = false }) => {
               >
                  <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                     <div>
+                        {standalone && (
+                            <button 
+                                onClick={() => window.location.hash = '/'}
+                                className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors group mb-4"
+                            >
+                                <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Back to Home
+                            </button>
+                        )}
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">CASE STUDIES</h2>
                         <p className="text-gray-400 max-w-xl text-lg">
                           Real results from real implementations. Deep dives into architecture, metrics, and outcomes.

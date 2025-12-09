@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
         <a href="https://github.com/mgunnin" target="_blank" rel="noreferrer" className="hover:text-cyber-primary transition-colors">GitHub</a>
         <a href="https://x.com/matthewgunnin" target="_blank" rel="noreferrer" className="hover:text-cyber-primary transition-colors">X</a>
       </div>
-      <p>© {new Date().getFullYear()} Matt Gunnin. Architected with React, Tailwind & Gemini AI.</p>
+      <p>© {new Date().getFullYear()} Matt Gunnin.</p>
     </footer>
   );
 };
