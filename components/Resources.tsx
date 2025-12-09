@@ -1,19 +1,66 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Book, PenTool, Newspaper, Search, Send, CloudRain, Clock, User, Share2, ArrowLeft, List, Check, Calendar } from 'lucide-react';
+import { ArrowRight, Book, PenTool, Newspaper, Search, Send, CloudRain, Clock, User, Share2, ArrowLeft, List, Check, Calendar, Github, Download, ExternalLink } from 'lucide-react';
 import { Resource } from '../types';
 
 const resourcesData: Resource[] = [
   {
     id: '1',
     title: 'Resource Hub (Raindrop)',
-    description: 'A curated collection of my favorite resources, guides, AI tools, and frontend libraries that I have collected over the years.',
+    description: 'A curated collection of my favorite resources, guides, AI tools, and frontend libraries. Updated daily with the best links from around the web.',
     type: 'Tool',
     slug: 'raindrop',
     date: 'Updated Daily',
     tags: ['AI', 'Dev', 'Tools'],
-    content: 'EMBED_RAINDROP', // Special flag for the renderer
-    readTime: 'N/A'
+    url: 'https://raindrop.io/esports', // Direct link
+    readTime: 'External'
+  },
+  {
+    id: '5',
+    title: 'Agentic Starter Kit',
+    description: 'A production-ready boilerplate for building multi-agent systems with Next.js, Python (FastAPI), and CrewAI. Includes pre-configured vector database connection.',
+    type: 'Tool',
+    slug: 'starter-kit',
+    date: 'v2.1.0',
+    tags: ['Code', 'GitHub', 'Template'],
+    url: 'https://github.com', // Placeholder for actual repo
+    readTime: 'Repository'
+  },
+  {
+    id: '4',
+    title: 'Enterprise AI Readiness Checklist',
+    description: 'A strategic framework for evaluating organizational readiness for autonomous agents. Assessing data maturity, security governance, and operational bottlenecks.',
+    type: 'Tool',
+    slug: 'ai-checklist',
+    date: 'Nov 2024',
+    readTime: '5 min read',
+    tags: ['Strategy', 'Enterprise', 'Checklist'],
+    toc: [
+      { id: 'governance', title: '1. Data Governance' },
+      { id: 'guardrails', title: '2. Deterministic Guardrails' },
+      { id: 'hitl', title: '3. Human-in-the-Loop' }
+    ],
+    content: `
+      <h3 id="governance">1. Data Governance</h3>
+      <p>Before deploying autonomous agents, the most critical step is ensuring your unstructured data is ready for retrieval. Agents are only as good as the context they can access.</p>
+      <ul>
+        <li><strong>Centralization:</strong> Is knowledge siloed in private Slacks or available in a unified Vector Database?</li>
+        <li><strong>Sanitization:</strong> Have PII and sensitive secrets been scrubbed from the training/RAG set?</li>
+        <li><strong>Freshness:</strong> Is there a pipeline to update embeddings in real-time as documents change?</li>
+      </ul>
+
+      <h3 id="guardrails">2. Deterministic Guardrails</h3>
+      <p>Probabilistic models (LLMs) need deterministic cages. You cannot rely on a prompt alone to prevent unauthorized actions.</p>
+      <ul>
+        <li><strong>Schema Validation:</strong> Do all agent outputs pass strict Zod/Pydantic validation before execution?</li>
+        <li><strong>Scope Limiting:</strong> Do API keys used by agents have least-privilege access?</li>
+        <li><strong>Rate Limiting:</strong> Are there circuit breakers to prevent runaway loops (infinite tool calling)?</li>
+      </ul>
+
+      <h3 id="hitl">3. Human-in-the-Loop (HITL)</h3>
+      <p>Autonomous does not mean unsupervised. For high-stakes actions (deploying code, transferring funds, emailing clients), a human verification step is mandatory.</p>
+      <p>We recommend a "Traffic Light" system: Green for information gathering (autonomous), Yellow for drafting (autonomous), Red for execution (human approval required).</p>
+    `
   },
   {
     id: '2',
@@ -112,58 +159,6 @@ const resourcesData: Resource[] = [
       <h3 id="rag">Optimizing for RAG</h3>
       <p>When injecting context from a vector database, order matters. LLMs suffer from "Lost in the Middle" phenomenon. Place your most critical instructions at the very beginning and the very end of the context window.</p>
     `
-  },
-  {
-    id: '4',
-    title: 'The Future of Esports & AI',
-    description: 'Analyzing how computer vision and reinforcement learning reshaped the analytics landscape in competitive gaming.',
-    type: 'Post',
-    slug: 'esports-ai',
-    date: 'Aug 2024',
-    readTime: '10 min read',
-    author: {
-      name: 'Matt Gunnin',
-      role: 'Founder, Esports One',
-      avatar: '/matt.jpg'
-    },
-    tags: ['Esports', 'AI', 'CV'],
-    toc: [
-      { id: 'vision', title: 'Computer Vision in Gaming' },
-      { id: 'prediction', title: 'Predictive Models' },
-      { id: 'coaching', title: 'AI Coaching' }
-    ],
-    content: `
-      <h3 id="vision">Computer Vision in Gaming</h3>
-      <p>Before API access was ubiquitous, we had to rely on pixels. At Esports One, we built custom CV pipelines using OpenCV and YOLO to track champion positions on the mini-map in real-time from Twitch streams.</p>
-      <p>This allowed us to calculate metrics like "Jungle Proximity" and "Gank Efficiency" without direct game integration.</p>
-
-      <h3 id="prediction">Predictive Models</h3>
-      <p>We trained Reinforcement Learning models on millions of match outcomes. The key realization was that <strong>Draft Phase</strong> accounts for nearly 40% of the win probability. By analyzing team compositions before the game even started, we could predict outcomes with 65% accuracy.</p>
-    `
-  },
-  {
-    id: '5',
-    title: 'Building Communities with Web3',
-    description: 'Case study on how Esports One minted 92,000+ NFT passes and built a thriving 10k+ member Discord community.',
-    type: 'Post',
-    slug: 'web3-communities',
-    date: '2023',
-    readTime: '6 min read',
-    author: {
-      name: 'Matt Gunnin',
-      role: 'Founder, Esports One',
-      avatar: '/matt.jpg'
-    },
-    tags: ['Web3', 'Community', 'NFT'],
-    toc: [
-      { id: 'token-gating', title: 'Utility-First Token Gating' },
-      { id: 'identity', title: 'Digital Identity' }
-    ],
-    content: `
-      <h3 id="token-gating">Utility-First Token Gating</h3>
-      <p>The mistake most Web3 projects make is selling the asset before the utility. We flipped this. The "Esports One Pass" was free to mint but required for advanced analytics features.</p>
-      <p>This drove massive adoption: <strong>92,000+ mints</strong> in 48 hours. The NFT wasn't a speculative asset; it was a login credential.</p>
-    `
   }
 ];
 
@@ -171,7 +166,6 @@ const resourcesData: Resource[] = [
 
 const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> = ({ resource, onClose }) => {
   const [copied, setCopied] = useState(false);
-  const isRaindrop = resource.slug === 'raindrop';
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -183,35 +177,6 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
-
-  if (isRaindrop) {
-    return (
-      <div className="w-full min-h-screen animate-[fadeIn_0.3s_ease-out]">
-        {/* Navigation Header */}
-        <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-          <button onClick={onClose} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
-            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-mono text-sm uppercase">Back to Hub</span>
-          </button>
-          <h2 className="text-sm font-bold text-white hidden md:block">{resource.title}</h2>
-          <div className="flex gap-2">
-            <button onClick={handleShare} className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
-               {copied ? <Check size={18} /> : <Share2 size={18} />}
-            </button>
-          </div>
-        </div>
-        
-        <div className="w-full h-[calc(100vh-64px)] bg-white">
-             <iframe 
-                src="https://raindrop.io/esports/public" 
-                className="w-full h-full border-0" 
-                title="Raindrop Collection"
-                allowFullScreen 
-             />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-5xl mx-auto animate-[fadeIn_0.3s_ease-out] pb-24">
@@ -268,8 +233,8 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                    )}
                 </div>
                 <div>
-                   <div className="text-white font-bold text-sm">{resource.author?.name}</div>
-                   <div className="text-cyber-secondary text-xs">{resource.author?.role}</div>
+                   <div className="text-white font-bold text-sm">{resource.author?.name || 'Vertical Labs Team'}</div>
+                   <div className="text-cyber-secondary text-xs">{resource.author?.role || 'Research'}</div>
                 </div>
             </div>
 
@@ -308,18 +273,16 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                <h3 className="text-xs font-mono text-gray-500 uppercase mb-4">Written By</h3>
                <div className="flex items-center gap-4 mb-4">
                    <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
-                      {resource.author?.avatar && (
-                        <img 
-                            src={resource.author.avatar} 
-                            onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
-                            alt={resource.author.name} 
-                            className="w-full h-full object-cover" 
-                        />
-                      )}
+                      <img 
+                          src={resource.author?.avatar || "/matt.jpg"}
+                          onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
+                          alt={resource.author?.name || "Team"}
+                          className="w-full h-full object-cover" 
+                      />
                    </div>
                    <div>
-                      <div className="text-white font-bold">{resource.author?.name}</div>
-                      <div className="text-cyber-secondary text-xs">{resource.author?.role}</div>
+                      <div className="text-white font-bold">{resource.author?.name || 'Vertical Labs Team'}</div>
+                      <div className="text-cyber-secondary text-xs">{resource.author?.role || 'Research'}</div>
                    </div>
                </div>
                <p className="text-sm text-gray-400 leading-relaxed mb-4">
@@ -374,7 +337,7 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
 };
 
 const Resources: React.FC = () => {
-  const [filter, setFilter] = useState<'All' | 'Guide' | 'Tool' | 'Post' | 'Newsletter'>('All');
+  const [filter, setFilter] = useState<'All' | 'Guide' | 'Tool' | 'Post'>('All');
   const [email, setEmail] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
@@ -388,9 +351,8 @@ const Resources: React.FC = () => {
     const slug = params.get('resource');
     if (slug) {
       const resource = resourcesData.find(r => r.slug === slug);
-      if (resource) {
+      if (resource && !resource.url) {
         setSelectedResource(resource);
-        // Scroll to top when opening a resource
         window.scrollTo(0, 0);
       }
     }
@@ -400,7 +362,7 @@ const Resources: React.FC = () => {
       const s = p.get('resource');
       if (s) {
         const res = resourcesData.find(r => r.slug === s);
-        if (res) setSelectedResource(res);
+        if (res && !res.url) setSelectedResource(res);
       } else {
         setSelectedResource(null);
       }
@@ -411,6 +373,11 @@ const Resources: React.FC = () => {
   }, []);
 
   const handleOpenResource = (resource: Resource) => {
+    if (resource.url) {
+        window.open(resource.url, '_blank');
+        return;
+    }
+    
     setSelectedResource(resource);
     const newUrl = `${window.location.pathname}?resource=${resource.slug}`;
     window.history.pushState({ resourceSlug: resource.slug }, '', newUrl);
@@ -438,8 +405,7 @@ const Resources: React.FC = () => {
                   RESOURCE HUB <CloudRain className="text-cyber-primary fill-cyber-primary/20" />
                 </h2>
                 <p className="text-gray-400 max-w-xl">
-                  A collection of my thoughts on Agentic AI, Startups, and Engineering. 
-                  Plus my curated Raindrop.io links.
+                  A curated library of tools, guides, and architectural references for the agentic future.
                 </p>
               </div>
               

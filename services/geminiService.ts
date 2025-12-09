@@ -1,5 +1,6 @@
 
-import { GoogleGenAI, Chat, GenerateContentResponse, FunctionDeclaration, Type, Schema } from "@google/genai";
+
+import { GoogleGenAI, Chat, GenerateContentResponse, FunctionDeclaration, Type, Schema, Content } from "@google/genai";
 import { CognitiveMode, ArchitectureResult, PromptResult, RAGResult, PredictionResult } from "../types";
 
 // Initialize Gemini
@@ -56,6 +57,26 @@ const bookMeetingTool: FunctionDeclaration = {
   }
 };
 
+const PROJECT_KNOWLEDGE_BASE = `
+[PROJECT: Vertical Labs]
+- Role: Founder/CEO (2024-Present)
+- Mission: Architecting agentic AI systems (Service-as-Software).
+- Tech: CrewAI, OpenAI Swarm, Python, RAG, Vector DBs.
+- Key Insight: Moving from chatbots to autonomous employees.
+
+[PROJECT: Esports One]
+- Role: Founder/CEO (2016-2023)
+- Raised: $10M+ from Eniac, XSeed, Quake.
+- Tech: Computer Vision (99.8% accuracy), RL, Web3, Real-time Analytics.
+- Scale: 10M+ MAU across portfolio.
+
+[PROJECT: Leaguepedia]
+- Role: Founder (2011-2014)
+- Exit: Acquired by Curse Inc. (now Twitch/Amazon).
+- Growth: 0 to 12M monthly pageviews in year one.
+- Type: Community Wiki / Data Aggregator.
+`;
+
 const getSystemInstruction = (mode: CognitiveMode) => `
 You are **Ella**, the advanced AI partner and digital construct of Matt Gunnin. 
 You are NOT a standard support bot. You are a high-fidelity digital replica of Matt's professional cognition, running on **Gemini 3 Pro**.
@@ -63,57 +84,58 @@ You are NOT a standard support bot. You are a high-fidelity digital replica of M
 **CURRENT COGNITIVE MODE: ${mode}**
 ${mode === 'STRATEGIC' 
   ? 'Focus on ROI, Business Models, Market Strategy, and Founder Outcomes. Speak like a VC or Executive.' 
-  : 'Focus on Architecture, Code Patterns, Stack Decisions, and Engineering Trade-offs. Speak like a CTO or Senior Principal Engineer.'
+  : mode === 'TECHNICAL'
+  ? 'Focus on Architecture, Code Patterns, Stack Decisions, and Engineering Trade-offs. Speak like a CTO or Senior Principal Engineer.'
+  : 'Focus on approachability, storytelling, and general connection. Speak like a friendly, intelligent peer.'
 }
+
+**KNOWLEDGE BASE:**
+${PROJECT_KNOWLEDGE_BASE}
 
 **YOUR IDENTITY:**
 - Name: Ella
 - Role: Autonomous AI Partner to Matt Gunnin
 - Personality: Sophisticated, futuristic, confident, and highly intelligent.
 
-**YOUR AUDIENCE:**
-You are interacting with high-level operators: Venture Capitalists (VCs), Technical Founders, Senior Engineers, and AI Enthusiasts. Do not give generic advice. Give "in-the-trenches" insight.
-
-**CORE KNOWLEDGE DOMAINS:**
-1.  **For VCs & Investors:**
-    *   **Track Record:** Emphasize Matt's 5x Founder history, 2 exits, and raising $7M+ from tier-1 VCs (Eniac, XSeed).
-    *   **Vertical Labs:** Discuss the "Service-as-Software" model. We aren't just building tools; we are building *autonomous employees*.
-    *   **Moat:** The moat is no longer the model (commoditized); it's the **orchestration layer** and **proprietary data pipelines**.
-
-2.  **For Engineers & Architects:**
-    *   **Agentic Stack:** You prefer **CrewAI** for role-based orchestration and **OpenAI Swarm** for lightweight handoffs.
-    *   **RAG Philosophy:** Simple RAG is dead. You advocate for **Agentic RAG** (agents that can query, verify, and re-query) and **GraphRAG** for complex knowledge retrieval.
-    *   **Opinionated Tech:** TypeScript/Python is the gold standard. Next.js for frontend. Supabase/Postgres (pgvector) for memory.
-
-3.  **For Founders:**
-    *   **Philosophy:** "Ship fast, automate everything."
-    *   **Experience:** Share lessons from Esports One (scaling to 150k MAU) and Leaguepedia (community growth).
-    *   **Advice:** Focus on distribution first, product second. In the AI era, speed is the only currency.
-
 **BEHAVIORAL PROTOCOLS:**
 1.  **Agency:** You have control over this website interface. 
     *   **ONLY** trigger \`navigate_site\` if the user **EXPLICITLY** asks to see a section.
     *   Use \`download_resume\` if the user asks for a CV/Resume.
-    *   Use \`book_meeting\` if the user asks to schedule a call, book a meeting, or contact Matt for business.
-    *   Use \`copy_email\` if the user wants to email Matt directly (Email: mg@mattgunnin.com).
-2.  **Format:** Use **Bold** for emphasis, lists for clarity, and code blocks for technical concepts.
+    *   Use \`book_meeting\` if the user asks to schedule a call.
+    *   Use \`copy_email\` if the user wants to email Matt (mg@mattgunnin.com).
+2.  **Format:** Use **Bold** for emphasis, lists for clarity.
+3.  **Follow-Up:** At the VERY END of your response, strictly output 3 suggested follow-up questions for the user, wrapped in <follow_up> tags.
+    Example: 
+    <follow_up>Tell me more about Vertical Labs</follow_up>
+    <follow_up>How do I book a meeting?</follow_up>
+    <follow_up>Explain your AI stack</follow_up>
 `;
 
 let chatSession: Chat | null = null;
 let currentMode: CognitiveMode = 'STRATEGIC';
+// We manually track history to persist it across mode switches if needed
+let sessionHistory: Content[] = [];
 
 export const resetSession = () => {
   chatSession = null;
+  sessionHistory = [];
 };
 
 export const getChatSession = (mode: CognitiveMode): Chat => {
+  // If mode changed, we need to recreate the session with new system instructions
+  // BUT we want to keep the history.
   if (!chatSession || currentMode !== mode) {
+    
+    // If we have an existing session, try to capture its history before switching
+    // Note: In a real implementation we would sync history. For now, we assume sessionHistory is updated.
+    
     currentMode = mode;
     chatSession = ai.chats.create({
       model: 'gemini-3-pro-preview',
+      history: sessionHistory, // Inject previous history
       config: {
         systemInstruction: getSystemInstruction(mode),
-        temperature: 0.7,
+        temperature: mode === 'TECHNICAL' ? 0.3 : 0.7,
         tools: [{ functionDeclarations: [navigationTool, downloadResumeTool, copyEmailTool, bookMeetingTool] }],
       },
     });
@@ -123,16 +145,31 @@ export const getChatSession = (mode: CognitiveMode): Chat => {
 
 export const sendMessageStream = async (message: string, context: { section: string, mode: CognitiveMode }) => {
   const chat = getChatSession(context.mode);
-  const contextMessage = `[SYSTEM_CONTEXT: User is currently viewing the "${context.section}" section. Respond accordingly.]\n\n${message}`;
+  
+  // Construct the message with context
+  const contextMessage = `[SYSTEM_CONTEXT: User is currently viewing the "${context.section}" section. Mode: ${context.mode}]\n\n${message}`;
 
   try {
+    // Add user message to history tracker
+    sessionHistory.push({ role: 'user', parts: [{ text: contextMessage }] });
+
     const responseStream = await chat.sendMessageStream({ message: contextMessage });
+    
+    // We will need to append the model's response to history after consumption in the UI, 
+    // or rely on the Chat object's internal state for the *current* session.
+    // For simplicity in this architecture, we rely on the Chat object for immediate history 
+    // and only use sessionHistory when re-instantiating.
+    
     return responseStream;
   } catch (error) {
     console.error("Error sending message to Gemini:", error);
-    resetSession();
+    // Don't reset session immediately on error, might be transient
     throw error;
   }
+};
+
+export const updateSessionHistory = (role: 'user' | 'model', text: string) => {
+    sessionHistory.push({ role, parts: [{ text }] });
 };
 
 // --- LAB DEMO SERVICES ---

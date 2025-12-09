@@ -1,7 +1,8 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, User, ArrowRight, ChevronLeft, Filter, Tag, Share2, Linkedin, Copy, Clock, Hash, ChevronRight, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, ChevronLeft, Filter, Share2, Linkedin, Copy, Clock, Hash, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import { BlogPost } from '../types';
+import ReturnButton from './ReturnButton';
 
 const blogPosts: BlogPost[] = [
   {
@@ -183,12 +184,9 @@ const SinglePostView: React.FC<{
        `}</style>
 
        <div className="container mx-auto px-4 md:px-6 py-8">
-           <button 
-             onClick={onClose}
-             className="flex items-center gap-2 text-cyber-primary hover:text-white mb-6 transition-colors font-mono text-sm uppercase tracking-wider group bg-black/50 px-4 py-2 rounded-full border border-gray-800 w-fit"
-           >
-             <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Return to Logs
-           </button>
+           <div className="mb-6">
+                <ReturnButton onClick={onClose} label="RETURN TO LOGS" />
+           </div>
 
            <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
                {/* Parallax Header */}
@@ -417,15 +415,12 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
         {/* Main Header (only show in list view) */}
         {!selectedPost && (
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-[fadeIn_0.5s_ease-out]">
-             <div className="flex flex-col items-start gap-4">
+             <div className="space-y-4">
                  {/* Back to Home Button (Standalone Mode Only) */}
                  {standalone && (
-                    <button 
-                        onClick={() => window.location.hash = '/'}
-                        className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors group mb-2"
-                    >
-                        <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Back to Home
-                    </button>
+                    <div className="mb-4">
+                        <ReturnButton onClick={() => window.location.hash = '/'} label="RETURN TO BASE" />
+                    </div>
                  )}
                  <div className="flex items-end gap-4">
                      <h2 className="text-4xl md:text-5xl font-bold text-white">TRANSMISSIONS</h2>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Code, Cpu, Globe, Database, Box, Terminal, Zap, Server, LayoutTemplate, Brain, MessageSquare, Image as ImageIcon, Bot, ArrowLeft, Calendar, Trophy, Target, MonitorPlay, ChevronRight, Share2 } from 'lucide-react';
 import { Project } from '../types';
+import ReturnButton from './ReturnButton';
 
 const majorProjects: Project[] = [
   {
@@ -441,13 +442,7 @@ const Projects: React.FC = () => {
              
              {/* Sticky Nav Overlay */}
              <div className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 pointer-events-none">
-                <button 
-                  onClick={handleCloseProject}
-                  className="pointer-events-auto flex items-center gap-2 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full border border-gray-700 hover:border-cyber-primary hover:text-cyber-primary transition-all duration-300 group"
-                >
-                   <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                   <span className="font-mono text-sm hidden md:inline">RETURN TO BASE</span>
-                </button>
+                <ReturnButton onClick={handleCloseProject} />
 
                 <div className="pointer-events-auto flex gap-2">
                     <button onClick={handleShare} className="bg-black/50 backdrop-blur-md p-2 rounded-full border border-gray-700 text-gray-400 hover:text-white hover:border-white transition-colors">

@@ -1,12 +1,15 @@
+
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles } from 'lucide-react';
-import { sendMessageStream } from '../services/geminiService';
+import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles, Mic, Share2, Download, MessageSquare, Coffee, Briefcase } from 'lucide-react';
+import { sendMessageStream, updateSessionHistory } from '../services/geminiService';
 import { ChatMessage, AgentStatus, CognitiveMode, NeuralInterfaceProps } from '../types';
 import { GenerateContentResponse } from '@google/genai';
 
 // Helper to parse basic markdown for better readability
 const renderMarkdown = (text: string) => {
   let formatted = text
+    .replace(/<follow_up>.*?<\/follow_up>/g, '') // Remove follow-up tags from display
     .replace(/```([\s\S]*?)```/g, '<div class="bg-black/50 p-3 rounded-lg border border-gray-700 font-mono text-xs my-3 overflow-x-auto shadow-inner text-cyber-primary">$1</div>')
     .replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyber-primary text-shadow-glow font-bold tracking-wide">$1</strong>')
     .replace(/\*(.*?)\*/g, '<em class="text-cyber-secondary not-italic">$1</em>')
@@ -16,13 +19,21 @@ const renderMarkdown = (text: string) => {
   return formatted;
 };
 
+// Helper to extract follow-ups
+const extractFollowUps = (text: string): string[] => {
+  const matches = text.match(/<follow_up>(.*?)<\/follow_up>/g);
+  if (!matches) return [];
+  return matches.map(m => m.replace(/<\/?follow_up>/g, ''));
+};
+
 const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<AgentStatus>('IDLE');
   const [mode, setMode] = useState<CognitiveMode>('STRATEGIC');
-  const [isMuted, setIsMuted] = useState(true); // Default to true to disable auto-speech
+  const [isMuted, setIsMuted] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   
   // HUD Stats
   const [cpuUsage, setCpuUsage] = useState(12);
@@ -30,19 +41,21 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   const [latency, setLatency] = useState(45);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Refs for animation system
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const statusRef = useRef(status); 
   const synthesisRef = useRef<SpeechSynthesis | null>(null);
   const isMutedRef = useRef(isMuted);
+  const recognitionRef = useRef<any>(null);
 
-  // Quick Action Chips
-  const starterPrompts = [
-    { label: "🏗️ Architecture", query: "How do you architect multi-agent systems using CrewAI?" },
-    { label: "💰 Fundraising", query: "What is your strategy for raising capital for AI startups?" },
-    { label: "🚀 Vertical Labs", query: "What is the mission of Vertical Labs?" },
-    { label: "📄 Resume", query: "Can I download your resume?" },
+  // Expanded Quick Actions
+  const quickActions = [
+    { label: "Book a Call", query: "I'd like to book a meeting with Matt." },
+    { label: "View Projects", query: "Show me your portfolio of projects." },
+    { label: "Vertical Labs", query: "Tell me about Vertical Labs." },
+    { label: "Resume", query: "Can I download your resume?" },
   ];
 
   useEffect(() => {
@@ -59,6 +72,35 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       synthesisRef.current = window.speechSynthesis;
+    }
+    
+    // Initialize Speech Recognition
+    if (typeof window !== 'undefined') {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            
+            recognition.onstart = () => {
+                setIsListening(true);
+                setStatus('LISTENING');
+            };
+            
+            recognition.onend = () => {
+                setIsListening(false);
+                if (statusRef.current === 'LISTENING') setStatus('IDLE');
+            };
+            
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setInput(transcript);
+                handleSend(transcript);
+            };
+
+            recognitionRef.current = recognition;
+        }
     }
   }, []);
 
@@ -118,6 +160,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
         if (currentStatus === 'ANALYZING') particleColor = 'rgba(250, 204, 21, 0.3)';
         if (currentStatus === 'EXECUTING') particleColor = 'rgba(239, 68, 68, 0.3)';
         if (currentStatus === 'STREAMING') particleColor = 'rgba(16, 185, 129, 0.2)';
+        if (currentStatus === 'LISTENING') particleColor = 'rgba(255, 255, 255, 0.4)';
 
         ctx.fillStyle = particleColor;
         ctx.strokeStyle = particleColor;
@@ -185,11 +228,12 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
     synthesisRef.current.cancel();
 
     // Strip basic markdown/html for speech
-    const cleanText = text.replace(/<[^>]*>?/gm, '').replace(/[*#`]/g, '');
+    let cleanText = text.replace(/<[^>]*>?/gm, '').replace(/[*#`]/g, '');
+    cleanText = cleanText.replace(/Follow-up questions:.*/gi, ''); // Don't read the follow up headers
     
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.pitch = 1.0; 
-    utterance.rate = 1.0; 
+    utterance.rate = 1.1; 
     
     const voices = synthesisRef.current.getVoices();
     // Try to find a high quality voice
@@ -197,6 +241,31 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
     if (preferredVoice) utterance.voice = preferredVoice;
 
     synthesisRef.current.speak(utterance);
+  };
+
+  const handleMicClick = () => {
+      if (isListening) {
+          recognitionRef.current?.stop();
+      } else {
+          recognitionRef.current?.start();
+      }
+  };
+
+  const handleExport = () => {
+      const exportText = messages.map(m => `[${m.role.toUpperCase()}]: ${m.text.replace(/<[^>]*>?/gm, '')}`).join('\n\n');
+      const blob = new Blob([exportText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `neural_logs_${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+  };
+
+  const handleShare = () => {
+      const exportText = messages.map(m => `[${m.role.toUpperCase()}]: ${m.text.replace(/<[^>]*>?/gm, '')}`).join('\n\n');
+      navigator.clipboard.writeText(exportText);
+      alert("Conversation copied to clipboard!");
   };
 
   const handleToolCall = (functionCall: any) => {
@@ -258,6 +327,10 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
 
     const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: text };
     setMessages(prev => [...prev, userMsg]);
+    // Note: sessionHistory is updated in the service, but we don't strictly need to do it here unless we are recreating chat often.
+    // However, to ensure consistency if we switch modes later:
+    updateSessionHistory('user', text);
+
     setInput('');
     setStatus('ANALYZING');
 
@@ -294,9 +367,16 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
         ));
       }
       
+      // Parse Followups
+      const followUps = extractFollowUps(fullText);
+      
       setMessages(prev => prev.map(msg => 
-        msg.id === botMsgId ? { ...msg, isStreaming: false } : msg
+        msg.id === botMsgId ? { ...msg, text: fullText, isStreaming: false, followUps } : msg
       ));
+      
+      // Update history in service
+      updateSessionHistory('model', fullText);
+
       setStatus('IDLE');
       
       // Speak final result
@@ -317,13 +397,21 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   };
 
   const toggleMode = () => {
-    const newMode = mode === 'STRATEGIC' ? 'TECHNICAL' : 'STRATEGIC';
+    let newMode: CognitiveMode = 'STRATEGIC';
+    if (mode === 'STRATEGIC') newMode = 'TECHNICAL';
+    else if (mode === 'TECHNICAL') newMode = 'CASUAL';
+    else newMode = 'STRATEGIC';
+
     setMode(newMode);
-    setMessages(prev => [...prev, { 
+    
+    // Add system message about mode switch
+    const switchMsg = { 
         id: Date.now().toString(), 
-        role: 'model', 
+        role: 'model' as const, 
         text: `> COGNITIVE MODE SHIFT: **${newMode}**\n> ADJUSTING PARAMETERS... DONE.` 
-    }]);
+    };
+    setMessages(prev => [...prev, switchMsg]);
+    updateSessionHistory('model', switchMsg.text);
   };
 
   const getStatusColor = () => {
@@ -331,6 +419,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
         case 'ANALYZING': return 'text-yellow-400 border-yellow-400';
         case 'EXECUTING': return 'text-red-500 border-red-500';
         case 'STREAMING': return 'text-cyber-primary border-cyber-primary';
+        case 'LISTENING': return 'text-white border-white animate-pulse';
         default: return 'text-green-500 border-green-500';
     }
   };
@@ -373,7 +462,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-cyber-primary">
               <Activity className="w-4 h-4" />
-              <span className="font-bold tracking-[0.2em] text-[10px] md:text-xs">ELLA_INTERFACE_V1</span>
+              <span className="font-bold tracking-[0.2em] text-[10px] md:text-xs">ELLA_INTERFACE_V2</span>
             </div>
             
             {/* System Stats HUD */}
@@ -406,9 +495,21 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
                 onClick={toggleMode}
                 className="hidden md:flex items-center gap-2 px-3 py-1 bg-gray-800 border border-gray-700 rounded hover:border-cyber-primary transition-colors group mr-2"
             >
-                <Layers size={12} className="text-gray-400 group-hover:text-cyber-primary" />
+                {mode === 'STRATEGIC' && <Briefcase size={12} className="text-cyber-primary" />}
+                {mode === 'TECHNICAL' && <Terminal size={12} className="text-cyber-secondary" />}
+                {mode === 'CASUAL' && <Coffee size={12} className="text-yellow-400" />}
                 <span className="text-[10px] text-gray-300 group-hover:text-white">{mode} MODE</span>
             </button>
+
+             {/* Tools */}
+             <div className="flex items-center gap-1 border-r border-gray-700 pr-3 mr-1">
+                <button onClick={handleShare} className="p-1.5 text-gray-500 hover:text-white transition-colors" title="Copy Conversation">
+                    <Share2 size={16} />
+                </button>
+                <button onClick={handleExport} className="p-1.5 text-gray-500 hover:text-white transition-colors" title="Export Log">
+                    <Download size={16} />
+                </button>
+             </div>
 
              {/* Audio Toggle */}
              <button onClick={() => setIsMuted(!isMuted)} className="text-gray-500 hover:text-cyber-primary transition-colors">
@@ -440,10 +541,13 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
               )}
               
               {status === 'ANALYZING' && (
-                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                 <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
+                    </div>
+                    <span className="text-[10px] text-yellow-500 animate-pulse">GENERATING RESPONSE...</span>
                  </div>
               )}
 
@@ -458,6 +562,17 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
                   }}
                 />
               ))}
+              
+              {(status === 'LISTENING') && (
+                  <div className="flex items-center gap-4">
+                      <div className="relative">
+                          <div className="absolute inset-0 bg-white rounded-full animate-ping opacity-25"></div>
+                          <Mic size={24} className="text-white relative z-10" />
+                      </div>
+                      <span className="text-white tracking-widest animate-pulse">LISTENING...</span>
+                  </div>
+              )}
+
               {(status === 'EXECUTING') && (
                  <div className="text-red-500 font-bold animate-pulse text-lg tracking-widest">EXECUTING PROTOCOL...</div>
               )}
@@ -469,47 +584,61 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
           <div className="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-black to-transparent pointer-events-none z-10"></div>
           
           {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-[slideIn_0.2s_ease-out]`}
-            >
-              {msg.role === 'model' && (
-                <div className="w-8 h-8 rounded border border-cyber-primary/30 bg-cyber-primary/5 flex items-center justify-center shrink-0 mt-1">
-                  <Hexagon size={16} className="text-cyber-primary" />
+            <div key={msg.id} className="space-y-2">
+                <div className={`flex gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-[slideIn_0.2s_ease-out]`}>
+                {msg.role === 'model' && (
+                    <div className="w-8 h-8 rounded border border-cyber-primary/30 bg-cyber-primary/5 flex items-center justify-center shrink-0 mt-1">
+                    <Hexagon size={16} className="text-cyber-primary" />
+                    </div>
+                )}
+                
+                <div className={`max-w-[85%] relative`}>
+                    <div className={`p-3 md:p-4 rounded border backdrop-blur-sm ${
+                    msg.role === 'user' 
+                        ? 'bg-cyber-secondary/10 border-cyber-secondary/30 text-white text-right font-sans' 
+                        : 'bg-gray-900/80 border-gray-700 text-gray-200 shadow-[0_0_15px_rgba(0,0,0,0.5)] font-mono text-sm tracking-wide'
+                    }`}>
+                    <div className="text-[8px] md:text-[10px] text-gray-500 mb-1 opacity-50 uppercase tracking-widest flex items-center gap-2 font-mono">
+                        {msg.role === 'model' ? 'ELLA_CORE' : 'USER_UPLINK'}
+                    </div>
+                    <div 
+                        className="whitespace-pre-wrap leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}
+                        style={msg.role === 'model' ? { textShadow: '0 0 2px rgba(0, 240, 255, 0.3)' } : {}}
+                    />
+                    {msg.isStreaming && <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 animate-pulse"></span>}
+                    </div>
                 </div>
-              )}
-              
-              <div className={`max-w-[85%] relative`}>
-                <div className={`p-3 md:p-4 rounded border backdrop-blur-sm ${
-                  msg.role === 'user' 
-                    ? 'bg-cyber-secondary/10 border-cyber-secondary/30 text-white text-right font-sans' 
-                    : 'bg-gray-900/80 border-gray-700 text-gray-200 shadow-[0_0_15px_rgba(0,0,0,0.5)] font-mono text-sm tracking-wide'
-                }`}>
-                  <div className="text-[8px] md:text-[10px] text-gray-500 mb-1 opacity-50 uppercase tracking-widest flex items-center gap-2 font-mono">
-                     {msg.role === 'model' ? 'ELLA_CORE' : 'USER_UPLINK'}
-                  </div>
-                  <div 
-                    className="whitespace-pre-wrap leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}
-                    style={msg.role === 'model' ? { textShadow: '0 0 2px rgba(0, 240, 255, 0.3)' } : {}}
-                  />
-                  {msg.isStreaming && <span className="inline-block w-2 h-4 bg-cyber-primary ml-1 animate-pulse"></span>}
                 </div>
-              </div>
+
+                {/* Suggestions Chips */}
+                {msg.followUps && msg.followUps.length > 0 && (
+                    <div className="flex flex-wrap gap-2 ml-12 animate-[fadeIn_0.5s_ease-out]">
+                        {msg.followUps.map((suggestion, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => handleSend(suggestion)}
+                                className="px-3 py-1 bg-gray-900 border border-gray-700 hover:border-cyber-primary rounded-full text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+                            >
+                                <MessageSquare size={10} /> {suggestion}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </div>
           ))}
 
-          {/* Quick Action Chips */}
+          {/* Quick Action Chips (Only on empty state or start) */}
           {messages.length < 3 && status === 'IDLE' && (
              <div className="grid grid-cols-2 md:flex md:flex-wrap gap-2 md:gap-3 mt-4 animate-[fadeIn_0.5s_ease-out]">
-                {starterPrompts.map(prompt => (
+                {quickActions.map(action => (
                    <button
-                     key={prompt.label}
-                     onClick={() => handleSend(prompt.query)}
+                     key={action.label}
+                     onClick={() => handleSend(action.query)}
                      className="px-3 py-2 bg-gray-900/50 border border-gray-700 hover:border-cyber-primary hover:bg-cyber-primary/10 text-[10px] md:text-xs text-gray-400 hover:text-white rounded transition-all duration-300 flex items-center gap-2 group font-mono"
                    >
                      <Terminal size={12} className="group-hover:text-cyber-primary transition-colors" />
-                     {prompt.label}
+                     {action.label}
                    </button>
                 ))}
              </div>
@@ -526,21 +655,31 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
                     <ChevronRight size={14} />
                 </div>
                 <input
+                  ref={inputRef}
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Enter command..."
+                  placeholder="Enter command or select mode..."
                   className="w-full bg-transparent border-none text-white px-2 py-3 md:py-4 focus:ring-0 focus:outline-none font-mono tracking-wider placeholder-gray-700 text-sm"
                   autoFocus
-                  disabled={status !== 'IDLE'}
+                  disabled={status !== 'IDLE' && status !== 'LISTENING'}
                 />
+                
+                {recognitionRef.current && (
+                    <button 
+                        onClick={handleMicClick} 
+                        className={`p-2 mr-1 rounded hover:bg-gray-800 transition-colors ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-500'}`}
+                    >
+                        <Mic size={18} />
+                    </button>
+                )}
               </div>
             </div>
             
             <button 
               onClick={() => handleSend(input)}
-              disabled={!input.trim() || status !== 'IDLE'}
+              disabled={(!input.trim() && status !== 'LISTENING') || (status !== 'IDLE' && status !== 'LISTENING')}
               className="group relative px-4 py-3 md:px-6 md:py-4 bg-gray-900 border border-gray-700 text-cyber-primary hover:text-black transition-all duration-300 rounded font-mono uppercase text-xs md:text-sm disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden shrink-0"
             >
               <div className="absolute inset-0 bg-cyber-primary translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>

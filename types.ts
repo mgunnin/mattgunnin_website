@@ -78,6 +78,7 @@ export interface ChatMessage {
   text: string;
   isStreaming?: boolean;
   isThinking?: boolean;
+  followUps?: string[];
 }
 
 export interface Experience {
@@ -110,7 +111,7 @@ export interface BlogPost {
 }
 
 export type AgentStatus = 'IDLE' | 'LISTENING' | 'ANALYZING' | 'EXECUTING' | 'STREAMING';
-export type CognitiveMode = 'STRATEGIC' | 'TECHNICAL';
+export type CognitiveMode = 'STRATEGIC' | 'TECHNICAL' | 'CASUAL';
 
 export interface NeuralInterfaceProps {
   currentSection: string;
