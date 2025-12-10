@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles, Mic, Share2, Download, MessageSquare, Coffee, Briefcase, Image as ImageIcon } from 'lucide-react';
-import { sendMessageStream, updateSessionHistory, generateImage, trackConversationStream } from '../services/geminiService';
+import { sendMessageStream, updateSessionHistory, generateImage } from '../services/geminiService';
 import { ChatMessage, AgentStatus, CognitiveMode, NeuralInterfaceProps } from '../types';
 import { GenerateContentResponse } from '@google/genai';
 
@@ -346,28 +346,26 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
     setInput('');
     setStatus('ANALYZING');
 
-    const startTime = performance.now();
-
     try {
       const stream = await sendMessageStream(userMsg.text, { section: currentSection, mode });
-
+      
       const botMsgId = (Date.now() + 1).toString();
       setMessages(prev => [...prev, { id: botMsgId, role: 'model', text: '', isStreaming: true }]);
       setStatus('STREAMING');
 
       let fullText = '';
-
+      
       for await (const chunk of stream) {
         const content = chunk as GenerateContentResponse;
-
+        
         // Check for Tool Calls
         const fc = content.candidates?.[0]?.content?.parts?.find(p => p.functionCall);
         if (fc && fc.functionCall) {
             const toolResult = await handleToolCall(fc.functionCall);
-
+             
              // If image was generated, append it
              if (toolResult.imageData) {
-                setMessages(prev => prev.map(msg =>
+                setMessages(prev => prev.map(msg => 
                     msg.id === botMsgId ? { ...msg, image: toolResult.imageData } : msg
                 ));
              }
@@ -381,37 +379,31 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
 
         const textChunk = content.text || '';
         fullText += textChunk;
-
-        setMessages(prev => prev.map(msg =>
-          msg.id === botMsgId
-            ? { ...msg, text: fullText }
+        
+        setMessages(prev => prev.map(msg => 
+          msg.id === botMsgId 
+            ? { ...msg, text: fullText } 
             : msg
         ));
       }
-
+      
       // Parse Followups
       const followUps = extractFollowUps(fullText);
-
-      setMessages(prev => prev.map(msg =>
+      
+      setMessages(prev => prev.map(msg => 
         msg.id === botMsgId ? { ...msg, text: fullText, isStreaming: false, followUps } : msg
       ));
-
+      
       // Update history in service
       updateSessionHistory('model', fullText);
 
-      // Track LLM analytics
-      const latencyMs = performance.now() - startTime;
-      trackConversationStream(text, fullText, mode, latencyMs, true);
-
       setStatus('IDLE');
-
+      
       // Speak final result
       speakResponse(fullText);
 
     } catch (error) {
       console.error(error);
-      const latencyMs = performance.now() - startTime;
-      trackConversationStream(text, '', mode, latencyMs, false, error instanceof Error ? error.message : String(error));
       setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: "CONNECTION INTERRUPTED. RETRYING HANDSHAKE..." }]);
       setStatus('IDLE');
     }

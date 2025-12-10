@@ -2,7 +2,6 @@
 
 import { GoogleGenAI, Chat, GenerateContentResponse, FunctionDeclaration, Type, Schema, Content } from "@google/genai";
 import { CognitiveMode, ArchitectureResult, PromptResult, RAGResult, PredictionResult } from "../types";
-import { trackLLMGeneration, createTraceId } from "./llmAnalytics";
 
 // Initialize Gemini
 const apiKey = process.env.API_KEY || ''; 
@@ -178,35 +177,9 @@ export const getChatSession = (mode: CognitiveMode): Chat => {
   return chatSession;
 };
 
-// Track streaming conversation after completion
-export const trackConversationStream = (
-  message: string,
-  response: string,
-  mode: CognitiveMode,
-  latencyMs: number,
-  success: boolean = true,
-  error?: string
-) => {
-  const modelName = (mode === 'STRATEGIC' || mode === 'TECHNICAL') ? 'gemini-3-pro-preview' : 'gemini-2.5-flash';
-
-  trackLLMGeneration({
-    model: modelName,
-    provider: 'google',
-    inputMessages: [{ role: 'user', content: message }],
-    outputContent: response,
-    latencyMs,
-    success,
-    error,
-    metadata: {
-      cognitive_mode: mode,
-      feature: 'ella_chat',
-    },
-  });
-};
-
 export const sendMessageStream = async (message: string, context: { section: string, mode: CognitiveMode }) => {
   const chat = getChatSession(context.mode);
-
+  
   // Construct the message with context
   const contextMessage = `[SYSTEM_CONTEXT: User is currently viewing the "${context.section}" section. Mode: ${context.mode}]\n\n${message}`;
 
@@ -229,8 +202,6 @@ export const updateSessionHistory = (role: 'user' | 'model', text: string) => {
 // --- IMAGE GENERATION SERVICE ---
 
 export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K' = '1K'): Promise<string> => {
-    const startTime = performance.now();
-
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-3-pro-image-preview',
@@ -240,40 +211,18 @@ export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K' = '
             config: {
                 imageConfig: {
                     imageSize: size,
-                    aspectRatio: "16:9"
+                    aspectRatio: "16:9" 
                 }
             }
         });
 
-        const latencyMs = performance.now() - startTime;
-
         for (const part of response.candidates?.[0]?.content?.parts || []) {
             if (part.inlineData) {
-                trackLLMGeneration({
-                    model: 'gemini-3-pro-image-preview',
-                    provider: 'google',
-                    inputMessages: [{ role: 'user', content: prompt }],
-                    outputContent: '[IMAGE_GENERATED]',
-                    latencyMs,
-                    success: true,
-                    metadata: { feature: 'ella_image_generation', image_size: size },
-                });
                 return `data:image/png;base64,${part.inlineData.data}`;
             }
         }
         throw new Error("No image data returned");
     } catch (error) {
-        const latencyMs = performance.now() - startTime;
-        trackLLMGeneration({
-            model: 'gemini-3-pro-image-preview',
-            provider: 'google',
-            inputMessages: [{ role: 'user', content: prompt }],
-            outputContent: '',
-            latencyMs,
-            success: false,
-            error: error instanceof Error ? error.message : String(error),
-            metadata: { feature: 'ella_image_generation', image_size: size },
-        });
         console.error("Image generation failed:", error);
         throw error;
     }
@@ -282,7 +231,6 @@ export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K' = '
 // --- LAB DEMO SERVICES ---
 
 export const generateAgentArchitecture = async (goal: string): Promise<ArchitectureResult> => {
-  const startTime = performance.now();
   const schema: Schema = {
     type: Type.OBJECT,
     properties: {
@@ -317,56 +265,27 @@ export const generateAgentArchitecture = async (goal: string): Promise<Architect
     required: ["agents", "flow", "summary"]
   };
 
-  const prompt = `Analyze this user goal and design a Multi-Agent System architecture to solve it.
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `Analyze this user goal and design a Multi-Agent System architecture to solve it. 
     Goal: "${goal}".
-    Create 3-5 agents. Assign specific roles and tools (e.g., 'WebSearch', 'PythonInterpreter').
+    Create 3-5 agents. Assign specific roles and tools (e.g., 'WebSearch', 'PythonInterpreter'). 
     Define the flow of information between them.
-    Colors should be cyberpunk themed (neon cyan, purple, pink, yellow).`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: schema,
-        temperature: 0.5
-      }
-    });
-
-    const latencyMs = performance.now() - startTime;
-
-    if (response.text) {
-      trackLLMGeneration({
-        model: 'gemini-2.5-flash',
-        provider: 'google',
-        inputMessages: [{ role: 'user', content: prompt }],
-        outputContent: response.text,
-        latencyMs,
-        success: true,
-        metadata: { feature: 'lab_agent_architecture' },
-      });
-      return JSON.parse(response.text) as ArchitectureResult;
+    Colors should be cyberpunk themed (neon cyan, purple, pink, yellow).`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+      temperature: 0.5
     }
-    throw new Error("Failed to generate architecture");
-  } catch (error) {
-    const latencyMs = performance.now() - startTime;
-    trackLLMGeneration({
-      model: 'gemini-2.5-flash',
-      provider: 'google',
-      inputMessages: [{ role: 'user', content: prompt }],
-      outputContent: '',
-      latencyMs,
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      metadata: { feature: 'lab_agent_architecture' },
-    });
-    throw error;
+  });
+
+  if (response.text) {
+    return JSON.parse(response.text) as ArchitectureResult;
   }
+  throw new Error("Failed to generate architecture");
 };
 
 export const optimizePrompt = async (prompt: string, options: string[] = []): Promise<PromptResult> => {
-  const startTime = performance.now();
   const schema: Schema = {
     type: Type.OBJECT,
     properties: {
@@ -379,107 +298,47 @@ export const optimizePrompt = async (prompt: string, options: string[] = []): Pr
     required: ["original", "optimized", "score", "critique", "changes"]
   };
 
-  const focusInstruction = options.length > 0
-    ? `Prioritize the following attributes: ${options.join(', ')}.`
+  const focusInstruction = options.length > 0 
+    ? `Prioritize the following attributes: ${options.join(', ')}.` 
     : '';
 
-  const fullPrompt = `Act as a Senior Prompt Engineer. Analyze the following prompt and optimize it for a Large Language Model (like GPT-4 or Gemini 1.5).
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `Act as a Senior Prompt Engineer. Analyze the following prompt and optimize it for a Large Language Model (like GPT-4 or Gemini 1.5).
     Apply techniques like: Chain of Thought, Persona adoption, Delimiters, Output formatting.
     ${focusInstruction}
-
-    Input Prompt: "${prompt}"`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: fullPrompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: schema,
-        temperature: 0.4
-      }
-    });
-
-    const latencyMs = performance.now() - startTime;
-
-    if (response.text) {
-      trackLLMGeneration({
-        model: 'gemini-2.5-flash',
-        provider: 'google',
-        inputMessages: [{ role: 'user', content: fullPrompt }],
-        outputContent: response.text,
-        latencyMs,
-        success: true,
-        metadata: { feature: 'lab_prompt_optimizer', options },
-      });
-      return JSON.parse(response.text) as PromptResult;
+    
+    Input Prompt: "${prompt}"`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+      temperature: 0.4
     }
-    throw new Error("Failed to optimize prompt");
-  } catch (error) {
-    const latencyMs = performance.now() - startTime;
-    trackLLMGeneration({
-      model: 'gemini-2.5-flash',
-      provider: 'google',
-      inputMessages: [{ role: 'user', content: fullPrompt }],
-      outputContent: '',
-      latencyMs,
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      metadata: { feature: 'lab_prompt_optimizer', options },
-    });
-    throw error;
+  });
+
+  if (response.text) {
+    return JSON.parse(response.text) as PromptResult;
   }
+  throw new Error("Failed to optimize prompt");
 };
 
 export const compressContext = async (text: string): Promise<string> => {
-  const startTime = performance.now();
-  const prompt = `You are a Context Optimizer. Your goal is to reduce the token count of the following text by 30-50% without losing any key information, facts, or semantic meaning.
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `You are a Context Optimizer. Your goal is to reduce the token count of the following text by 30-50% without losing any key information, facts, or semantic meaning.
     Remove filler words, redundant phrasing, and excessive formatting. Keep code snippets intact.
-
+    
     Input Text:
-    """${text.substring(0, 30000)}"""`;
+    """${text.substring(0, 30000)}"""`,
+    config: {
+      temperature: 0.2
+    }
+  });
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        temperature: 0.2
-      }
-    });
-
-    const latencyMs = performance.now() - startTime;
-    const output = response.text || text;
-
-    trackLLMGeneration({
-      model: 'gemini-2.5-flash',
-      provider: 'google',
-      inputMessages: [{ role: 'user', content: prompt }],
-      outputContent: output,
-      latencyMs,
-      success: true,
-      metadata: { feature: 'lab_context_compressor', input_length: text.length },
-    });
-
-    return output;
-  } catch (error) {
-    const latencyMs = performance.now() - startTime;
-    trackLLMGeneration({
-      model: 'gemini-2.5-flash',
-      provider: 'google',
-      inputMessages: [{ role: 'user', content: prompt }],
-      outputContent: '',
-      latencyMs,
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      metadata: { feature: 'lab_context_compressor' },
-    });
-    throw error;
-  }
+  return response.text || text;
 };
 
 export const analyzeDocument = async (text: string, query: string): Promise<RAGResult> => {
-  const startTime = performance.now();
   const schema: Schema = {
     type: Type.OBJECT,
     properties: {
@@ -490,57 +349,28 @@ export const analyzeDocument = async (text: string, query: string): Promise<RAGR
     required: ["answer", "citations", "confidence"]
   };
 
-  const prompt = `You are a RAG (Retrieval Augmented Generation) system.
-    Context Document: """${text.substring(0, 50000)}"""
-
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `You are a RAG (Retrieval Augmented Generation) system. 
+    Context Document: """${text.substring(0, 50000)}""" 
+    
     User Query: "${query}"
-
-    Answer the query strictly based on the provided text. Identify the exact substrings used to formulate your answer as citations.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: schema,
-        temperature: 0.2
-      }
-    });
-
-    const latencyMs = performance.now() - startTime;
-
-    if (response.text) {
-      trackLLMGeneration({
-        model: 'gemini-2.5-flash',
-        provider: 'google',
-        inputMessages: [{ role: 'user', content: prompt }],
-        outputContent: response.text,
-        latencyMs,
-        success: true,
-        metadata: { feature: 'lab_rag_analyzer', query },
-      });
-      return JSON.parse(response.text) as RAGResult;
+    
+    Answer the query strictly based on the provided text. Identify the exact substrings used to formulate your answer as citations.`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+      temperature: 0.2
     }
-    throw new Error("Failed to analyze document");
-  } catch (error) {
-    const latencyMs = performance.now() - startTime;
-    trackLLMGeneration({
-      model: 'gemini-2.5-flash',
-      provider: 'google',
-      inputMessages: [{ role: 'user', content: prompt }],
-      outputContent: '',
-      latencyMs,
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      metadata: { feature: 'lab_rag_analyzer', query },
-    });
-    throw error;
+  });
+
+  if (response.text) {
+    return JSON.parse(response.text) as RAGResult;
   }
+  throw new Error("Failed to analyze document");
 };
 
 export const predictMatch = async (matchup: string): Promise<PredictionResult> => {
-  const startTime = performance.now();
   const schema: Schema = {
     type: Type.OBJECT,
     properties: {
@@ -553,50 +383,22 @@ export const predictMatch = async (matchup: string): Promise<PredictionResult> =
     required: ["matchup", "winner", "probability", "keyFactors", "mvpPrediction"]
   };
 
-  const prompt = `Act as an Esports Analyst/Oracle. Analyze the following hypothetical matchup based on historical team data, playstyles, and meta trends (up to your knowledge cutoff).
-
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `Act as an Esports Analyst/Oracle. Analyze the following hypothetical matchup based on historical team data, playstyles, and meta trends (up to your knowledge cutoff).
+    
     Matchup: "${matchup}"
-
-    Provide a prediction. If teams are generic, invent plausible scenarios based on current esports meta.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: schema,
-        temperature: 0.7
-      }
-    });
-
-    const latencyMs = performance.now() - startTime;
-
-    if (response.text) {
-      trackLLMGeneration({
-        model: 'gemini-2.5-flash',
-        provider: 'google',
-        inputMessages: [{ role: 'user', content: prompt }],
-        outputContent: response.text,
-        latencyMs,
-        success: true,
-        metadata: { feature: 'lab_esports_predictor', matchup },
-      });
-      return JSON.parse(response.text) as PredictionResult;
+    
+    Provide a prediction. If teams are generic, invent plausible scenarios based on current esports meta.`,
+    config: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+      temperature: 0.7
     }
-    throw new Error("Failed to generate prediction");
-  } catch (error) {
-    const latencyMs = performance.now() - startTime;
-    trackLLMGeneration({
-      model: 'gemini-2.5-flash',
-      provider: 'google',
-      inputMessages: [{ role: 'user', content: prompt }],
-      outputContent: '',
-      latencyMs,
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-      metadata: { feature: 'lab_esports_predictor', matchup },
-    });
-    throw error;
+  });
+
+  if (response.text) {
+    return JSON.parse(response.text) as PredictionResult;
   }
+  throw new Error("Failed to generate prediction");
 };

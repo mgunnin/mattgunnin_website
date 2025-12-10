@@ -20,12 +20,13 @@ import Booking from './components/Booking';
 import Footer from './components/Footer';
 import Sitemap from './components/Sitemap';
 import SEO from './components/SEO';
+import NotFound from './components/NotFound';
 import { Menu, X } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentSection, setCurrentSection] = useState('hero');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [pageMode, setPageMode] = useState<'home' | 'booking' | 'blog' | 'case-studies' | 'sitemap'>('home');
+  const [pageMode, setPageMode] = useState<'home' | 'booking' | 'blog' | 'case-studies' | 'sitemap' | '404'>('home');
 
   useEffect(() => {
     // Check for direct route access via Hash or Path
@@ -33,46 +34,68 @@ const App: React.FC = () => {
         // Prioritize Hash routing for restricted environments (Blob/Sandboxed)
         const hash = window.location.hash;
         const path = hash.length > 1 ? hash.substring(1) : window.location.pathname;
+        const cleanPath = path === '/' ? '/' : path.replace(/\/$/, '');
         
-        if (path === '/book' || path.startsWith('/book')) {
+        // 1. Explicit Standalone Pages
+        if (cleanPath === '/book' || cleanPath.startsWith('/book/')) {
             setPageMode('booking');
             window.scrollTo(0, 0);
             return;
         } 
         
-        if (path.startsWith('/blog')) {
+        if (cleanPath === '/blog' || cleanPath.startsWith('/blog/')) {
             setPageMode('blog');
             window.scrollTo(0, 0);
             return;
         }
 
-        if (path.startsWith('/case-studies')) {
+        if (cleanPath === '/case-studies' || cleanPath.startsWith('/case-studies/')) {
             setPageMode('case-studies');
             window.scrollTo(0, 0);
             return;
         }
 
-        if (path === '/sitemap') {
+        if (cleanPath === '/sitemap') {
             setPageMode('sitemap');
             window.scrollTo(0, 0);
             return;
         }
 
-        setPageMode('home');
+        // 2. Home Section Checks (deep links that should render Home)
+        const validHomeSections = [
+            'hero', 'about', 'resume', 'projects', 'speaking',
+            'resources', 'tools', 'lab', 'contact'
+        ];
 
-        // Handle anchor/deep links if on home page
-        // We use a small timeout to allow rendering
-        if (path.includes('/tools')) {
-            setTimeout(() => document.getElementById('tools')?.scrollIntoView(), 100);
-        } else if (path.includes('/case-studies') && path === '/case-studies') {
-             setTimeout(() => document.getElementById('case-studies')?.scrollIntoView(), 100);
-        } else if (path.includes('/speaking')) {
-            setTimeout(() => document.getElementById('speaking')?.scrollIntoView(), 100);
-        } else if (path.includes('/resources')) {
-            setTimeout(() => document.getElementById('resources')?.scrollIntoView(), 100);
-        } else if (new URLSearchParams(window.location.search).get('project')) {
-            setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 100);
+        // Root is always home
+        if (cleanPath === '/' || cleanPath === '') {
+             setPageMode('home');
+             return;
         }
+
+        // Check if it starts with a valid section (e.g. /tools/roi-calculator)
+        const isHomeSection = validHomeSections.some(section =>
+            cleanPath === `/${section}` || cleanPath.startsWith(`/${section}/`)
+        );
+
+        if (isHomeSection) {
+            setPageMode('home');
+            const section = validHomeSections.find(s => cleanPath.includes(s));
+            if(section) {
+                 setTimeout(() => document.getElementById(section)?.scrollIntoView(), 100);
+            }
+            return;
+        }
+
+        // Handle Project specific query params which are usually on root
+        if (new URLSearchParams(window.location.search).get('project')) {
+             setPageMode('home');
+             setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 100);
+             return;
+        }
+        
+        // 3. Fallback to 404
+        setPageMode('404');
     };
 
     checkRoute();
@@ -170,6 +193,21 @@ const App: React.FC = () => {
     { id: 'contact', label: 'Contact' },
     { id: 'book', label: 'Book' },
   ];
+
+  if (pageMode === '404') {
+    return (
+        <main className="min-h-screen bg-cyber-black text-gray-200 font-sans cursor-auto md:cursor-none">
+            <SEO 
+                title="Page Not Found | Matt Gunnin"
+                description="The requested page could not be found."
+            />
+            <Cursor />
+            <Background />
+            <NotFound />
+            <NeuralInterface currentSection="404" />
+        </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-cyber-black text-gray-200 selection:bg-cyber-primary selection:text-black font-sans overflow-x-hidden cursor-auto md:cursor-none">
