@@ -226,7 +226,7 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                    {resource.author?.avatar && (
                      <img 
                         src={resource.author.avatar} 
-                        onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
+                        onError={(e) => { e.currentTarget.src = "https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1"; }}
                         alt={resource.author.name} 
                         className="w-full h-full object-cover" 
                      />
@@ -275,7 +275,7 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                    <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
                       <img 
                           src={resource.author?.avatar || "/matt.jpg"}
-                          onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
+                          onError={(e) => { e.currentTarget.src = "https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1"; }}
                           alt={resource.author?.name || "Team"}
                           className="w-full h-full object-cover" 
                       />

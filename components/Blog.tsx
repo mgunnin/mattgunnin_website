@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft, Filter, Share2, Linkedin, Copy, Clock, Hash, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import { BlogPost } from '../types';
@@ -246,7 +245,7 @@ const SinglePostView: React.FC<{
                               <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden">
                                  <img 
                                     src="/matt.jpg" 
-                                    onError={(e) => { e.currentTarget.src = "https://ui-avatars.com/api/?name=Matt+Gunnin&background=0D8ABC&color=fff"; }}
+                                    onError={(e) => { e.currentTarget.src = "https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1"; }}
                                     alt="Matt Gunnin" 
                                     className="w-full h-full object-cover" 
                                  />

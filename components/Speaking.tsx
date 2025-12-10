@@ -129,8 +129,7 @@ const Speaking: React.FC = () => {
                <img 
                  src="/matt.jpg" 
                  onError={(e) => {
-                    // Fallback to high-quality placeholder if local file is missing/broken
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=1200&auto=format&fit=crop";
+                    e.currentTarget.src = "https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1";
                  }}
                  alt="Matt Gunnin Speaking" 
                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
