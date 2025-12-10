@@ -101,7 +101,7 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <section id="hero" className="relative h-screen min-h-[800px] w-full flex flex-col items-center justify-center overflow-hidden bg-cyber-black">
+    <section id="hero" className="relative w-full flex flex-col items-center overflow-hidden bg-cyber-black min-h-screen md:h-screen md:min-h-[800px] pt-28 pb-12 md:py-0 justify-start md:justify-center">
       
       {/* Matrix Rain Canvas */}
       <canvas 
@@ -257,7 +257,7 @@ const Hero: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1 }}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-gray-700 animate-bounce"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-gray-700 animate-bounce hidden md:block"
       >
         <ChevronDown size={20} />
       </motion.div>
