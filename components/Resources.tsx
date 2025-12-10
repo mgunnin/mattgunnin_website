@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Book, PenTool, Newspaper, Search, Send, CloudRain, Clock, User, Share2, ArrowLeft, List, Check, Calendar, Github, Download, ExternalLink } from 'lucide-react';
+import { ArrowRight, Book, PenTool, Newspaper, Search, Send, Library, Clock, User, Share2, ArrowLeft, List, Check, Calendar, Github, Download, ExternalLink } from 'lucide-react';
 import { Resource } from '../types';
 
 const resourcesData: Resource[] = [
@@ -14,17 +14,6 @@ const resourcesData: Resource[] = [
     tags: ['AI', 'Dev', 'Tools'],
     url: 'https://raindrop.io/esports', // Direct link
     readTime: 'External'
-  },
-  {
-    id: '5',
-    title: 'Agentic Starter Kit',
-    description: 'A production-ready boilerplate for building multi-agent systems with Next.js, Python (FastAPI), and CrewAI. Includes pre-configured vector database connection.',
-    type: 'Tool',
-    slug: 'starter-kit',
-    date: 'v2.1.0',
-    tags: ['Code', 'GitHub', 'Template'],
-    url: 'https://github.com', // Placeholder for actual repo
-    readTime: 'Repository'
   },
   {
     id: '4',
@@ -162,8 +151,6 @@ const resourcesData: Resource[] = [
   }
 ];
 
-// --- REUSABLE RESOURCE DETAIL TEMPLATE ---
-
 const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> = ({ resource, onClose }) => {
   const [copied, setCopied] = useState(false);
 
@@ -180,7 +167,6 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
 
   return (
     <div className="max-w-5xl mx-auto animate-[fadeIn_0.3s_ease-out] pb-24">
-      {/* Navigation Header */}
       <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-gray-800 py-4 mb-8 flex items-center justify-between">
          <button onClick={onClose} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group">
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -195,9 +181,7 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-         {/* Main Content */}
          <div className="lg:col-span-8 space-y-8">
-            {/* Header Section */}
             <div>
                <div className="flex flex-wrap gap-2 mb-4">
                   <span className="text-xs font-mono text-cyber-primary bg-cyber-primary/10 border border-cyber-primary/20 px-2 py-1 rounded uppercase">
@@ -220,7 +204,6 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                </div>
             </div>
 
-            {/* Author Block Mobile */}
             <div className="lg:hidden flex items-center gap-4 bg-gray-900/30 p-4 rounded-xl border border-gray-800">
                 <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden">
                    {resource.author?.avatar && (
@@ -238,13 +221,11 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                 </div>
             </div>
 
-            {/* Content Body */}
             <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-gray-300 prose-a:text-cyber-primary hover:prose-a:text-white prose-code:text-cyber-secondary prose-code:bg-gray-900 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-800">
                {resource.content && <div dangerouslySetInnerHTML={{ __html: resource.content }} />}
                {!resource.content && <p className="text-gray-500 italic">Content loading...</p>}
             </div>
 
-            {/* Newsletter CTA Bottom */}
             <div className="mt-16 bg-gradient-to-br from-gray-900 to-black border border-gray-800 p-8 rounded-2xl relative overflow-hidden">
                <div className="absolute top-0 right-0 p-4 opacity-10">
                   <Send size={100} />
@@ -266,9 +247,7 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
             </div>
          </div>
 
-         {/* Sidebar */}
          <div className="lg:col-span-4 space-y-8">
-            {/* Author Widget */}
             <div className="hidden lg:block bg-gray-900/30 p-6 rounded-2xl border border-gray-800 sticky top-32">
                <h3 className="text-xs font-mono text-gray-500 uppercase mb-4">Written By</h3>
                <div className="flex items-center gap-4 mb-4">
@@ -276,7 +255,7 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                       <img 
                           src={resource.author?.avatar || "/matt.jpg"}
                           onError={(e) => { e.currentTarget.src = "https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1"; }}
-                          alt={resource.author?.name || "Team"}
+                          alt={resource.author?.name || "Matt Gunnin"}
                           className="w-full h-full object-cover" 
                       />
                    </div>
@@ -294,7 +273,6 @@ const ResourceDetailView: React.FC<{ resource: Resource; onClose: () => void }> 
                </div>
             </div>
 
-            {/* Table of Contents */}
             {resource.toc && (
                <div className="hidden lg:block">
                   <h3 className="text-xs font-mono text-gray-500 uppercase mb-4 flex items-center gap-2">
@@ -345,7 +323,6 @@ const Resources: React.FC = () => {
     ? resourcesData 
     : resourcesData.filter(r => r.type === filter);
 
-  // Handle URL Routing
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('resource');
@@ -374,7 +351,7 @@ const Resources: React.FC = () => {
 
   const handleOpenResource = (resource: Resource) => {
     if (resource.url) {
-        window.open(resource.url, '_blank');
+        window.open(resource.url, '_blank', 'noopener noreferrer');
         return;
     }
     
@@ -391,10 +368,8 @@ const Resources: React.FC = () => {
 
   return (
     <section id="resources" className="py-24 px-6 md:px-24 w-full bg-black relative min-h-screen">
-      {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-800 to-transparent"></div>
       
-      {/* Detail View Overlay */}
       {selectedResource ? (
         <ResourceDetailView resource={selectedResource} onClose={handleCloseResource} />
       ) : (
@@ -402,14 +377,13 @@ const Resources: React.FC = () => {
            <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
               <div>
                 <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center gap-3">
-                  RESOURCE HUB <CloudRain className="text-cyber-primary fill-cyber-primary/20" />
+                  RESOURCE HUB <Library className="text-cyber-primary" />
                 </h2>
                 <p className="text-gray-400 max-w-xl">
                   A curated library of tools, guides, and architectural references for the agentic future.
                 </p>
               </div>
               
-              {/* Newsletter Mini Form */}
               <div className="bg-gray-900/50 p-6 rounded-xl border border-gray-800 w-full md:w-auto backdrop-blur-sm">
                  <h4 className="text-white font-bold mb-2 text-sm">Join the Neural Network</h4>
                  <p className="text-gray-500 text-xs mb-3">Weekly insights on AI Agents & Architecture.</p>
@@ -428,7 +402,6 @@ const Resources: React.FC = () => {
               </div>
            </div>
 
-           {/* Filters */}
            <div className="flex flex-wrap gap-2 mb-8 border-b border-gray-800 pb-4">
              {['All', 'Guide', 'Tool', 'Post'].map((f) => (
                <button
@@ -445,7 +418,6 @@ const Resources: React.FC = () => {
              ))}
            </div>
 
-           {/* Grid */}
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredResources.map((res) => (
                  <button 

@@ -131,7 +131,7 @@ const Speaking: React.FC = () => {
                  onError={(e) => {
                     e.currentTarget.src = "https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1";
                  }}
-                 alt="Matt Gunnin Speaking" 
+                 alt="Matt Gunnin Speaking at Tech Conference" 
                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                />
                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
@@ -186,7 +186,7 @@ const Speaking: React.FC = () => {
                 <div key={engagement.id} className="group relative bg-gray-900/20 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-600 transition-all flex flex-col md:flex-row">
                    <div className="md:w-1/3 relative h-48 md:h-auto overflow-hidden">
                       <div className="absolute inset-0 bg-cyber-accent/10 mix-blend-overlay z-10 group-hover:opacity-0 transition-opacity"></div>
-                      <img src={engagement.imageUrl} alt={engagement.event} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img src={engagement.imageUrl} alt={`Speaking at ${engagement.event}`} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       {engagement.videoUrl && (
                         <div className="absolute inset-0 flex items-center justify-center z-20 opacity-0 group-hover:opacity-100 transition-opacity">
                            <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center border border-white/50">

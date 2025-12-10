@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Code, Cpu, Globe, Database, Box, Terminal, Zap, Server, LayoutTemplate, Brain, MessageSquare, Image as ImageIcon, Bot, ArrowLeft, Calendar, Trophy, Target, MonitorPlay, ChevronRight, Share2 } from 'lucide-react';
 import { Project } from '../types';
@@ -16,21 +15,6 @@ const majorProjects: Project[] = [
       <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Agentic Moment</h3>
       <p class="text-gray-300 leading-relaxed mb-6">
         The "Chatbot Era" is ending. Businesses no longer just want AI that talks; they want AI that <strong>works</strong>. We founded Vertical Labs to capitalize on the emergence of Agentic AI—systems capable of reasoning, planning, and executing tasks autonomously, rather than just generating text.
-      </p>
-
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Architecture</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        We architect sophisticated multi-agent systems using cutting-edge frameworks like <strong>CrewAI</strong>, <strong>Eliza</strong>, and <strong>OpenAI Swarm</strong>. Unlike monolithic LLM applications, our agents operate in collaborative swarms:
-      </p>
-      <ul class="list-disc pl-6 mb-6 space-y-2 text-gray-400">
-        <li><strong>Researcher Agents:</strong> Scour internal vector databases (RAG) for context.</li>
-        <li><strong>Analyst Agents:</strong> Process data patterns and insights.</li>
-        <li><strong>Executor Agents:</strong> Trigger API calls to perform actions (e.g., booking, coding, deployment).</li>
-      </ul>
-
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">Service-as-Software</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        We are pioneering a new delivery model. Instead of selling tools for humans to use (SaaS), we build <strong>autonomous digital employees</strong> that integrate directly into enterprise workflows. This shift from SaaS to "Service-as-Software" dramatically increases ROI by reducing human operational overhead.
       </p>
     `,
     achievements: [
@@ -50,35 +34,6 @@ const majorProjects: Project[] = [
     role: 'Founder/CEO',
     period: '2016 - 2023',
     description: 'Founded and led a pioneering technology startup focusing on advanced analytics and real-time data solutions for the esports industry. Revolutionized data capture using Computer Vision.',
-    caseStudy: `
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Problem</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        In 2016, esports data was trapped in video pixels. Unlike traditional sports which had robust APIs for every play, esports data existed only on the screen. Teams, broadcasters, and fantasy platforms lacked a real-time "source of truth."
-      </p>
-
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">AI Innovation</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        We built proprietary <strong>Computer Vision and Reinforcement Learning</strong> pipelines capable of ingesting live game feeds and extracting complex state data with <strong>99.8% accuracy</strong>. This technology powered real-time dashboards for partners like Riot Games, the NBA, and the NFL.
-      </p>
-
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Web3 Pivot & Community</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        Recognizing the shift towards digital ownership, we expanded into Web3, launching NFT membership passes that granted access to advanced fantasy tools. This initiative resulted in:
-      </p>
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <div class="bg-black/40 p-3 rounded border border-gray-800">
-          <div class="text-cyber-primary font-bold text-xl">92,000+</div>
-          <div class="text-xs text-gray-500 uppercase">NFTs Minted</div>
-        </div>
-        <div class="bg-black/40 p-3 rounded border border-gray-800">
-          <div class="text-cyber-primary font-bold text-xl">10,000+</div>
-          <div class="text-xs text-gray-500 uppercase">Discord Members</div>
-        </div>
-      </div>
-      <p class="text-gray-300 leading-relaxed">
-        We successfully raised <strong>$10M+</strong> from Tier 1 VCs (Eniac, XSeed, Quake) and scaled our platforms to reach over <strong>10 million users</strong> across the portfolio.
-      </p>
-    `,
     achievements: [
       'Raised over $10 million from top Venture Capital firms (Eniac Ventures, Quake Capital, XSeed Capital).',
       'Spearheaded the implementation of Computer Vision and Reinforcement Learning with 99.8% accuracy.',
@@ -96,25 +51,6 @@ const majorProjects: Project[] = [
     role: 'Founder/CEO',
     period: '2011 - 2014',
     description: 'Founded the global go-to resource for competitive League of Legends. Architected from the ground up to serve millions of passionate users.',
-    caseStudy: `
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Problem</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        In 2011, the esports landscape was fragmented. Information about tournaments, player rosters, and match statistics was scattered across reddit threads and outdated fan sites. There was no single record of history for the booming League of Legends ecosystem.
-      </p>
-
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">The Solution</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        Leaguepedia was architected as the first comprehensive, community-driven encyclopedia for competitive League of Legends. We democratized data access, allowing anyone to contribute while maintaining strict editorial standards.
-      </p>
-
-      <h3 class="text-2xl font-bold text-white mb-4 border-l-4 border-cyber-primary pl-4">Scale & Exit</h3>
-      <p class="text-gray-300 leading-relaxed mb-6">
-        Leveraging a customized MediaWiki framework and aggressive growth hacking strategies, we grew to <strong>12 million monthly pageviews</strong> and <strong>3 million MAUs</strong> within the first year. 
-      </p>
-      <p class="text-gray-300 leading-relaxed">
-        The platform became indispensable to the ecosystem, leading to its acquisition by <strong>Curse Inc.</strong> (later acquired by Amazon/Twitch). This exit validated the thesis that community-curated data is a valuable asset class in esports.
-      </p>
-    `,
     achievements: [
       'Doubled site traffic to 12 million monthly pageviews and 3 million MAUs within the first year.',
       'Acquired by Curse Inc. (later acquired by Twitch/Amazon) in 2014.',
@@ -298,7 +234,6 @@ const ProjectCard: React.FC<{ project: Project; onClick: () => void; isCompact?:
     onClick={onClick}
     className={`group relative bg-gray-900 border border-gray-800 hover:border-cyber-primary/50 transition-all duration-500 overflow-hidden rounded-lg flex flex-col cursor-pointer hover:-translate-y-2 ${isCompact ? 'opacity-90 hover:opacity-100' : ''}`}
   >
-    {/* Image Container */}
     <div className={`${isCompact ? 'h-40' : 'h-56'} overflow-hidden relative shrink-0`}>
       <div className="absolute inset-0 bg-cyber-secondary/10 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
       <img 
@@ -348,21 +283,8 @@ const ProjectCard: React.FC<{ project: Project; onClick: () => void; isCompact?:
 const Projects: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  // SEO: Dynamic Document Title
-  useEffect(() => {
-    if (selectedProject) {
-      document.title = `${selectedProject.title} | Matt Gunnin`;
-    } else {
-      document.title = "Matt Gunnin | Agentic AI Architect & Founder";
-    }
-    return () => {
-      document.title = "Matt Gunnin | Agentic AI Architect & Founder";
-    };
-  }, [selectedProject]);
-
   // Handle URL state
   useEffect(() => {
-    // Check URL on mount
     const params = new URLSearchParams(window.location.search);
     const projectId = params.get('project');
     if (projectId) {
@@ -370,7 +292,6 @@ const Projects: React.FC = () => {
       if (project) setSelectedProject(project);
     }
 
-    // Handle back button
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const id = params.get('project');
@@ -388,15 +309,13 @@ const Projects: React.FC = () => {
 
   const handleOpenProject = (project: Project) => {
     setSelectedProject(project);
-    // Push state to URL without reloading
     const newUrl = `${window.location.pathname}?project=${project.id}`;
     window.history.pushState({ projectId: project.id }, '', newUrl);
-    window.scrollTo(0, 0); // Reset scroll for the new "page"
+    window.scrollTo(0, 0);
   };
 
   const handleCloseProject = () => {
     setSelectedProject(null);
-    // Reset URL
     window.history.pushState({}, '', window.location.pathname);
   };
 
@@ -429,7 +348,6 @@ const Projects: React.FC = () => {
     <section id="projects" className="py-24 px-6 md:px-24 w-full min-h-screen flex flex-col justify-center relative bg-gradient-to-b from-transparent to-black/80">
       <div className="max-w-7xl mx-auto w-full">
         
-        {/* Header (Only show if not selected) */}
         {!selectedProject && (
           <div className="flex items-end gap-4 mb-16 border-b border-gray-800 pb-6 animate-[fadeIn_0.5s_ease-out]">
             <h2 className="text-5xl md:text-7xl font-bold text-white opacity-90">CAREER</h2>
@@ -438,10 +356,8 @@ const Projects: React.FC = () => {
         )}
 
         {selectedProject ? (
-          // Detailed Project View (Virtual Page)
           <div className="fixed inset-0 z-50 bg-cyber-black overflow-y-auto animate-[fadeIn_0.3s_ease-out] custom-scrollbar">
              
-             {/* Sticky Nav Overlay */}
              <div className="fixed top-0 left-0 w-full p-6 flex justify-between items-center z-50 pointer-events-none">
                 <ReturnButton onClick={handleCloseProject} />
 
@@ -460,7 +376,6 @@ const Projects: React.FC = () => {
                 </div>
              </div>
 
-             {/* Hero Section */}
              <div className="relative h-[60vh] w-full overflow-hidden shrink-0">
                 <div className="absolute inset-0 bg-gradient-to-t from-cyber-black via-cyber-black/50 to-transparent z-10" />
                 <div className="absolute inset-0 bg-cyber-primary/10 mix-blend-overlay z-10" />
@@ -470,7 +385,6 @@ const Projects: React.FC = () => {
                   className="w-full h-full object-cover"
                 />
 
-                {/* Title Overlay */}
                 <div className="absolute bottom-12 left-6 md:left-24 z-20 max-w-4xl">
                    <div className="flex items-center gap-3 mb-4 animate-[slideIn_0.5s_ease-out]">
                       <span className="bg-cyber-primary text-black text-xs font-bold px-3 py-1 rounded uppercase font-mono tracking-wider shadow-[0_0_15px_rgba(0,240,255,0.4)]">
@@ -494,7 +408,6 @@ const Projects: React.FC = () => {
              </div>
 
              <div className="max-w-7xl mx-auto px-6 md:px-24 py-16 grid grid-cols-1 lg:grid-cols-3 gap-16">
-                {/* Left Column: Details */}
                 <div className="lg:col-span-2 space-y-12 animate-[fadeIn_0.8s_ease-out]">
                    <div className="prose prose-invert prose-lg md:prose-xl max-w-none prose-headings:text-white prose-p:text-gray-300 prose-strong:text-cyber-primary prose-li:text-gray-300">
                       {selectedProject.caseStudy ? (
@@ -526,7 +439,6 @@ const Projects: React.FC = () => {
                    </div>
                 </div>
 
-                {/* Right Column: Tech Stack & Meta */}
                 <div className="space-y-10 animate-[fadeIn_0.9s_ease-out]">
                    <div className="bg-gray-900/20 border border-gray-800 rounded-2xl p-8 backdrop-blur-sm sticky top-24">
                       <h4 className="text-xs font-mono text-cyber-primary uppercase mb-6 tracking-widest border-b border-gray-800 pb-2">Technologies Deployed</h4>
@@ -551,7 +463,6 @@ const Projects: React.FC = () => {
                 </div>
              </div>
 
-             {/* Footer Navigation */}
              <div className="border-t border-gray-900 bg-black py-12 px-6">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <button onClick={() => navigateProject('prev')} className="text-gray-500 hover:text-white transition-colors flex flex-col items-start gap-1">
@@ -567,8 +478,6 @@ const Projects: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-24">
-            
-            {/* Major Ventures Section */}
             <div>
               <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                  <span className="w-8 h-1 bg-cyber-primary inline-block shadow-[0_0_10px_#00f0ff]"></span>
@@ -581,7 +490,6 @@ const Projects: React.FC = () => {
               </div>
             </div>
 
-            {/* Minor Projects Section */}
             <div>
               <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
                  <span className="w-8 h-1 bg-cyber-secondary inline-block shadow-[0_0_10px_#7000ff]"></span>

@@ -1,10 +1,11 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Share2, Check, Download, Calendar, Users, Cpu, Activity, Clock, Target, Layers, Globe, Zap, Database } from 'lucide-react';
 import { CaseStudy } from '../types';
 import ReturnButton from './ReturnButton';
+import SEO from './SEO';
+import Breadcrumbs from './Breadcrumbs';
 
 const caseStudiesData: CaseStudy[] = [
   {
@@ -207,16 +208,33 @@ const CaseStudyDetail: React.FC<{ caseStudy: CaseStudy; onClose: () => void }> =
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}>
+       <SEO 
+         title={`${caseStudy.title} - Case Study | Matt Gunnin`}
+         description={`Case Study: ${caseStudy.title}. ${caseStudy.challenge.substring(0, 150)}...`}
+         image={caseStudy.imageUrl}
+         type="article"
+         breadcrumbs={[
+             { name: 'Home', item: '/' },
+             { name: 'Case Studies', item: '/case-studies' },
+             { name: caseStudy.title, item: `/case-studies/${caseStudy.slug}` }
+         ]}
+       />
+
        <div className="mb-8">
            <ReturnButton onClick={onClose} label="RETURN TO CASE STUDIES" />
        </div>
 
        {/* Hero */}
        <div className="relative h-[400px] rounded-2xl overflow-hidden mb-12 border border-gray-800">
-          <img src={caseStudy.imageUrl} alt={caseStudy.title} className="w-full h-full object-cover" />
+          <img src={caseStudy.imageUrl} alt={`Case Study: ${caseStudy.title}`} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
           <div className="absolute bottom-0 left-0 w-full p-8 md:p-12">
-             <div className="flex gap-4 mb-4">
+             <Breadcrumbs items={[
+                { label: 'Case Studies', href: '/case-studies' },
+                { label: caseStudy.title, href: `/case-studies/${caseStudy.slug}` }
+             ]} />
+             
+             <div className="flex gap-4 mb-4 mt-4">
                 <span className="bg-cyber-primary text-black px-3 py-1 rounded text-xs font-bold uppercase">{caseStudy.industry}</span>
                 <span className="bg-black/50 text-white border border-gray-600 px-3 py-1 rounded text-xs font-bold uppercase">{caseStudy.year}</span>
              </div>
@@ -337,19 +355,15 @@ const CaseStudies: React.FC<CaseStudiesProps> = ({ standalone = false }) => {
   const [filter, setFilter] = useState<'All' | 'AI' | 'Data' | 'Crypto' | 'Enterprise'>('All');
   const [selectedCase, setSelectedCase] = useState<CaseStudy | null>(null);
 
-  // Filter Logic
   const filteredCases = filter === 'All' 
     ? caseStudiesData 
     : caseStudiesData.filter(cs => cs.industry.includes(filter) || cs.title.includes(filter));
 
-  // Routing Logic
   useEffect(() => {
     const handleRoute = () => {
         const hash = window.location.hash;
-        
         let path = hash.startsWith('#') ? hash.substring(1) : hash;
 
-        // If not standalone and path implies deep linking, ignore (prevents embedded rendering of detail)
         if (!standalone && path.startsWith('/case-studies/')) {
             setSelectedCase(null);
             return;
@@ -360,7 +374,6 @@ const CaseStudies: React.FC<CaseStudiesProps> = ({ standalone = false }) => {
             const cs = caseStudiesData.find(c => c.slug === slug);
             if (cs) setSelectedCase(cs);
         } else {
-            // Handle query param fallback or root
             const params = new URLSearchParams(window.location.search);
             const slug = params.get('case-study');
             if (slug) {
@@ -372,11 +385,14 @@ const CaseStudies: React.FC<CaseStudiesProps> = ({ standalone = false }) => {
         }
     };
     
-    // Initial check
     handleRoute();
-    
     window.addEventListener('hashchange', handleRoute);
-    return () => window.removeEventListener('hashchange', handleRoute);
+    window.addEventListener('popstate', handleRoute);
+    
+    return () => {
+        window.removeEventListener('hashchange', handleRoute);
+        window.removeEventListener('popstate', handleRoute);
+    };
   }, [standalone]);
 
   const openCase = (cs: CaseStudy) => {
@@ -418,7 +434,6 @@ const CaseStudies: React.FC<CaseStudiesProps> = ({ standalone = false }) => {
                         </p>
                     </div>
                     
-                    {/* Filters */}
                     <div className="flex flex-wrap gap-2">
                       {['All', 'AI', 'Data', 'Crypto', 'Enterprise'].map(f => (
                         <button 

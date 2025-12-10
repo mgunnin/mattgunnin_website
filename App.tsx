@@ -18,12 +18,14 @@ import Cursor from './components/Cursor';
 import Blog from './components/Blog';
 import Booking from './components/Booking';
 import Footer from './components/Footer';
+import Sitemap from './components/Sitemap';
+import SEO from './components/SEO';
 import { Menu, X } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentSection, setCurrentSection] = useState('hero');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [pageMode, setPageMode] = useState<'home' | 'booking' | 'blog' | 'case-studies'>('home');
+  const [pageMode, setPageMode] = useState<'home' | 'booking' | 'blog' | 'case-studies' | 'sitemap'>('home');
 
   useEffect(() => {
     // Check for direct route access via Hash or Path
@@ -46,6 +48,12 @@ const App: React.FC = () => {
 
         if (path.startsWith('/case-studies')) {
             setPageMode('case-studies');
+            window.scrollTo(0, 0);
+            return;
+        }
+
+        if (path === '/sitemap') {
+            setPageMode('sitemap');
             window.scrollTo(0, 0);
             return;
         }
@@ -165,6 +173,14 @@ const App: React.FC = () => {
 
   return (
     <main className="min-h-screen bg-cyber-black text-gray-200 selection:bg-cyber-primary selection:text-black font-sans overflow-x-hidden cursor-auto md:cursor-none">
+      {/* Global Default SEO */}
+      <SEO 
+        title="Matt Gunnin | Agentic AI Architect & Founder"
+        description="5x Technical Founder & AI Specialist. Architecting agentic AI systems and multi-agent frameworks. Exploring the future of autonomous technology."
+        image="https://mattgunnin.com/og-image.jpg"
+        url="https://mattgunnin.com"
+      />
+
       <Cursor />
       <Background />
       {pageMode === 'home' && <Navigation currentSection={currentSection} />}
@@ -207,6 +223,8 @@ const App: React.FC = () => {
         <Blog standalone={true} />
       ) : pageMode === 'case-studies' ? (
         <CaseStudies standalone={true} />
+      ) : pageMode === 'sitemap' ? (
+        <Sitemap />
       ) : (
         <>
             <Hero />

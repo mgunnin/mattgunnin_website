@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft, Filter, Share2, Linkedin, Copy, Clock, Hash, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import { BlogPost } from '../types';
 import ReturnButton from './ReturnButton';
+import SEO from './SEO';
+import Breadcrumbs from './Breadcrumbs';
 
 const blogPosts: BlogPost[] = [
   {
@@ -136,8 +138,6 @@ const blogPosts: BlogPost[] = [
   }
 ];
 
-// --- SINGLE POST VIEW COMPONENT ---
-
 const SinglePostView: React.FC<{ 
   post: BlogPost; 
   onClose: () => void; 
@@ -153,9 +153,9 @@ const SinglePostView: React.FC<{
     const text = `Read "${post.title}" by Matt Gunnin`;
     
     if (platform === 'twitter') {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank', 'noopener noreferrer');
     } else if (platform === 'linkedin') {
-      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank', 'noopener noreferrer');
     } else {
       navigator.clipboard.writeText(url);
       setCopied(true);
@@ -169,7 +169,32 @@ const SinglePostView: React.FC<{
 
   return (
     <div className="animate-[slideUp_0.4s_ease-out] w-full min-h-screen bg-cyber-black pb-24">
-       {/* CSS for Blog Content Formatting */}
+       {/* SEO Injection */}
+       <SEO 
+         title={`${post.title} | Matt Gunnin`}
+         description={post.excerpt}
+         image={post.image}
+         type="article"
+         schema={{
+             "@context": "https://schema.org",
+             "@type": "BlogPosting",
+             "headline": post.title,
+             "image": post.image,
+             "description": post.excerpt,
+             "author": {
+                 "@type": "Person",
+                 "name": post.author
+             },
+             "datePublished": post.date
+         }}
+         breadcrumbs={[
+             { name: 'Home', item: '/' },
+             { name: 'Blog', item: '/blog' },
+             { name: post.title, item: `/blog/${post.slug}` }
+         ]}
+       />
+
+       {/* Styles... */}
        <style>{`
         .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; color: #d1d5db; }
         .blog-content h3 { font-size: 1.75rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1.5rem; color: white; border-left: 4px solid #00f0ff; padding-left: 1rem; }
@@ -195,7 +220,7 @@ const SinglePostView: React.FC<{
                   onMouseMove={handleMouseMove}
                   onMouseLeave={() => setParallaxOffset({ x: 0, y: 0 })}
                >
-                   {/* Background Image if available, else generative pattern */}
+                   {/* Background Image */}
                    {post.image ? (
                      <div 
                         className="absolute inset-[-10%]"
@@ -216,13 +241,16 @@ const SinglePostView: React.FC<{
                      />
                    )}
                    
-                   {/* Overlay Gradients */}
                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,transparent_20%,#111827_100%)] opacity-80" />
                    
-                   {/* Title Container */}
                    <div className="absolute bottom-0 left-0 w-full p-8 md:p-12 z-20">
-                      <div className="flex flex-wrap gap-2 mb-4">
+                      <Breadcrumbs items={[
+                          { label: 'Blog', href: '/blog' },
+                          { label: post.title, href: `/blog/${post.slug}` }
+                      ]} />
+                      
+                      <div className="flex flex-wrap gap-2 mb-4 mt-4">
                           {post.tags.map(tag => (
                           <button 
                               key={tag} 
@@ -238,7 +266,6 @@ const SinglePostView: React.FC<{
                </div>
 
                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 p-8 md:p-12">
-                   {/* Sidebar Meta */}
                    <div className="lg:col-span-3 space-y-8 order-2 lg:order-1">
                       <div className="bg-black/40 border border-gray-800 rounded-xl p-6 backdrop-blur-sm sticky top-24">
                           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-800">
@@ -276,14 +303,12 @@ const SinglePostView: React.FC<{
                       </div>
                    </div>
 
-                   {/* Main Content */}
                    <div className="lg:col-span-9 order-1 lg:order-2">
                        <div 
                           className="blog-content text-gray-300 text-lg leading-relaxed"
                           dangerouslySetInnerHTML={{ __html: post.content }}
                        />
                        
-                       {/* Footer Navigation */}
                        <div className="mt-16 pt-8 border-t border-gray-800">
                           <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                              <Hash className="text-cyber-primary" /> Related Transmissions
@@ -327,23 +352,17 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
   const [page, setPage] = useState(1);
   const POSTS_PER_PAGE = 6;
 
-  // Handle URL Routing
   useEffect(() => {
     const handleRoute = () => {
-        const hash = window.location.hash; // e.g. #/blog/slug
-        
-        // Robust hash parsing
+        const hash = window.location.hash;
         let path = hash.startsWith('#') ? hash.substring(1) : hash;
         
-        // CRITICAL: If we are embedded in Home (not standalone), we IGNORE deep links logic for state
-        // This prevents the embedded component from hijacking the view unless the route is explicitly active (handled by App.tsx)
         if (!standalone && path.startsWith('/blog/')) {
             setSelectedPost(null);
             return;
         }
 
         if (path.startsWith('/blog/')) {
-            // Remove /blog/ prefix and potential query params
             const slug = path.split('/blog/')[1]?.split('?')[0].split('#')[0].replace(/\/$/, '');
             const post = blogPosts.find(p => p.slug === slug);
             if (post) {
@@ -352,13 +371,11 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
             }
         }
         
-        // Default to list view if no post found
         setSelectedPost(null);
     };
 
     handleRoute();
-    window.addEventListener('hashchange', handleRoute); // Listen for hash changes
-    // Fallback for popstate as well
+    window.addEventListener('hashchange', handleRoute);
     window.addEventListener('popstate', handleRoute);
     
     return () => {
@@ -369,12 +386,10 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
 
   const handleOpenPost = (e: React.MouseEvent, post: BlogPost) => {
     e.preventDefault();
-    // Use hash navigation to avoid SecurityErrors with pushState in restricted environments
     window.location.hash = `/blog/${post.slug}`;
   };
 
   const handleClosePost = () => {
-    // Navigate back to blog root
     if (standalone) {
         window.location.hash = '/blog';
     } else {
@@ -397,10 +412,7 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
     setParallaxOffset({ x, y });
   };
 
-  // Extract unique tags
   const allTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
-
-  // Filter and Pagination
   const filteredPosts = activeTag 
     ? blogPosts.filter(post => post.tags.includes(activeTag))
     : blogPosts;
@@ -412,11 +424,9 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
     <section id="blog" className={`${standalone ? 'min-h-screen pt-24' : 'py-24 border-t border-gray-900'} px-6 md:px-24 w-full bg-cyber-black relative`}>
       <div className="max-w-7xl mx-auto">
         
-        {/* Main Header (only show in list view) */}
         {!selectedPost && (
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-[fadeIn_0.5s_ease-out]">
              <div className="space-y-4">
-                 {/* Back to Home Button (Standalone Mode Only) */}
                  {standalone && (
                     <div className="mb-4">
                         <ReturnButton onClick={() => window.location.hash = '/'} label="RETURN TO BASE" />
@@ -428,7 +438,6 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
                  </div>
              </div>
 
-             {/* Filter Bar */}
              <div className="flex flex-wrap gap-2">
                <button
                  onClick={() => setActiveTag(null)}
@@ -458,7 +467,6 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
         )}
 
         {selectedPost ? (
-          // Single Post View (Full Page or Overlay)
           <SinglePostView 
              post={selectedPost} 
              onClose={handleClosePost} 
@@ -468,7 +476,6 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
              setParallaxOffset={setParallaxOffset} 
           />
         ) : (
-          // List View
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {displayPosts.length > 0 ? (
@@ -523,7 +530,6 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
               )}
             </div>
 
-            {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex justify-center gap-4 mt-12">
                  <button 
