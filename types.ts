@@ -79,6 +79,7 @@ export interface ChatMessage {
   isStreaming?: boolean;
   isThinking?: boolean;
   followUps?: string[];
+  image?: string; // Base64 data for generated images
 }
 
 export interface Experience {

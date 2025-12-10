@@ -1,8 +1,8 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles, Mic, Share2, Download, MessageSquare, Coffee, Briefcase } from 'lucide-react';
-import { sendMessageStream, updateSessionHistory } from '../services/geminiService';
+import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles, Mic, Share2, Download, MessageSquare, Coffee, Briefcase, Image as ImageIcon } from 'lucide-react';
+import { sendMessageStream, updateSessionHistory, generateImage } from '../services/geminiService';
 import { ChatMessage, AgentStatus, CognitiveMode, NeuralInterfaceProps } from '../types';
 import { GenerateContentResponse } from '@google/genai';
 
@@ -56,6 +56,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
     { label: "View Projects", query: "Show me your portfolio of projects." },
     { label: "Vertical Labs", query: "Tell me about Vertical Labs." },
     { label: "Resume", query: "Can I download your resume?" },
+    { label: "Contact", query: "How can I contact Matt directly?" },
   ];
 
   useEffect(() => {
@@ -121,7 +122,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
       setMessages([{
         id: 'init',
         role: 'model',
-        text: `NEURAL UPLINK ESTABLISHED.\n\nHello, I am **Ella**, Matt Gunnin's autonomous AI partner. \nRunning in **${mode}** mode.\n\nI can navigate this system, discuss architectural patterns, or schedule a connection.`
+        text: `NEURAL UPLINK ESTABLISHED.\n\nHello, I am **Ella**, Matt Gunnin's autonomous AI partner. \nRunning in **${mode}** mode.\n\nI can navigate this system, discuss architectural patterns, visualize concepts, or schedule a connection.`
       }]);
     }
   }, [isOpen]);
@@ -265,10 +266,10 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   const handleShare = () => {
       const exportText = messages.map(m => `[${m.role.toUpperCase()}]: ${m.text.replace(/<[^>]*>?/gm, '')}`).join('\n\n');
       navigator.clipboard.writeText(exportText);
-      alert("Conversation copied to clipboard!");
+      alert("Conversation transcript copied to clipboard!");
   };
 
-  const handleToolCall = (functionCall: any) => {
+  const handleToolCall = async (functionCall: any) => {
     const args = functionCall.args;
     
     if (functionCall.name === 'navigate_site') {
@@ -317,6 +318,19 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
         return { result: 'Navigated to booking page' };
     }
 
+    if (functionCall.name === 'generate_image') {
+       setStatus('EXECUTING');
+       // Don't close for image gen, we want to see it
+       try {
+           const prompt = args.prompt;
+           const size = args.size || '1K';
+           const base64Image = await generateImage(prompt, size);
+           return { result: 'Image generated successfully', imageData: base64Image };
+       } catch (error) {
+           return { result: 'Image generation failed', error: String(error) };
+       }
+    }
+
     return { result: 'Unknown function' };
   };
 
@@ -327,8 +341,6 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
 
     const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: text };
     setMessages(prev => [...prev, userMsg]);
-    // Note: sessionHistory is updated in the service, but we don't strictly need to do it here unless we are recreating chat often.
-    // However, to ensure consistency if we switch modes later:
     updateSessionHistory('user', text);
 
     setInput('');
@@ -349,9 +361,17 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
         // Check for Tool Calls
         const fc = content.candidates?.[0]?.content?.parts?.find(p => p.functionCall);
         if (fc && fc.functionCall) {
-            await handleToolCall(fc.functionCall);
+            const toolResult = await handleToolCall(fc.functionCall);
+             
+             // If image was generated, append it
+             if (toolResult.imageData) {
+                setMessages(prev => prev.map(msg => 
+                    msg.id === botMsgId ? { ...msg, image: toolResult.imageData } : msg
+                ));
+             }
+
              const toolName = fc.functionCall.name;
-             const toolMsg = `\n> *EXECUTING PROTOCOL: ${toolName.toUpperCase()}...*`;
+             const toolMsg = `\n> *EXECUTING PROTOCOL: ${toolName.toUpperCase()}...* ${toolResult.error ? '[FAILED]' : '[SUCCESS]'}`;
              fullText += toolMsg;
              setMessages(prev => prev.map(msg => msg.id === botMsgId ? { ...msg, text: fullText } : msg));
             continue;
@@ -601,6 +621,13 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
                     <div className="text-[8px] md:text-[10px] text-gray-500 mb-1 opacity-50 uppercase tracking-widest flex items-center gap-2 font-mono">
                         {msg.role === 'model' ? 'ELLA_CORE' : 'USER_UPLINK'}
                     </div>
+                    
+                    {msg.image && (
+                        <div className="mb-3 rounded-lg overflow-hidden border border-gray-700">
+                             <img src={msg.image} alt="Generated by AI" className="w-full h-auto" />
+                        </div>
+                    )}
+
                     <div 
                         className="whitespace-pre-wrap leading-relaxed"
                         dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.text) }}

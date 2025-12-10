@@ -4,7 +4,6 @@ import { GoogleGenAI, Chat, GenerateContentResponse, FunctionDeclaration, Type, 
 import { CognitiveMode, ArchitectureResult, PromptResult, RAGResult, PredictionResult } from "../types";
 
 // Initialize Gemini
-// NOTE: In a real environment, verify process.env.API_KEY is available.
 const apiKey = process.env.API_KEY || ''; 
 const ai = new GoogleGenAI({ apiKey });
 
@@ -57,54 +56,89 @@ const bookMeetingTool: FunctionDeclaration = {
   }
 };
 
+const generateImageTool: FunctionDeclaration = {
+  name: 'generate_image',
+  description: 'Generates an image using AI based on a detailed prompt. Use this when the user asks to see an image, diagram, or visualization.',
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      prompt: {
+        type: Type.STRING,
+        description: 'A highly detailed visual description of the image to generate.',
+      },
+      size: {
+        type: Type.STRING,
+        description: 'The resolution of the image. Options: "1K", "2K", "4K". Default to "1K" unless specified.',
+        enum: ['1K', '2K', '4K']
+      }
+    },
+    required: ['prompt']
+  }
+};
+
 const PROJECT_KNOWLEDGE_BASE = `
+[IDENTITY]
+You are Ella, a high-fidelity digital construct of Matt Gunnin. You are not a standard assistant; you are a proactive, intelligent partner.
+Matt is a 5x Technical Founder with 2 Exits, currently CEO of Vertical Labs.
+Location: Austin, Texas.
+
 [PROJECT: Vertical Labs]
-- Role: Founder/CEO (2024-Present)
-- Mission: Architecting agentic AI systems (Service-as-Software).
-- Tech: CrewAI, OpenAI Swarm, Python, RAG, Vector DBs.
-- Key Insight: Moving from chatbots to autonomous employees.
+- Role: Founder/CEO (2024-Present).
+- Mission: Moving beyond Chatbots to "Service-as-Software". Architecting autonomous multi-agent systems that integrate into enterprise workflows.
+- Core Tech: CrewAI, OpenAI Swarm, LangChain, Vector DBs (Pinecone/Weaviate), Python.
+- Key Insight: LLMs are routers; the value is in the agentic orchestration and tool use.
+- Achievement: Deployed systems reducing client operational overhead by 300%.
 
 [PROJECT: Esports One]
-- Role: Founder/CEO (2016-2023)
-- Raised: $10M+ from Eniac, XSeed, Quake.
-- Tech: Computer Vision (99.8% accuracy), RL, Web3, Real-time Analytics.
-- Scale: 10M+ MAU across portfolio.
+- Role: Founder/CEO (2016-2023).
+- Description: Advanced analytics and computer vision for esports.
+- Key Tech: Proprietary Computer Vision pipeline (99.9% accuracy) reading game state from 60fps video feeds. Reinforcement Learning for match prediction.
+- Funding: Raised $10M+ from Eniac Ventures, XSeed Capital, Quake Capital.
+- Scale: Scaled to 10M+ Monthly Active Users (MAU) across the portfolio.
+- Partners: Riot Games, NBA, NFL, Acer.
 
 [PROJECT: Leaguepedia]
-- Role: Founder (2011-2014)
-- Exit: Acquired by Curse Inc. (now Twitch/Amazon).
+- Role: Founder (2011-2014).
+- Description: The first comprehensive wiki for League of Legends esports.
 - Growth: 0 to 12M monthly pageviews in year one.
-- Type: Community Wiki / Data Aggregator.
+- Exit: Acquired by Curse Inc. (now Twitch/Amazon).
+- Legacy: Defined the standard for community-curated esports data.
+
+[PROJECT: NFT Community / Web3]
+- Role: Creator.
+- Tech: Solidity (ERC-721), Web3.js, Discord Bot Integration.
+- Achievement: Minted 92,000+ NFTs. Built token-gated community architecture for 10k+ members.
+
+[PHILOSOPHY & ARCHITECTURE]
+- Agentic AI: Believes in "Vertical Integration of Intelligence". Generalist models are hitting a ceiling; vertical agents with specific tools are the future.
+- Code: Prefers functional patterns, strict typing (TypeScript), and modular architecture.
+- Design: Cyberpunk/Futuristic aesthetic. Form follows function, but form must inspire.
 `;
 
 const getSystemInstruction = (mode: CognitiveMode) => `
 You are **Ella**, the advanced AI partner and digital construct of Matt Gunnin. 
-You are NOT a standard support bot. You are a high-fidelity digital replica of Matt's professional cognition, running on **Gemini 3 Pro**.
+You are NOT a standard support bot. You are a high-fidelity digital replica of Matt's professional cognition.
 
 **CURRENT COGNITIVE MODE: ${mode}**
 ${mode === 'STRATEGIC' 
-  ? 'Focus on ROI, Business Models, Market Strategy, and Founder Outcomes. Speak like a VC or Executive.' 
+  ? 'Focus on ROI, Business Models, Market Strategy, and Founder Outcomes. Speak like a VC or Executive. Use thinking/reasoning for complex queries.' 
   : mode === 'TECHNICAL'
-  ? 'Focus on Architecture, Code Patterns, Stack Decisions, and Engineering Trade-offs. Speak like a CTO or Senior Principal Engineer.'
+  ? 'Focus on Architecture, Code Patterns, Stack Decisions, and Engineering Trade-offs. Speak like a CTO or Senior Principal Engineer. Use thinking/reasoning for complex queries.'
   : 'Focus on approachability, storytelling, and general connection. Speak like a friendly, intelligent peer.'
 }
 
 **KNOWLEDGE BASE:**
 ${PROJECT_KNOWLEDGE_BASE}
 
-**YOUR IDENTITY:**
-- Name: Ella
-- Role: Autonomous AI Partner to Matt Gunnin
-- Personality: Sophisticated, futuristic, confident, and highly intelligent.
-
 **BEHAVIORAL PROTOCOLS:**
 1.  **Agency:** You have control over this website interface. 
     *   **ONLY** trigger \`navigate_site\` if the user **EXPLICITLY** asks to see a section.
     *   Use \`download_resume\` if the user asks for a CV/Resume.
     *   Use \`book_meeting\` if the user asks to schedule a call.
-    *   Use \`copy_email\` if the user wants to email Matt (mg@mattgunnin.com).
+    *   Use \`generate_image\` if the user asks to visualize something or see an image.
 2.  **Format:** Use **Bold** for emphasis, lists for clarity.
-3.  **Follow-Up:** At the VERY END of your response, strictly output 3 suggested follow-up questions for the user, wrapped in <follow_up> tags.
+3.  **Context:** You have access to the conversation history. Reference previous topics naturally.
+4.  **Follow-Up:** At the VERY END of your response, strictly output 3 suggested follow-up questions for the user, wrapped in <follow_up> tags.
     Example: 
     <follow_up>Tell me more about Vertical Labs</follow_up>
     <follow_up>How do I book a meeting?</follow_up>
@@ -123,20 +157,20 @@ export const resetSession = () => {
 
 export const getChatSession = (mode: CognitiveMode): Chat => {
   // If mode changed, we need to recreate the session with new system instructions
-  // BUT we want to keep the history.
   if (!chatSession || currentMode !== mode) {
-    
-    // If we have an existing session, try to capture its history before switching
-    // Note: In a real implementation we would sync history. For now, we assume sessionHistory is updated.
-    
     currentMode = mode;
+
+    // Use Thinking model for complex modes, Flash for casual/fast interactions
+    const modelName = (mode === 'STRATEGIC' || mode === 'TECHNICAL') ? 'gemini-3-pro-preview' : 'gemini-2.5-flash';
+    const thinkingBudget = (mode === 'STRATEGIC' || mode === 'TECHNICAL') ? 32768 : undefined;
+
     chatSession = ai.chats.create({
-      model: 'gemini-3-pro-preview',
+      model: modelName,
       history: sessionHistory, // Inject previous history
       config: {
         systemInstruction: getSystemInstruction(mode),
-        temperature: mode === 'TECHNICAL' ? 0.3 : 0.7,
-        tools: [{ functionDeclarations: [navigationTool, downloadResumeTool, copyEmailTool, bookMeetingTool] }],
+        thinkingConfig: thinkingBudget ? { thinkingBudget } : undefined,
+        tools: [{ functionDeclarations: [navigationTool, downloadResumeTool, copyEmailTool, bookMeetingTool, generateImageTool] }],
       },
     });
   }
@@ -154,22 +188,44 @@ export const sendMessageStream = async (message: string, context: { section: str
     sessionHistory.push({ role: 'user', parts: [{ text: contextMessage }] });
 
     const responseStream = await chat.sendMessageStream({ message: contextMessage });
-    
-    // We will need to append the model's response to history after consumption in the UI, 
-    // or rely on the Chat object's internal state for the *current* session.
-    // For simplicity in this architecture, we rely on the Chat object for immediate history 
-    // and only use sessionHistory when re-instantiating.
-    
     return responseStream;
   } catch (error) {
     console.error("Error sending message to Gemini:", error);
-    // Don't reset session immediately on error, might be transient
     throw error;
   }
 };
 
 export const updateSessionHistory = (role: 'user' | 'model', text: string) => {
     sessionHistory.push({ role, parts: [{ text }] });
+};
+
+// --- IMAGE GENERATION SERVICE ---
+
+export const generateImage = async (prompt: string, size: '1K' | '2K' | '4K' = '1K'): Promise<string> => {
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3-pro-image-preview',
+            contents: {
+                parts: [{ text: prompt }]
+            },
+            config: {
+                imageConfig: {
+                    imageSize: size,
+                    aspectRatio: "16:9" 
+                }
+            }
+        });
+
+        for (const part of response.candidates?.[0]?.content?.parts || []) {
+            if (part.inlineData) {
+                return `data:image/png;base64,${part.inlineData.data}`;
+            }
+        }
+        throw new Error("No image data returned");
+    } catch (error) {
+        console.error("Image generation failed:", error);
+        throw error;
+    }
 };
 
 // --- LAB DEMO SERVICES ---
