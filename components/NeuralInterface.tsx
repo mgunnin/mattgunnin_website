@@ -461,7 +461,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
 
   return (
     <div 
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 md:bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
+        className="fixed inset-0 z-50 flex flex-col md:flex-row md:items-center md:justify-center bg-black/95 md:bg-black/90 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]"
         onClick={() => setIsOpen(false)} // Click outside to close
     >
       {/* Background Effects */}
@@ -473,7 +473,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
 
       {/* Main Interface Window */}
       <div 
-        className="relative w-full h-[100dvh] md:h-[90vh] md:max-w-5xl bg-black md:bg-black/90 border-0 md:border border-gray-800 md:rounded-lg shadow-[0_0_50px_rgba(0,240,255,0.1)] flex flex-col overflow-hidden z-20 backdrop-filter backdrop-blur-xl"
+        className="relative w-full h-full md:h-[90vh] md:max-w-5xl bg-black md:bg-black/90 border-0 md:border border-gray-800 md:rounded-lg shadow-[0_0_50px_rgba(0,240,255,0.1)] flex flex-col overflow-hidden z-20 backdrop-filter backdrop-blur-xl"
         onClick={(e) => e.stopPropagation()} // Prevent close on inner click
       >
         
