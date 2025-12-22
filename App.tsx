@@ -1,112 +1,123 @@
 
-import React, { useState, useEffect } from 'react';
-import Background from './components/Background';
-import Navigation from './components/Navigation';
-import Hero from './components/Hero';
-import SocialProof from './components/SocialProof';
-import About from './components/About';
-import Resume from './components/Resume';
-import Projects from './components/Projects';
-import CaseStudies from './components/CaseStudies';
-import Speaking from './components/Speaking';
-import Resources from './components/Resources';
-import Tools from './components/Tools';
-import Lab from './components/Lab';
-import Contact from './components/Contact';
-import NeuralInterface from './components/NeuralInterface';
-import Cursor from './components/Cursor';
-import Blog from './components/Blog';
-import Booking from './components/Booking';
-import Footer from './components/Footer';
-import Sitemap from './components/Sitemap';
-import SEO from './components/SEO';
-import NotFound from './components/NotFound';
+import React, { useState, useEffect, useCallback } from 'react';
+import Background from './components/Background.tsx';
+import Navigation from './components/Navigation.tsx';
+import Hero from './components/Hero.tsx';
+import SocialProof from './components/SocialProof.tsx';
+import About from './components/About.tsx';
+import Resume from './components/Resume.tsx';
+import Projects from './components/Projects.tsx';
+import CaseStudies from './components/CaseStudies.tsx';
+import Speaking from './components/Speaking.tsx';
+import Resources from './components/Resources.tsx';
+import Tools from './components/Tools.tsx';
+import Lab from './components/Lab.tsx';
+import Contact from './components/Contact.tsx';
+import NeuralInterface from './components/NeuralInterface.tsx';
+import Cursor from './components/Cursor.tsx';
+import Blog from './components/Blog.tsx';
+import Booking from './components/Booking.tsx';
+import Footer from './components/Footer.tsx';
+import Sitemap from './components/Sitemap.tsx';
+import SEO from './components/SEO.tsx';
+import NotFound from './components/NotFound.tsx';
 import { Menu, X } from 'lucide-react';
+
+type PageMode = 'home' | 'booking' | 'blog' | 'case-studies' | 'sitemap' | '404';
 
 const App: React.FC = () => {
   const [currentSection, setCurrentSection] = useState('hero');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [pageMode, setPageMode] = useState<'home' | 'booking' | 'blog' | 'case-studies' | 'sitemap' | '404'>('home');
+  const [pageMode, setPageMode] = useState<PageMode>('home');
+
+  const checkRoute = useCallback(() => {
+    const hash = window.location.hash;
+    const pathname = window.location.pathname;
+    
+    // Priority: Hash Routing (Safe for all environments)
+    // If hash exists and looks like a route (starts with #/), use it.
+    let activePath = '';
+    
+    if (hash.length > 1 && hash.startsWith('#/')) {
+        activePath = hash.substring(1); // e.g. /blog
+    } else {
+        // Fallback to pathname, but be careful with subdirectories.
+        // We only care if the pathname *contains* a known route segment.
+        activePath = pathname;
+    }
+
+    // Normalize: remove .html, remove index, lowercase
+    const norm = activePath.toLowerCase().replace('/index.html', '').replace('.html', '');
+    
+    // Helper to check if path contains segment
+    const has = (segment: string) => norm.includes(`/${segment}`) || norm === segment || norm.endsWith(`/${segment}`);
+
+    // 1. Dynamic Pages (Explicit Routes)
+    if (has('book')) {
+      setPageMode('booking');
+      window.scrollTo(0, 0);
+      return;
+    }
+    
+    if (has('blog')) {
+      setPageMode('blog');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (has('case-studies')) {
+      setPageMode('case-studies');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (has('sitemap')) {
+      setPageMode('sitemap');
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    // 2. Home Section Routing
+    // If we are here, we are likely Home. Check for specific sections.
+    const validHomeSections = [
+      'hero', 'about', 'resume', 'projects', 'speaking',
+      'resources', 'tools', 'lab', 'contact'
+    ];
+
+    const matchingSection = validHomeSections.find(s => has(s));
+    
+    setPageMode('home'); // Default to home for everything else (Fail-safe)
+    
+    if (matchingSection) {
+      setCurrentSection(matchingSection);
+      // Small delay to ensure DOM render
+      setTimeout(() => {
+        const element = document.getElementById(matchingSection);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      setCurrentSection('hero');
+      // Only scroll to top if we explicitly detected "home" or "index" or root, 
+      // but defaulting to hero is safe.
+    }
+    
+    // Legacy support
+    if (new URLSearchParams(window.location.search).get('project')) {
+      setCurrentSection('projects');
+      setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 100);
+    }
+  }, []);
 
   useEffect(() => {
-    // Check for direct route access via Hash or Path
-    const checkRoute = () => {
-        // Prioritize Hash routing for restricted environments (Blob/Sandboxed)
-        const hash = window.location.hash;
-        const path = hash.length > 1 ? hash.substring(1) : window.location.pathname;
-        const cleanPath = path === '/' ? '/' : path.replace(/\/$/, '');
-        
-        // 1. Explicit Standalone Pages
-        if (cleanPath === '/book' || cleanPath.startsWith('/book/')) {
-            setPageMode('booking');
-            window.scrollTo(0, 0);
-            return;
-        } 
-        
-        if (cleanPath === '/blog' || cleanPath.startsWith('/blog/')) {
-            setPageMode('blog');
-            window.scrollTo(0, 0);
-            return;
-        }
-
-        if (cleanPath === '/case-studies' || cleanPath.startsWith('/case-studies/')) {
-            setPageMode('case-studies');
-            window.scrollTo(0, 0);
-            return;
-        }
-
-        if (cleanPath === '/sitemap') {
-            setPageMode('sitemap');
-            window.scrollTo(0, 0);
-            return;
-        }
-
-        // 2. Home Section Checks (deep links that should render Home)
-        const validHomeSections = [
-            'hero', 'about', 'resume', 'projects', 'speaking',
-            'resources', 'tools', 'lab', 'contact'
-        ];
-
-        // Root is always home
-        if (cleanPath === '/' || cleanPath === '') {
-             setPageMode('home');
-             return;
-        }
-
-        // Check if it starts with a valid section (e.g. /tools/roi-calculator)
-        const isHomeSection = validHomeSections.some(section =>
-            cleanPath === `/${section}` || cleanPath.startsWith(`/${section}/`)
-        );
-
-        if (isHomeSection) {
-            setPageMode('home');
-            const section = validHomeSections.find(s => cleanPath.includes(s));
-            if(section) {
-                 setTimeout(() => document.getElementById(section)?.scrollIntoView(), 100);
-            }
-            return;
-        }
-
-        // Handle Project specific query params which are usually on root
-        if (new URLSearchParams(window.location.search).get('project')) {
-             setPageMode('home');
-             setTimeout(() => document.getElementById('projects')?.scrollIntoView(), 100);
-             return;
-        }
-        
-        // 3. Fallback to 404
-        setPageMode('404');
-    };
-
     checkRoute();
-    window.addEventListener('popstate', checkRoute);
-    window.addEventListener('hashchange', checkRoute); // Listen for hash changes
+    
+    const onRouteEvent = () => checkRoute();
+    window.addEventListener('popstate', onRouteEvent);
+    window.addEventListener('hashchange', onRouteEvent);
 
     const handleScroll = () => {
       if (pageMode !== 'home') return;
-
       const sections = ['hero', 'about', 'resume', 'projects', 'case-studies', 'speaking', 'resources', 'tools', 'lab', 'blog', 'contact'];
-      // Using a slightly lower threshold for better UX on mobile
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
       for (const section of sections) {
@@ -122,59 +133,41 @@ const App: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => {
-        window.removeEventListener('scroll', handleScroll);
-        window.removeEventListener('popstate', checkRoute);
-        window.removeEventListener('hashchange', checkRoute);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('popstate', onRouteEvent);
+      window.removeEventListener('hashchange', onRouteEvent);
     };
-  }, [pageMode]);
+  }, [checkRoute, pageMode]);
 
   const scrollToSection = (id: string) => {
-    // Handle booking navigation
     if (id === 'book') {
-        window.location.hash = '/book';
-        setIsMobileMenuOpen(false);
-        return;
+      window.location.hash = '/book';
+      setIsMobileMenuOpen(false);
+      return;
     }
 
-    // Handle blog navigation
     if (id === 'blog') {
-        if (pageMode !== 'home') {
-             window.location.hash = '/'; // Go home first
-             setTimeout(() => {
-                document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth' });
-             }, 100);
-        } else {
-             document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth' });
-        }
-        setIsMobileMenuOpen(false);
-        return;
+      if (pageMode !== 'home') window.location.hash = '/blog';
+      else document.getElementById('blog')?.scrollIntoView({ behavior: 'smooth' });
+      setIsMobileMenuOpen(false);
+      return;
     }
 
-    // Handle case studies navigation from menu
     if (id === 'case-studies') {
-        if (pageMode !== 'home') {
-             window.location.hash = '/'; // Go home first
-             setTimeout(() => {
-                document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' });
-             }, 100);
-        } else {
-             document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' });
-        }
-        setIsMobileMenuOpen(false);
-        return;
+      if (pageMode !== 'home') window.location.hash = '/case-studies';
+      else document.getElementById('case-studies')?.scrollIntoView({ behavior: 'smooth' });
+      setIsMobileMenuOpen(false);
+      return;
     }
 
-    // If we are on a different page mode, go home first
     if (pageMode !== 'home') {
-        window.location.hash = '/';
-        setTimeout(() => {
-            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+      window.location.hash = `/${id}`;
     } else {
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+        window.location.hash = `/${id}`;
+      }
     }
     setIsMobileMenuOpen(false);
   };
@@ -196,25 +189,21 @@ const App: React.FC = () => {
 
   if (pageMode === '404') {
     return (
-        <main className="min-h-screen bg-cyber-black text-gray-200 font-sans cursor-auto md:cursor-none">
-            <SEO 
-                title="Page Not Found | Matt Gunnin"
-                description="The requested page could not be found."
-            />
-            <Cursor />
-            <Background />
-            <NotFound />
-            <NeuralInterface currentSection="404" />
-        </main>
+      <main className="min-h-screen bg-cyber-black text-gray-200 font-sans cursor-auto md:cursor-none overflow-x-hidden">
+        <SEO title="Page Not Found | Matt Gunnin" description="The requested page could not be found." />
+        <Cursor />
+        <Background />
+        <NotFound />
+        <NeuralInterface currentSection="404" />
+      </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-cyber-black text-gray-200 selection:bg-cyber-primary selection:text-black font-sans overflow-x-hidden cursor-auto md:cursor-none">
-      {/* Global Default SEO */}
       <SEO 
         title="Matt Gunnin | Agentic AI Architect & Founder"
-        description="5x Technical Founder & AI Specialist. Architecting agentic AI systems and multi-agent frameworks. Exploring the future of autonomous technology."
+        description="5x Technical Founder & AI Specialist. Architecting agentic AI systems and multi-agent frameworks."
         image="https://mattgunnin.com/og-image.jpg"
         url="https://mattgunnin.com"
       />
@@ -223,18 +212,13 @@ const App: React.FC = () => {
       <Background />
       {pageMode === 'home' && <Navigation currentSection={currentSection} />}
       
-      {/* Sticky Header Mobile */}
       <div className="fixed top-0 w-full z-40 flex items-center justify-between p-4 bg-black/80 backdrop-blur-md lg:hidden border-b border-white/5">
-        <span className="font-mono font-bold text-cyber-primary tracking-widest text-sm" onClick={() => scrollToSection('hero')}>MATT_GUNNIN</span>
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="text-cyber-primary p-1"
-        >
+        <span className="font-mono font-bold text-cyber-primary tracking-widest text-sm cursor-pointer" onClick={() => scrollToSection('hero')}>MATT_GUNNIN</span>
+        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-cyber-primary p-1">
           {isMobileMenuOpen ? <X /> : <Menu />}
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-30 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center lg:hidden animate-[fadeIn_0.2s_ease-out]">
           <div className="flex flex-col gap-8 text-center">
@@ -254,9 +238,7 @@ const App: React.FC = () => {
       )}
 
       {pageMode === 'booking' ? (
-        <Booking onBack={() => {
-            window.location.hash = '/';
-        }} />
+        <Booking onBack={() => { window.location.hash = ''; }} />
       ) : pageMode === 'blog' ? (
         <Blog standalone={true} />
       ) : pageMode === 'case-studies' ? (
@@ -265,23 +247,22 @@ const App: React.FC = () => {
         <Sitemap />
       ) : (
         <>
-            <Hero />
-            <SocialProof />
-            <About />
-            <Resume />
-            <Projects />
-            <CaseStudies />
-            <Speaking />
-            <Resources />
-            <Tools />
-            <Lab />
-            <Blog />
-            <Contact />
+          <Hero />
+          <SocialProof />
+          <About />
+          <Resume />
+          <Projects />
+          <CaseStudies />
+          <Speaking />
+          <Resources />
+          <Tools />
+          <Lab />
+          <Blog />
+          <Contact />
         </>
       )}
       
       <NeuralInterface currentSection={pageMode === 'home' ? currentSection : pageMode} />
-
       <Footer />
     </main>
   );

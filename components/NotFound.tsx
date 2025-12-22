@@ -1,8 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Home, Search, Terminal, ArrowLeft, Zap, AlertTriangle, MessageSquare } from 'lucide-react';
+import { Home, Search, Zap, AlertTriangle } from 'lucide-react';
 import Link from './Link';
-import ReturnButton from './ReturnButton';
 
 const NotFound: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,11 +30,14 @@ const NotFound: React.FC = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-    // Redirect to home with search query parameter which Ella or Search component can pick up
-    // For now, we'll just go home and focus the search or similar. 
-    // Actually, a simple redirect to home is often best, or trigger Ella.
-    // Let's make it trigger Ella via hash for now, assuming App handles it or just go home.
     window.location.href = `/?search=${encodeURIComponent(searchQuery)}`;
+  };
+
+  const forceHome = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Use Hash reset which is safer for preview environments
+    window.location.hash = '/';
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -81,9 +83,9 @@ const NotFound: React.FC = () => {
 
         {/* Actions */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12">
-            <Link href="/" className="flex items-center gap-2 bg-cyber-primary text-black font-bold px-6 py-3 rounded hover:bg-white transition-colors w-full md:w-auto justify-center">
+            <button onClick={forceHome} className="flex items-center gap-2 bg-cyber-primary text-black font-bold px-6 py-3 rounded hover:bg-white transition-colors w-full md:w-auto justify-center">
                 <Home size={18} /> RETURN HOME
-            </Link>
+            </button>
             <Link href="/#lab" className="flex items-center gap-2 border border-gray-700 text-white px-6 py-3 rounded hover:border-cyber-primary hover:text-cyber-primary transition-colors w-full md:w-auto justify-center">
                 <Zap size={18} /> ENTER AI LAB
             </Link>
@@ -105,7 +107,7 @@ const NotFound: React.FC = () => {
                 />
             </form>
             <p className="text-[10px] text-gray-600 mt-3 font-mono">
-                Running into issues? <button onClick={() => window.location.href = '/'} className="text-cyber-secondary hover:underline">Ask Ella</button> for navigation assistance.
+                Running into issues? <button onClick={forceHome} className="text-cyber-secondary hover:underline">Ask Ella</button> for navigation assistance.
             </p>
         </div>
 

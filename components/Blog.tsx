@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Calendar, ChevronLeft, Filter, Share2, Linkedin, Copy, Clock, Hash, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
-import { BlogPost } from '../types';
-import ReturnButton from './ReturnButton';
-import SEO from './SEO';
-import Breadcrumbs from './Breadcrumbs';
+import { BlogPost } from '../types.ts';
+import ReturnButton from './ReturnButton.tsx';
+import SEO from './SEO.tsx';
+import Breadcrumbs from './Breadcrumbs.tsx';
 
 const blogPosts: BlogPost[] = [
   {
@@ -169,7 +169,6 @@ const SinglePostView: React.FC<{
 
   return (
     <div className="animate-[slideUp_0.4s_ease-out] w-full min-h-screen bg-cyber-black pb-24">
-       {/* SEO Injection */}
        <SEO 
          title={`${post.title} | Matt Gunnin`}
          description={post.excerpt}
@@ -194,7 +193,6 @@ const SinglePostView: React.FC<{
          ]}
        />
 
-       {/* Styles... */}
        <style>{`
         .blog-content p { margin-bottom: 1.5rem; line-height: 1.8; color: #d1d5db; }
         .blog-content h3 { font-size: 1.75rem; font-weight: 700; margin-top: 3rem; margin-bottom: 1.5rem; color: white; border-left: 4px solid #00f0ff; padding-left: 1rem; }
@@ -214,13 +212,11 @@ const SinglePostView: React.FC<{
            </div>
 
            <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-2xl">
-               {/* Parallax Header */}
                <div 
                   className="relative h-72 md:h-96 w-full overflow-hidden cursor-crosshair group"
                   onMouseMove={handleMouseMove}
                   onMouseLeave={() => setParallaxOffset({ x: 0, y: 0 })}
                >
-                   {/* Background Image */}
                    {post.image ? (
                      <div 
                         className="absolute inset-[-10%]"
@@ -271,8 +267,7 @@ const SinglePostView: React.FC<{
                           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-800">
                               <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden">
                                  <img 
-                                    src="/matt.jpg" 
-                                    onError={(e) => { e.currentTarget.src = "https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1"; }}
+                                    src="https://www.dropbox.com/scl/fi/hh37mi3k8bfmgm7fsbx70/matt.jpg?rlkey=qtsywzir60666vck9xvwkylci&st=7eip8hni&raw=1" 
                                     alt="Matt Gunnin" 
                                     className="w-full h-full object-cover" 
                                  />
@@ -328,9 +323,6 @@ const SinglePostView: React.FC<{
                                    <h4 className="font-bold text-white group-hover:text-cyber-primary transition-colors">{rp.title}</h4>
                                 </a>
                              ))}
-                             {relatedPosts.length === 0 && (
-                                <p className="text-gray-500 italic text-sm">End of related logs.</p>
-                             )}
                           </div>
                        </div>
                    </div>
@@ -341,9 +333,7 @@ const SinglePostView: React.FC<{
   );
 };
 
-interface BlogProps {
-    standalone?: boolean;
-}
+interface BlogProps { standalone?: boolean; }
 
 const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
@@ -356,28 +346,17 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
     const handleRoute = () => {
         const hash = window.location.hash;
         let path = hash.startsWith('#') ? hash.substring(1) : hash;
-        
-        if (!standalone && path.startsWith('/blog/')) {
-            setSelectedPost(null);
-            return;
-        }
-
+        if (!standalone && path.startsWith('/blog/')) { setSelectedPost(null); return; }
         if (path.startsWith('/blog/')) {
             const slug = path.split('/blog/')[1]?.split('?')[0].split('#')[0].replace(/\/$/, '');
             const post = blogPosts.find(p => p.slug === slug);
-            if (post) {
-                setSelectedPost(post);
-                return;
-            }
+            if (post) { setSelectedPost(post); return; }
         }
-        
         setSelectedPost(null);
     };
-
     handleRoute();
     window.addEventListener('hashchange', handleRoute);
     window.addEventListener('popstate', handleRoute);
-    
     return () => {
         window.removeEventListener('hashchange', handleRoute);
         window.removeEventListener('popstate', handleRoute);
@@ -390,11 +369,8 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
   };
 
   const handleClosePost = () => {
-    if (standalone) {
-        window.location.hash = '/blog';
-    } else {
-        window.location.hash = '/';
-    }
+    if (standalone) window.location.hash = '/blog';
+    else window.location.hash = '/';
   };
 
   const handleTagClick = (e: React.MouseEvent, tag: string) => {
@@ -413,17 +389,13 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
   };
 
   const allTags = Array.from(new Set(blogPosts.flatMap(post => post.tags)));
-  const filteredPosts = activeTag 
-    ? blogPosts.filter(post => post.tags.includes(activeTag))
-    : blogPosts;
-  
+  const filteredPosts = activeTag ? blogPosts.filter(post => post.tags.includes(activeTag)) : blogPosts;
   const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
   const displayPosts = filteredPosts.slice((page - 1) * POSTS_PER_PAGE, page * POSTS_PER_PAGE);
 
   return (
     <section id="blog" className={`${standalone ? 'min-h-screen pt-24' : 'py-24 border-t border-gray-900'} px-6 md:px-24 w-full bg-cyber-black relative`}>
       <div className="max-w-7xl mx-auto">
-        
         {!selectedPost && (
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-[fadeIn_0.5s_ease-out]">
              <div className="space-y-4">
@@ -434,132 +406,34 @@ const Blog: React.FC<BlogProps> = ({ standalone = false }) => {
                  )}
                  <div className="flex items-end gap-4">
                      <h2 className="text-4xl md:text-5xl font-bold text-white">TRANSMISSIONS</h2>
-                     <span className="text-cyber-secondary font-mono text-lg mb-1 hidden md:inline">/ LOGS_2025</span>
                  </div>
              </div>
-
              <div className="flex flex-wrap gap-2">
-               <button
-                 onClick={() => setActiveTag(null)}
-                 className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 ${
-                   activeTag === null 
-                     ? 'bg-cyber-primary text-black border-cyber-primary font-bold shadow-[0_0_10px_rgba(0,240,255,0.3)]' 
-                     : 'text-gray-400 border-gray-800 hover:border-cyber-primary/50 hover:text-white bg-black/40'
-                 }`}
-               >
-                 ALL
-               </button>
+               <button onClick={() => setActiveTag(null)} className={`px-4 py-1.5 text-xs font-mono rounded-full border ${activeTag === null ? 'bg-cyber-primary text-black border-cyber-primary' : 'text-gray-400 border-gray-800'}`}>ALL</button>
                {allTags.map(tag => (
-                 <button
-                   key={tag}
-                   onClick={(e) => handleTagClick(e, tag)}
-                   className={`px-4 py-1.5 text-xs font-mono rounded-full border transition-all duration-300 ${
-                     activeTag === tag
-                       ? 'bg-cyber-primary text-black border-cyber-primary font-bold shadow-[0_0_10px_rgba(0,240,255,0.3)]'
-                       : 'text-gray-400 border-gray-800 hover:border-cyber-primary/50 hover:text-white bg-black/40'
-                   }`}
-                 >
-                   #{tag}
-                 </button>
+                 <button key={tag} onClick={(e) => handleTagClick(e, tag)} className={`px-4 py-1.5 text-xs font-mono rounded-full border ${activeTag === tag ? 'bg-cyber-primary text-black border-cyber-primary' : 'text-gray-400 border-gray-800'}`}>{tag}</button>
                ))}
              </div>
           </div>
         )}
 
         {selectedPost ? (
-          <SinglePostView 
-             post={selectedPost} 
-             onClose={handleClosePost} 
-             onTagClick={handleTagClick} 
-             parallaxOffset={parallaxOffset} 
-             handleMouseMove={handleMouseMove} 
-             setParallaxOffset={setParallaxOffset} 
-          />
+          <SinglePostView post={selectedPost} onClose={handleClosePost} onTagClick={handleTagClick} parallaxOffset={parallaxOffset} handleMouseMove={handleMouseMove} setParallaxOffset={setParallaxOffset} />
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {displayPosts.length > 0 ? (
-                  displayPosts.map((post, idx) => (
-                    <a 
-                      key={post.id}
-                      href={`#/blog/${post.slug}`}
-                      onClick={(e) => handleOpenPost(e, post)}
-                      style={{ animationDelay: `${idx * 100}ms` }}
-                      className="group bg-gray-900/30 border border-gray-800 hover:border-cyber-primary hover:bg-gray-900/60 p-6 rounded-xl transition-all duration-300 cursor-pointer flex flex-col h-full hover:-translate-y-1 animate-[fadeIn_0.5s_ease-out_both]"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <span className="text-xs font-mono text-gray-500">{post.date}</span>
-                        <span className="text-xs font-mono text-cyber-secondary">{post.readTime}</span>
-                      </div>
-
-                      <h3 className="text-xl font-bold text-gray-100 group-hover:text-cyber-primary transition-colors mb-3">
-                        {post.title}
-                      </h3>
-                      
-                      <p className="text-gray-400 text-sm mb-6 flex-grow line-clamp-3">
-                        {post.excerpt}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-800/50 mt-auto">
-                        <div className="flex gap-2">
-                          {post.tags.slice(0, 3).map(tag => (
-                            <button 
-                              key={tag} 
-                              onClick={(e) => handleTagClick(e, tag)}
-                              className="text-[10px] text-gray-500 font-mono bg-black/50 px-1.5 py-0.5 rounded hover:text-cyber-primary hover:bg-black transition-colors"
-                            >
-                              #{tag}
-                            </button>
-                          ))}
-                        </div>
-                        <ArrowRight size={16} className="text-gray-600 group-hover:text-cyber-primary -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-                      </div>
-                    </a>
-                  ))
-              ) : (
-                  <div className="col-span-full py-16 text-center border border-dashed border-gray-800 rounded-xl bg-gray-900/20">
-                      <Filter className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-                      <p className="text-gray-500 font-mono text-lg">No transmissions found for protocol <span className="text-cyber-primary">#{activeTag}</span></p>
-                      <button 
-                          onClick={() => setActiveTag(null)}
-                          className="mt-4 text-sm text-cyber-secondary hover:text-white underline underline-offset-4"
-                      >
-                          Reset Filters
-                      </button>
-                  </div>
-              )}
+              {displayPosts.map(post => (
+                <a key={post.id} href={`#/blog/${post.slug}`} onClick={(e) => handleOpenPost(e, post)} className="group bg-gray-900/30 border border-gray-800 p-6 rounded-xl transition-all block">
+                  <div className="flex justify-between items-start mb-4 text-xs font-mono text-gray-500"><span>{post.date}</span><span>{post.readTime}</span></div>
+                  <h3 className="text-xl font-bold text-gray-100 group-hover:text-cyber-primary transition-colors mb-3">{post.title}</h3>
+                  <p className="text-gray-400 text-sm mb-6 line-clamp-3">{post.excerpt}</p>
+                </a>
+              ))}
             </div>
-
-            {totalPages > 1 && (
-              <div className="flex justify-center gap-4 mt-12">
-                 <button 
-                    disabled={page === 1}
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    className="p-2 border border-gray-800 rounded hover:border-cyber-primary disabled:opacity-50 disabled:hover:border-gray-800 transition-colors"
-                 >
-                    <ChevronLeft size={20} className="text-white" />
-                 </button>
-                 <span className="font-mono text-gray-500 py-2">PAGE {page} / {totalPages}</span>
-                 <button 
-                    disabled={page === totalPages}
-                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                    className="p-2 border border-gray-800 rounded hover:border-cyber-primary disabled:opacity-50 disabled:hover:border-gray-800 transition-colors"
-                 >
-                    <ChevronRight size={20} className="text-white" />
-                 </button>
-              </div>
-            )}
           </>
         )}
       </div>
-      <style>{`
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </section>
   );
 };
-
 export default Blog;

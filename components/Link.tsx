@@ -14,21 +14,31 @@ const Link: React.FC<LinkProps> = ({ href, children, className, onClick, ...prop
 
         e.preventDefault();
         
-        if (href.startsWith('#')) {
-            const id = href.substring(1);
-            // Special handling for route-based hashes
+        const targetPath = href;
+
+        if (targetPath === '/' || targetPath === '') {
+            // Safer home reset using hash for compatibility
+            window.location.hash = '/';
+            window.scrollTo(0, 0);
+        } else if (targetPath.startsWith('/')) {
+            // For other internal paths, assume hash routing if needed or just set hash
+            // This forces the App router to pick it up via the hash logic
+            window.location.hash = targetPath;
+        } else if (targetPath.startsWith('#')) {
+            const id = targetPath.substring(1);
             if (id.startsWith('/')) {
-                 window.history.pushState(null, '', href);
-                 window.dispatchEvent(new PopStateEvent('popstate'));
+                 window.location.hash = id;
             } else {
                 const element = document.getElementById(id);
-                if (element) element.scrollIntoView({ behavior: 'smooth' });
-                window.history.pushState(null, '', href);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                    window.location.hash = id;
+                } else {
+                    window.location.hash = id;
+                }
             }
         } else {
-            window.history.pushState(null, '', href);
-            window.dispatchEvent(new PopStateEvent('popstate'));
-            window.scrollTo(0, 0);
+             window.location.hash = targetPath;
         }
     };
 
