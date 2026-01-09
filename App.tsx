@@ -8,6 +8,7 @@ import About from './components/About.tsx';
 import Resume from './components/Resume.tsx';
 import Projects from './components/Projects.tsx';
 import CaseStudies from './components/CaseStudies.tsx';
+import Press from './components/Press.tsx';
 import Speaking from './components/Speaking.tsx';
 import Resources from './components/Resources.tsx';
 import Tools from './components/Tools.tsx';
@@ -80,7 +81,7 @@ const App: React.FC = () => {
     // 2. Home Section Routing
     // If we are here, we are likely Home. Check for specific sections.
     const validHomeSections = [
-      'hero', 'about', 'resume', 'projects', 'speaking',
+      'hero', 'about', 'resume', 'projects', 'press', 'speaking',
       'resources', 'tools', 'lab', 'contact'
     ];
 
@@ -117,7 +118,7 @@ const App: React.FC = () => {
 
     const handleScroll = () => {
       if (pageMode !== 'home') return;
-      const sections = ['hero', 'about', 'resume', 'projects', 'case-studies', 'speaking', 'resources', 'tools', 'lab', 'blog', 'contact'];
+      const sections = ['hero', 'about', 'resume', 'projects', 'case-studies', 'press', 'speaking', 'resources', 'tools', 'lab', 'blog', 'contact'];
       const scrollPosition = window.scrollY + window.innerHeight / 3;
 
       for (const section of sections) {
@@ -178,6 +179,7 @@ const App: React.FC = () => {
     { id: 'resume', label: 'Resume' },
     { id: 'projects', label: 'Work' },
     { id: 'case-studies', label: 'Case Studies' },
+    { id: 'press', label: 'Press' },
     { id: 'speaking', label: 'Speaking' },
     { id: 'resources', label: 'Reading' },
     { id: 'tools', label: 'Tools' },
@@ -253,6 +255,7 @@ const App: React.FC = () => {
           <Resume />
           <Projects />
           <CaseStudies />
+          <Press />
           <Speaking />
           <Resources />
           <Tools />

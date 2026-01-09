@@ -13,32 +13,32 @@ const ToolsHub: React.FC<{ onNavigate: (t: ToolType, p: string) => void }> = ({ 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="space-y-12"
+            className="space-y-8"
         >
             <div className="text-center max-w-3xl mx-auto">
-                <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
+                <h2 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight">
                     AI TOOLS <span className="text-cyber-secondary">HUB</span>
                 </h2>
-                <p className="text-xl text-gray-400">
+                <p className="text-gray-400 text-sm md:text-base">
                     Free utilities to accelerate your autonomous journey. 
                     <br className="hidden md:block"/> Calculate ROI, architect your stack, and engineer better prompts.
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {/* ROI Card */}
                 <div 
                     onClick={() => onNavigate('roi', '/tools/roi-calculator')}
-                    className="group bg-gray-900/40 border border-gray-800 rounded-2xl p-8 hover:bg-gray-900/60 hover:border-cyber-primary/50 transition-all cursor-pointer relative overflow-hidden"
+                    className="group bg-gray-900/40 border border-gray-800 rounded-xl p-6 hover:bg-gray-900/60 hover:border-cyber-primary/50 transition-all cursor-pointer relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
-                         <Calculator size={48} className="text-cyber-primary" />
+                         <Calculator size={40} className="text-cyber-primary" />
                     </div>
-                    <div className="w-12 h-12 bg-black rounded-xl border border-gray-700 flex items-center justify-center mb-6 group-hover:border-cyber-primary group-hover:scale-110 transition-all">
-                        <DollarSign className="text-white group-hover:text-cyber-primary" />
+                    <div className="w-10 h-10 bg-black rounded-lg border border-gray-700 flex items-center justify-center mb-4 group-hover:border-cyber-primary group-hover:scale-110 transition-all">
+                        <DollarSign className="text-white group-hover:text-cyber-primary" size={20} />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">Agent ROI Calculator</h3>
-                    <p className="text-gray-400 text-sm mb-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Agent ROI Calculator</h3>
+                    <p className="text-gray-400 text-sm mb-4 leading-relaxed">
                         Visualize the cost savings of deploying autonomous agents vs manual labor. Includes break-even analysis.
                     </p>
                     <div className="flex items-center text-cyber-primary font-mono text-xs uppercase tracking-widest gap-2">
@@ -49,16 +49,16 @@ const ToolsHub: React.FC<{ onNavigate: (t: ToolType, p: string) => void }> = ({ 
                 {/* Stack Recommender Card */}
                 <div 
                     onClick={() => onNavigate('stack', '/tools/stack-recommender')}
-                    className="group bg-gray-900/40 border border-gray-800 rounded-2xl p-8 hover:bg-gray-900/60 hover:border-cyber-secondary/50 transition-all cursor-pointer relative overflow-hidden"
+                    className="group bg-gray-900/40 border border-gray-800 rounded-xl p-6 hover:bg-gray-900/60 hover:border-cyber-secondary/50 transition-all cursor-pointer relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
-                         <Cpu size={48} className="text-cyber-secondary" />
+                         <Cpu size={40} className="text-cyber-secondary" />
                     </div>
-                    <div className="w-12 h-12 bg-black rounded-xl border border-gray-700 flex items-center justify-center mb-6 group-hover:border-cyber-secondary group-hover:scale-110 transition-all">
-                        <Layers className="text-white group-hover:text-cyber-secondary" />
+                    <div className="w-10 h-10 bg-black rounded-lg border border-gray-700 flex items-center justify-center mb-4 group-hover:border-cyber-secondary group-hover:scale-110 transition-all">
+                        <Layers className="text-white group-hover:text-cyber-secondary" size={20} />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">AI Stack Recommender</h3>
-                    <p className="text-gray-400 text-sm mb-6">
+                    <h3 className="text-xl font-bold text-white mb-2">AI Stack Recommender</h3>
+                    <p className="text-gray-400 text-sm mb-4 leading-relaxed">
                         Not sure which LLM or framework to use? Take this 5-step quiz to get a tailored architecture recommendation.
                     </p>
                     <div className="flex items-center text-cyber-secondary font-mono text-xs uppercase tracking-widest gap-2">
@@ -69,16 +69,16 @@ const ToolsHub: React.FC<{ onNavigate: (t: ToolType, p: string) => void }> = ({ 
                 {/* Prompt Library Card */}
                 <div 
                     onClick={() => onNavigate('prompts', '/tools/prompt-templates')}
-                    className="group bg-gray-900/40 border border-gray-800 rounded-2xl p-8 hover:bg-gray-900/60 hover:border-green-400/50 transition-all cursor-pointer relative overflow-hidden"
+                    className="group bg-gray-900/40 border border-gray-800 rounded-xl p-6 hover:bg-gray-900/60 hover:border-green-400/50 transition-all cursor-pointer relative overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-100 transition-opacity">
-                         <FileText size={48} className="text-green-400" />
+                         <FileText size={40} className="text-green-400" />
                     </div>
-                    <div className="w-12 h-12 bg-black rounded-xl border border-gray-700 flex items-center justify-center mb-6 group-hover:border-green-400 group-hover:scale-110 transition-all">
-                        <Zap className="text-white group-hover:text-green-400" />
+                    <div className="w-10 h-10 bg-black rounded-lg border border-gray-700 flex items-center justify-center mb-4 group-hover:border-green-400 group-hover:scale-110 transition-all">
+                        <Zap className="text-white group-hover:text-green-400" size={20} />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-3">Prompt Template Library</h3>
-                    <p className="text-gray-400 text-sm mb-6">
+                    <h3 className="text-xl font-bold text-white mb-2">Prompt Template Library</h3>
+                    <p className="text-gray-400 text-sm mb-4 leading-relaxed">
                         A curated collection of system prompts for coding, analysis, and content generation. Optimized for GPT-4 & Claude.
                     </p>
                     <div className="flex items-center text-green-400 font-mono text-xs uppercase tracking-widest gap-2">
@@ -551,7 +551,7 @@ const Tools: React.FC = () => {
   };
 
   return (
-    <section id="tools" className="py-24 px-6 md:px-24 w-full bg-cyber-black relative border-t border-gray-900 min-h-screen">
+    <section id="tools" className="py-12 px-6 md:px-24 w-full bg-cyber-black relative border-t border-gray-900">
        <div className="absolute inset-0 bg-[linear-gradient(rgba(112,0,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(112,0,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
        <div className="max-w-7xl mx-auto relative z-10">

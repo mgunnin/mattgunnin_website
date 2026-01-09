@@ -1,7 +1,6 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles, Mic, Share2, Download, MessageSquare, Coffee, Briefcase, Image as ImageIcon } from 'lucide-react';
+import { Power, Activity, Zap, ChevronRight, Terminal, Volume2, VolumeX, Layers, Hexagon, Sparkles, Mic, Share2, Download, MessageSquare, Coffee, Briefcase, Image as ImageIcon, Check } from 'lucide-react';
 import { sendMessageStream, updateSessionHistory, generateImage } from '../services/geminiService';
 import { ChatMessage, AgentStatus, CognitiveMode, NeuralInterfaceProps } from '../types';
 import { GenerateContentResponse } from '@google/genai';
@@ -34,6 +33,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
   const [mode, setMode] = useState<CognitiveMode>('STRATEGIC');
   const [isMuted, setIsMuted] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   
   // HUD Stats
   const [cpuUsage, setCpuUsage] = useState(12);
@@ -263,10 +263,35 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
       URL.revokeObjectURL(url);
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
       const exportText = messages.map(m => `[${m.role.toUpperCase()}]: ${m.text.replace(/<[^>]*>?/gm, '')}`).join('\n\n');
-      navigator.clipboard.writeText(exportText);
-      alert("Conversation transcript copied to clipboard!");
+      
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(exportText);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } else {
+             // Fallback for older browsers or restricted iframes
+            const textArea = document.createElement("textarea");
+            textArea.value = exportText;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+            } catch (err) {
+                console.error('Fallback: Unable to copy', err);
+                alert("Failed to copy to clipboard.");
+            }
+            document.body.removeChild(textArea);
+        }
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+        alert("Failed to copy to clipboard.");
+      }
   };
 
   const handleToolCall = async (functionCall: any) => {
@@ -524,7 +549,7 @@ const NeuralInterface: React.FC<NeuralInterfaceProps> = ({ currentSection }) => 
              {/* Tools */}
              <div className="flex items-center gap-1 border-r border-gray-700 pr-3 mr-1">
                 <button onClick={handleShare} className="p-1.5 text-gray-500 hover:text-white transition-colors" title="Copy Conversation">
-                    <Share2 size={16} />
+                    {isCopied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} />}
                 </button>
                 <button onClick={handleExport} className="p-1.5 text-gray-500 hover:text-white transition-colors" title="Export Log">
                     <Download size={16} />

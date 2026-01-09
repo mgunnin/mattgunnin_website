@@ -2,7 +2,7 @@
 import React from 'react';
 import { Calendar, Clock, Video, ArrowLeft, CheckCircle, Zap } from 'lucide-react';
 
-const CALENDLY_URL = "https://calendly.com/mgunnin/esports-one";
+const CALENDLY_URL = "https://calendly.com/matt-verticallabs/consult";
 
 const meetingTypes = [
   {

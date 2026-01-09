@@ -25,6 +25,7 @@ const Sitemap: React.FC = () => {
         { label: "Building Agentic Systems", href: "/blog/agentic-systems" },
         { label: "Claude Code Environment", href: "/blog/claude-environment" },
         { label: "Autonomous AI 2026", href: "/blog/autonomous-2026" },
+        { label: "Press & Media", href: "/#press" },
         { label: "Speaking & Events", href: "/#speaking" },
         { label: "Resources", href: "/#resources" },
     ]},

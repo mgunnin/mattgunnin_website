@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Home, User, Briefcase, BookOpen, Mail, FileText, Zap, PenTool, Target, Mic, Calendar } from 'lucide-react';
+import { Home, User, Briefcase, BookOpen, Mail, FileText, Zap, PenTool, Target, Mic, Calendar, Newspaper } from 'lucide-react';
 
 interface NavigationProps {
   currentSection: string;
@@ -13,6 +13,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentSection }) => {
     { id: 'resume', icon: FileText, label: 'Resume' },
     { id: 'projects', icon: Briefcase, label: 'Work' },
     { id: 'case-studies', icon: Target, label: 'Case Studies' },
+    { id: 'press', icon: Newspaper, label: 'Press' },
     { id: 'speaking', icon: Mic, label: 'Speaking' },
     { id: 'resources', icon: BookOpen, label: 'Reading' },
     { id: 'tools', icon: PenTool, label: 'Tools' },
