@@ -1,0 +1,30 @@
+#:schema https://conductor.build/schemas/settings.repo.schema.json
+
+# Guaranteed per-session workflow injection + branch-name enforcement.
+# Full detail lives in AGENTS.md / agent-docs/GIT_WORKFLOW.md where present.
+
+[git]
+# Make Conductor's suggested branch names use conventional-commit type prefixes
+# (feat/fix/chore/...) so suggestions already match <type>/<linear-id>-slug.
+branch_prefix_type = "conventional"
+
+[prompts]
+general = """
+MANDATORY DEV WORKFLOW — follow for EVERY task in this repo, no exceptions:
+1. Linear first. Every branch maps to a Linear issue (team PER, prefix PER-###). Search Linear before branching; if none exists, create one first.
+2. Branch naming: <type>/per-<id>-<short-description>, lowercase (e.g. feat/per-123-short-desc). <type> = feat|fix|chore|docs|refactor|test. Never push directly to main.
+3. Commit with conventional-commit messages referencing the Linear ID.
+4. Open a PR to main (title conventional-commit form with the Linear id for auto-linking, e.g. feat(per-123): summary). Link the Linear issue in the PR.
+5. Run targeted verification + autoreview; resolve ALL CodeRabbit + autoreview findings (fix or explicitly reject with rationale) before merge. A green check hiding open review comments is NOT clean.
+6. Only after checks/reviews are green: merge to main.
+7. Close the Linear issue after merge.
+"""
+create_pr = """
+Open the PR against main. Use a conventional-commit title with the Linear id, e.g. feat(per-123): summary. Include a Linear: PER-### reference in the branch, title, or body. Ensure the branch is named <type>/per-<id>-slug. Do not push directly to main.
+"""
+code_review = """
+Review against our standards: conventional-commit title with Linear id, branch named <type>/per-<id>-slug, PR targeting main, and all CodeRabbit + autoreview findings resolved (fixed or explicitly rejected with rationale) before merge.
+"""
+resolve_merge_conflicts = """
+Resolve conflicts by rebasing onto the latest main. Preserve local-only commits on a backup branch first if any exist. Never merge production into a feature branch when it drags release-only artifacts.
+"""
