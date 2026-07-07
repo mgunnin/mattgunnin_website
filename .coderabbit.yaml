@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit config — tuned to avoid Fair-Usage review-limit throttling.
+# Key lever: auto_incremental_review=false. CodeRabbit reviews a PR ONCE when it
+# opens, and does NOT re-review on every push. Trigger a fresh review on-demand
+# with `@coderabbitai review` (incremental) or `@coderabbitai full review` once
+# the PR is actually ready. This collapses review volume from "every commit" to
+# "once + when you ask", which is what fixes the rate limits.
+
+reviews:
+  profile: chill
+  auto_review:
+    enabled: true
+    # Do NOT re-review on every push — the big volume saver.
+    auto_incremental_review: false
+    # Never review draft PRs.
+    drafts: false
+    # Review PRs targeting main AND staging (staging-first repos).
+    base_branches:
+      - "main"
+      - "staging"
+    # Skip PRs whose title flags them as not-ready.
+    ignore_title_keywords:
+      - "wip"
+      - "draft"
+      - "do not review"
+      - "no review"
+  high_level_summary: true
+  # Don't spend a review pass suggesting/assigning reviewers automatically.
+  suggested_reviewers: false
+  poem: false
+  path_filters:
+    - "!**/*.md"
+    - "!**/*.lock"
+    - "!**/package-lock.json"
+    - "!**/pnpm-lock.yaml"
+    - "!**/yarn.lock"
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/.next/**"
+    - "!**/coverage/**"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.jpeg"
+    - "!**/*.gif"
+    - "!**/*.svg"
+    - "!**/*.ico"
+    - "!**/*.pdf"
+
+chat:
+  auto_reply: true
+
+language: en-US
+early_access: false
